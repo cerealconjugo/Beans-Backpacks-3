@@ -1,0 +1,38 @@
+{
+  "parent": "beansbackpacks:quiver",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/quiver/empty"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "fullness": 0.1
+      },
+      "model": "beansbackpacks:quiver/1"
+    },
+    {
+      "predicate": {
+        "fullness": 0.4
+      },
+      "model": "beansbackpacks:quiver/2"
+    },
+    {
+      "predicate": {
+        "fullness": 0.7
+      },
+      "model": "beansbackpacks:quiver/3"
+    },
+    {
+      "predicate": {
+        "fullness": 0.9
+      },
+      "model": "beansbackpacks:quiver/4"
+    },
+    {
+      "predicate": {
+        "fullness": 1
+      },
+      "model": "beansbackpacks:quiver/full"
+    }
+  ]
+}

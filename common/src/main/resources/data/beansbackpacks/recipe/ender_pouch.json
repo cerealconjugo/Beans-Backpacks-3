@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:ender_eye"
+    },
+    {
+      "item": "minecraft:echo_shard"
+    },
+    {
+      "item": "beansbackpacks:bundle"
+    }
+  ],
+  "result": {
+    "id": "beansbackpacks:empty_ender_pouch",
+    "count": 1
+  }
+}

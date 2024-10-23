@@ -1,0 +1,88 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "backpack": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beansbackpacks:quiver"
+            ]
+          }
+        ]
+      }
+    },
+    "leather": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:string",
+              "minecraft:leather"
+            ]
+          }
+        ]
+      }
+    },
+    "arrow": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:arrow"
+            ]
+          }
+        ]
+      }
+    },
+    "spectral": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:spectral_arrow"
+            ]
+          }
+        ]
+      }
+    },
+    "tipped": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:tipped_arrow"
+            ]
+          }
+        ]
+      }
+    },
+    "recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "beansbackpacks:quiver"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "backpack",
+      "leather",
+      "arrow",
+      "spectral",
+      "tipped",
+      "recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beansbackpacks:quiver"
+    ]
+  },
+  "sends_telemetry_event": false
+}

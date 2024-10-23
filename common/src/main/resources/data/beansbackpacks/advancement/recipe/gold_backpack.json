@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "backpack": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beansbackpacks:gold_backpack"
+            ]
+          }
+        ]
+      }
+    },
+    "gold": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:gold_ingot"
+            ]
+          }
+        ]
+      }
+    },
+    "recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "beansbackpacks:gold_backpack"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "backpack",
+      "gold",
+      "recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beansbackpacks:gold_backpack"
+    ]
+  },
+  "sends_telemetry_event": false
+}

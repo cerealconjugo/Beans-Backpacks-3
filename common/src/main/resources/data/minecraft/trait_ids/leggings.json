@@ -1,0 +1,9 @@
+{
+  "bundle": {
+    "size": 2,
+    "sound": "soft"
+  },
+  "equipable": {
+    "slots": "legs"
+  }
+}

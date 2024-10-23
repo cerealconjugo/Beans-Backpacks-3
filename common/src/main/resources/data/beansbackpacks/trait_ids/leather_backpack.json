@@ -1,0 +1,11 @@
+{
+  "bulk": {
+    "size": 5,
+    "sound": "soft"
+  },
+  "equipable": {
+    "slots": "body",
+    "model": true
+  },
+  "placeable": {}
+}

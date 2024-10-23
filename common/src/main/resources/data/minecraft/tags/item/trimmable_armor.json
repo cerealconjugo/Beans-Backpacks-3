@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "beansbackpacks:iron_backpack",
+    "beansbackpacks:gold_backpack",
+    "beansbackpacks:netherite_backpack"
+  ]
+}

@@ -1,0 +1,541 @@
+package com.beansgalaxy.backpacks.traits.generic;
+
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.access.BackData;
+import com.beansgalaxy.backpacks.components.PlaceableComponent;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.registry.ModItems;
+import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.IDeclaredFields;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.components.reference.NonTrait;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+
+public class BackpackEntity extends Entity {
+      public static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.ITEM_STACK);
+      public static final EntityDataAccessor<PlaceableComponent> PLACEABLE = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
+
+            @Override
+            public StreamCodec<? super RegistryFriendlyByteBuf, PlaceableComponent> codec() {
+                  return PlaceableComponent.STREAM_CODEC;
+            }
+
+            @Override
+            public PlaceableComponent copy(PlaceableComponent placeableComponent) {
+                  return new PlaceableComponent(placeableComponent.modelLocation);
+            }
+      });
+
+      public static final EntityDataAccessor<GenericTraits.MutableTraits> TRAIT = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
+            public static final StreamCodec<RegistryFriendlyByteBuf, GenericTraits.MutableTraits> STREAM_CODEC = new StreamCodec<>() {
+                  @Override
+                  public GenericTraits.MutableTraits decode(RegistryFriendlyByteBuf buf) {
+                        boolean isNon = buf.readBoolean();
+                        if (isNon)
+                              return NonTrait.INSTANCE;
+
+                        TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> decode = TraitComponentKind.STREAM_CODEC.decode(buf);
+                        return decode.streamCodec().decode(buf).mutable();
+                  }
+
+                  @Override
+                  public void encode(RegistryFriendlyByteBuf buf, GenericTraits.MutableTraits mute) {
+                        boolean isNon = NonTrait.is(mute);
+                        if (isNon)
+                              buf.writeBoolean(true);
+                        else {
+                              buf.writeBoolean(false);
+                              GenericTraits traits = mute.freeze();
+                              TraitComponentKind.STREAM_CODEC.encode(buf, traits.kind());
+                              traits.kind().encode(buf, traits);
+                        }
+                  }
+            };
+
+            @Override
+            public StreamCodec<? super RegistryFriendlyByteBuf, GenericTraits.MutableTraits> codec() {
+                  return STREAM_CODEC;
+            }
+
+            @Override @NotNull
+            public GenericTraits.MutableTraits copy(@NotNull GenericTraits.MutableTraits mute) {
+                  return mute.freeze().mutable();
+            }
+      });
+
+      private Direction direction = Direction.UP;
+      public int wobble = 12;
+      public int breakAmount = 0;
+
+      public InteractionResult useTraitInteraction(Player player, InteractionHand hand) {
+            return tryTraits().map(mute ->
+                        mute.interact(BackpackEntity.this, player, hand)
+            ).orElse(InteractionResult.PASS);
+      }
+
+      public BackpackEntity(EntityType<?> $$0, Level $$1) {
+            super($$0, $$1);
+            blocksBuilding = true;
+      }
+
+      private Optional<GenericTraits.MutableTraits> tryTraits() {
+            GenericTraits.MutableTraits value = entityData.get(TRAIT);
+            if (NonTrait.is(value))
+                  return Optional.empty();
+            else
+                  return Optional.of(value);
+      }
+
+      public Optional<EquipableComponent> getEquipable() {
+            ItemStack stack = entityData.get(ITEM_STACK);
+            return EquipableComponent.get(stack);
+      }
+
+      public PlaceableComponent getPlaceable() {
+            return entityData.get(PLACEABLE);
+      }
+
+      @Nullable
+      public static BackpackEntity create(
+                  UseOnContext ctx,
+                  ItemStack backpackStack,
+                  PlaceableComponent placeable,
+                  Optional<GenericTraits> traits)
+      {
+            Level level = ctx.getLevel();
+            Direction clickedFace = ctx.getClickedFace();
+            Vec3 clickLocation = ctx.getClickLocation();
+            float rotation = ctx.getRotation();
+
+            float yRot;
+            Vec3 pos;
+            switch (clickedFace) {
+                  case WEST, EAST -> { // X
+                        yRot = clickedFace.toYRot();
+                        pos = new Vec3(
+                                    clickLocation.x + clickedFace.getAxisDirection().getStep() * (2 / 16f),
+                                    roundForY(clickLocation.y, ctx.getPlayer().getEyeY()) - 6/16.0,
+                                    roundToScale(clickLocation.z, 2)
+                        );
+                  }
+                  case NORTH, SOUTH -> { // Z
+                        yRot = clickedFace.toYRot();
+                        pos = new Vec3(
+                                    roundToScale(clickLocation.x, 2),
+                                    roundForY(clickLocation.y, ctx.getPlayer().getEyeY()) - 6/16.0,
+                                    clickLocation.z + clickedFace.getAxisDirection().getStep() * (2 / 16f)
+                        );
+                  }
+                  default -> {
+                        pos = new Vec3(
+                                    clickLocation.x,
+                                    clickLocation.y,
+                                    clickLocation.z
+                        );
+                        yRot = rotation + 180;
+                  }
+            }
+
+            AABB aabb = BackpackEntity.newBoundingBox(clickedFace, pos);
+            if (!level.noCollision(aabb))
+                  return null;
+
+            BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY, level);
+            backpackEntity.setPos(pos);
+            backpackEntity.setYRot(yRot);
+            backpackEntity.setDirection(clickedFace);
+
+            backpackEntity.entityData.set(PLACEABLE, placeable);
+
+            GenericTraits.MutableTraits mute = traits.map(GenericTraits::mutable).orElse(NonTrait.INSTANCE);
+            mute.onPlace(backpackEntity, ctx.getPlayer(), backpackStack);
+            backpackEntity.entityData.set(TRAIT, mute);
+
+            backpackEntity.entityData.set(ITEM_STACK, backpackStack.copyWithCount(1));
+            backpackStack.shrink(1);
+
+            if (level instanceof ServerLevel) {
+                  level.addFreshEntity(backpackEntity);
+            }
+
+            return backpackEntity;
+      }
+
+      @Override @NotNull
+      protected AABB makeBoundingBox() {
+            return newBoundingBox(direction, position());
+      }
+
+      private static AABB newBoundingBox(Direction direction, Vec3 pos) {
+            double d = (4 / 32.0);
+            double w = (8 / 32.0);
+            double h = 9 / 16.0;
+
+            return switch (direction) {
+                  case NORTH, SOUTH -> new AABB(pos.x - w, pos.y, pos.z + d, pos.x + w, pos.y + h, pos.z - d); // -Z
+                  case EAST, WEST -> new AABB(pos.x - d, pos.y, pos.z - w, pos.x + d, pos.y + h, pos.z + w); // X
+                  case null, default -> {
+                        double width = (7 / 32.0);
+                        yield new AABB(pos.add(width, h, width), pos.add(-width, 0, -width));
+                  }
+            };
+      }
+
+      private static double roundForY(double i, double playerEye) {
+            i -= 1.0/16;
+            double scale = 8;
+            double scaled = i * scale;
+            double v = i - playerEye;
+            if (v > 0) {
+                  return 2.0/16 + (int) scaled / scale;
+            } else {
+                  return 2.0/16 + Mth.ceil(scaled) / scale;
+            }
+      }
+
+      private static double roundToScale(double position, double scale) {
+            int i = position < 0 ? -1 : 1;
+            int block = (int) position;
+            double v = Math.abs(position - block);
+            if (v < 0.3)
+                  return block + (i * 0.25);
+            else if (v > 0.7)
+                  return block + (i * 0.75);
+            else
+                  return block + (i * 0.5);
+      }
+
+      public ItemStack toStack() {
+            ItemStack itemStack = entityData.get(ITEM_STACK);
+            tryTraits().ifPresent(mute -> {
+                  if (!NonTrait.is(mute))
+                        mute.trait().kind().freezeAndCancel(PatchedComponentHolder.of(itemStack), mute);
+            });
+            return itemStack;
+      }
+
+      @Override
+      public void tick() {
+            super.tick();
+            updateGravity();
+            wobble();
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            tryTraits().ifPresent(mute -> {
+                  mute.entityTick(this);
+            });
+      }
+
+      private void wobble() {
+            if (wobble > 0)
+                  wobble--;
+            else breakAmount = 0;
+      }
+
+      private void updateGravity() {
+            boolean collides = !this.level().noCollision(this, this.getBoundingBox().inflate(0.1, -0.1, 0.1));
+            this.setNoGravity(this.isNoGravity() && collides);
+            if (!this.isNoGravity()) {
+                  if (this.isInWater()) {
+                        inWaterGravity();
+                  } else if (this.isInLava()) {
+                        if (this.isEyeInFluid(FluidTags.LAVA) && getDeltaMovement().y < 0.1) {
+                              this.setDeltaMovement(this.getDeltaMovement().add(0D, 0.02D, 0D));
+                        }
+                        this.setDeltaMovement(this.getDeltaMovement().scale(0.6D));
+                  } else {
+                        this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.03D, 0.0D));
+                        this.setDeltaMovement(this.getDeltaMovement().scale(0.98D));
+                  }
+            }
+      }
+
+      private void inWaterGravity() {
+            AABB thisBox = this.getBoundingBox();
+            AABB box = new AABB(thisBox.maxX, thisBox.maxY + 6D / 16D, thisBox.maxZ, thisBox.minX, thisBox.maxY, thisBox.minZ);
+            List<Entity> entityList = this.getCommandSenderWorld().getEntities(this, box);
+            if (!entityList.isEmpty()) {
+                  Entity entity = entityList.get(0);
+                  double velocity = this.getY() - entity.getY();
+                  if (entityList.get(0) instanceof Player player) {
+                        this.setDeltaMovement(0, velocity / 10, 0);
+//                        if (player instanceof ServerPlayer serverPlayer)
+//                              Services.REGISTRY.triggerSpecial(serverPlayer, SpecialCriterion.Special.HOP);
+                  }
+                  else if (velocity < -0.6)
+                        inWaterBob();
+                  else this.setDeltaMovement(0, velocity / 20, 0);
+            } else inWaterBob();
+      }
+
+      private void inWaterBob() {
+            if (this.isUnderWater()) {
+                  this.setDeltaMovement(this.getDeltaMovement().scale(0.95D));
+                  this.setDeltaMovement(this.getDeltaMovement().add(0D, 0.003D, 0D));
+            } else if (this.isInWater() && getDeltaMovement().y < 0.01) {
+                  this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+                  this.setDeltaMovement(this.getDeltaMovement().add(0D, -0.01D, 0D));
+            }
+      }
+
+      @Override
+      public boolean fireImmune() {
+            return entityData.get(ITEM_STACK).has(DataComponents.FIRE_RESISTANT);
+      }
+
+      @Override
+      protected void defineSynchedData(SynchedEntityData.Builder builder) {
+            builder.define(ITEM_STACK, ModItems.IRON_BACKPACK.get().getDefaultInstance());
+            builder.define(TRAIT, NonTrait.INSTANCE);
+            builder.define(PLACEABLE, new PlaceableComponent());
+      }
+
+      @Override
+      protected void readAdditionalSaveData(CompoundTag tag) {
+            ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.get("as_stack")).getOrThrow();
+            entityData.set(ITEM_STACK, stack);
+            Traits.runIfPresent(stack, traits ->
+                  entityData.set(TRAIT, traits.mutable())
+            );
+            PlaceableComponent.get(stack).ifPresent(placeable ->
+                  entityData.set(PLACEABLE, placeable)
+            );
+      }
+
+      @Override
+      protected void addAdditionalSaveData(CompoundTag tag) {
+            ItemStack stack = toStack();
+            tag.put("as_stack", ItemStack.OPTIONAL_CODEC.encodeStart(registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow());
+      }
+
+      @Override
+      public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
+            return new ClientboundAddEntityPacket(this, entity, direction.get3DDataValue());
+      }
+
+      @Override
+      public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+            super.recreateFromPacket(packet);
+            setDirection(Direction.from3DDataValue(packet.getData()));
+      }
+
+      protected void setDirection(Direction direction) {
+            if (direction != null) {
+                  this.direction = direction;
+                  if (direction.getAxis().isHorizontal()) {
+                        this.setNoGravity(true);
+                        this.setYRot((float) direction.get2DDataValue() * 90);
+                  }
+                  this.xRotO = this.getXRot();
+                  this.yRotO = this.getYRot();
+                  setBoundingBox(makeBoundingBox());
+            }
+      }
+
+      @Override
+      public Direction getDirection() {
+            return direction;
+      }
+
+      @Override
+      public Component getName() {
+            return Constants.getName(toStack());
+      }
+
+      @Override
+      protected boolean repositionEntityAfterLoad() {
+            return false;
+      }
+
+      @Override
+      public boolean canCollideWith(@NotNull Entity that) {
+            if (that instanceof LivingEntity livingEntity && !livingEntity.isAlive())
+                  return false;
+
+            if (this.isPassengerOfSameVehicle(that))
+                  return false;
+
+            return (that.canBeCollidedWith() || that.isPushable());
+      }
+
+      @Override
+      public boolean canBeCollidedWith() {
+            return true;
+      }
+
+      @Nullable @Override
+      public ItemStack getPickResult() {
+            return toStack();
+      }
+
+      @Override
+      public boolean isPickable() {
+            return true;
+      }
+
+      @Override
+      public boolean skipAttackInteraction(Entity attacker) {
+            if (attacker instanceof Player player) {
+                  return this.hurt(this.damageSources().playerAttack(player), 0.0f);
+            }
+            return false;
+      }
+
+      @Override
+      public boolean hurt(DamageSource damageSource, float amount) {
+            double height = 0.1D;
+
+            if ((damageSource.is(DamageTypes.IN_FIRE) || damageSource.is(DamageTypes.LAVA))) {
+                  if (fireImmune())
+                        return false;
+                  damage(1, true);
+                  if ((breakAmount + 10) % 11 == 0)
+                        playSound(SoundEvents.GENERIC_BURN, 0.8f, 1f);
+                  return true;
+            }
+            if (damageSource.is(DamageTypes.ON_FIRE))
+                  return false;
+            if (damageSource.is(DamageTypes.CACTUS)) {
+                  breakAndDropContents();
+                  return true;
+            }
+            if (damageSource.is(DamageTypes.EXPLOSION) || damageSource.is(DamageTypes.PLAYER_EXPLOSION)) {
+                  height += Math.sqrt(amount) / 20;
+                  return hop(height);
+            }
+            if (damageSource.is(DamageTypes.ARROW) || damageSource.is(DamageTypes.THROWN) || damageSource.is(DamageTypes.TRIDENT) || damageSource.is(DamageTypes.MOB_PROJECTILE)) {
+                  hop(height);
+                  return false;
+            }
+            if (damageSource.is(DamageTypes.PLAYER_ATTACK) && damageSource.getDirectEntity() instanceof Player player) {
+                  if (player.isCreative()) {
+                        this.spawnAtLocation(toStack());
+                        this.kill();
+                        this.markHurt();
+                  }
+                  else {
+                        float damage = 10; // !player.getUUID().equals(getPlacedBy()) && isLocked()) ? 3 : 10;
+                        return damage((int) (damage), false);
+                  }
+            }
+
+            hop(height);
+            return true;
+      }
+
+      public boolean hop(double height) {
+            if (this.isNoGravity())
+                  this.setNoGravity(false);
+            else {
+                  this.setDeltaMovement(this.getDeltaMovement().add(0.0D, height, 0.0D));
+            }
+//            if (level().isClientSide())
+//                  getViewable().headPitch += 0.1f;
+            return true;
+      }
+
+      private boolean damage(int damage, boolean silent) {
+            int health = 24;
+            wobble = Math.min(wobble + 10, health);
+
+            breakAmount += damage;
+            if (breakAmount >= health)
+                  breakAndDropContents();
+            else {
+                  tryTraits().ifPresent(mute ->
+                              mute.damageTrait(this, damage, silent)
+                  );
+                  if (!silent) {
+                        float pitch = random.nextFloat() * 0.3f;
+                        ModSound modSound = tryTraits().map(GenericTraits.MutableTraits::sound).orElse(ModSound.SOFT);
+                        modSound.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
+                  }
+                  return hop(0.1);
+            }
+            return true;
+      }
+
+      protected void breakAndDropContents() {
+            boolean dropItems = level().getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
+            ModSound modSound = tryTraits().map(mute -> {
+                  if (dropItems)
+                        mute.dropItems(this);
+
+                  return mute.sound();
+            }).orElse(ModSound.SOFT);
+            modSound.at(this, ModSound.Type.BREAK);
+
+            ItemStack backpack = toStack();
+            if (!this.isRemoved() && !this.level().isClientSide()) {
+                  this.kill();
+                  this.markHurt();
+                  if (dropItems) this.spawnAtLocation(backpack);
+            }
+      }
+
+      @Override
+      public InteractionResult interact(Player player, InteractionHand hand) {
+            BackData backData = BackData.get(player);
+            if (backData.isActionKeyDown()) {
+                  NonNullList<ItemStack> backSlot = backData.beans_Backpacks_3$getBody();
+                  if (backSlot.getFirst().isEmpty()) {
+                        tryTraits().ifPresent(mute ->
+                                    mute.onPickup(this, player)
+                        );
+
+                        backSlot.set(0, toStack());
+                        if (!this.isRemoved() && !this.level().isClientSide()) {
+                              this.kill();
+                              this.markHurt();
+                        }
+
+                        ModSound modSound = tryTraits().map(GenericTraits.MutableTraits::sound).orElse(ModSound.SOFT);
+                        modSound.at(player, ModSound.Type.EQUIP);
+                        return InteractionResult.SUCCESS;
+                  }
+                  return InteractionResult.FAIL;
+            }
+            return useTraitInteraction(player, hand);
+      }
+}

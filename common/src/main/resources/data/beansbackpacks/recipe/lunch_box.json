@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#",
+    "P"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:leather"
+    },
+    "P": {
+      "item": "minecraft:powder_snow_bucket"
+    }
+  },
+  "result": {
+    "id": "beansbackpacks:lunch_box",
+    "count": 1
+  }
+}

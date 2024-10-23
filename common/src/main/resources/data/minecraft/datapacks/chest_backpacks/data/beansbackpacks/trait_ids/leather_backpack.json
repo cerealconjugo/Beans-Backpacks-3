@@ -1,0 +1,10 @@
+{
+  "chest": {
+    "rows": 2,
+    "columns": 4,
+    "sound": "soft",
+    "placeable": {
+      "use_builtin_leather_model": true
+    }
+  }
+}

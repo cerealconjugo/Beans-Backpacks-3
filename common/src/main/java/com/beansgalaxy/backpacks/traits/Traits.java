@@ -1,0 +1,193 @@
+package com.beansgalaxy.backpacks.traits;
+
+import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
+import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.components.PlaceableComponent;
+import com.beansgalaxy.backpacks.items.EmptyEnderItem;
+import com.beansgalaxy.backpacks.platform.Services;
+import com.beansgalaxy.backpacks.traits.alchemy.AlchemyCodecs;
+import com.beansgalaxy.backpacks.traits.alchemy.AlchemyTraits;
+import com.beansgalaxy.backpacks.traits.bulk.BulkCodecs;
+import com.beansgalaxy.backpacks.traits.bulk.BulkTraits;
+import com.beansgalaxy.backpacks.traits.bundle.BundleCodecs;
+import com.beansgalaxy.backpacks.traits.bundle.BundleTraits;
+import com.beansgalaxy.backpacks.traits.chest.ChestCodecs;
+import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
+import com.beansgalaxy.backpacks.traits.experience.XpCodecs;
+import com.beansgalaxy.backpacks.traits.experience.XpTraits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxCodecs;
+import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
+import com.beansgalaxy.backpacks.traits.quiver.QuiverCodecs;
+import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
+import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
+import com.mojang.serialization.*;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.math.Fraction;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.*;
+
+public interface Traits {
+
+      DataComponentType<PlaceableComponent>
+                  PLACEABLE = register(PlaceableComponent.NAME, PlaceableComponent.CODEC, PlaceableComponent.STREAM_CODEC);
+
+      DataComponentType<EquipableComponent>
+                  EQUIPABLE = register(EquipableComponent.NAME, EquipableComponent.CODEC, EquipableComponent.STREAM_CODEC);
+
+      DataComponentType<ReferenceTrait>
+                  REFERENCE = register("reference", ReferenceTrait.CODEC, ReferenceTrait.STREAM_CODEC);
+
+      DataComponentType<EnderTraits>
+                  ENDER = register("ender", EnderTraits.CODEC, EnderTraits.STREAM_CODEC);
+
+      DataComponentType<EmptyEnderItem.UnboundEnderTraits>
+                  EMPTY_ENDER = register("empty_ender", EmptyEnderItem.CODEC, EmptyEnderItem.STREAM_CODEC);
+
+      TraitComponentKind<BundleTraits, ? extends IDeclaredFields>
+                  BUNDLE = TraitComponentKind.register(BundleTraits.NAME, BundleCodecs.INSTANCE);
+
+      TraitComponentKind<BulkTraits, ? extends IDeclaredFields>
+                  BULK = TraitComponentKind.register(BulkTraits.NAME, BulkCodecs.INSTANCE);
+
+      TraitComponentKind<LunchBoxTraits, ? extends IDeclaredFields>
+                  LUNCH_BOX = TraitComponentKind.register(LunchBoxTraits.NAME, LunchBoxCodecs.INSTANCE);
+
+      TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>
+                  BUCKET = Services.PLATFORM.registerBucket();
+
+      TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>
+                  BATTERY = Services.PLATFORM.registerBattery();
+
+      TraitComponentKind<XpTraits, ? extends IDeclaredFields>
+                  EXPERIENCE = TraitComponentKind.register(XpTraits.NAME, XpCodecs.INSTANCE);
+
+      TraitComponentKind<QuiverTraits, ? extends IDeclaredFields>
+                  QUIVER = TraitComponentKind.register(QuiverTraits.NAME, QuiverCodecs.INSTANCE);
+
+      TraitComponentKind<AlchemyTraits, ? extends IDeclaredFields>
+                  ALCHEMY = TraitComponentKind.register(AlchemyTraits.NAME, AlchemyCodecs.INSTANCE);
+
+      TraitComponentKind<ChestTraits, ? extends IDeclaredFields>
+                  CHEST = TraitComponentKind.register(ChestTraits.NAME, ChestCodecs.INSTANCE);
+
+      List<TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>> ALL_TRAITS = List.of(
+                  BUNDLE,     LUNCH_BOX,        BULK,       BUCKET,
+                  BATTERY,    EXPERIENCE,       QUIVER,     ALCHEMY,
+                  CHEST
+      );
+
+      List<TraitComponentKind<? extends ItemStorageTraits, ? extends IDeclaredFields>> STORAGE_TRAITS = List.of(
+                  BUNDLE,     LUNCH_BOX,        BULK,       QUIVER,
+                  ALCHEMY,    CHEST
+      );
+
+      static <T> DataComponentType<T> register(String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
+            DataComponentType.Builder<T> builder = DataComponentType.builder();
+            return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
+                        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
+                        builder.persistent(codec).networkSynchronized(streamCodec).cacheEncoding().build());
+      }
+
+      static Optional<GenericTraits> get(ItemStack stack) {
+            return stack.isEmpty() ? Optional.empty() : get((DataComponentHolder) stack);
+      }
+
+      static Optional<GenericTraits> get(DataComponentHolder stack) {
+            ReferenceTrait reference = stack.get(REFERENCE);
+            if (reference != null && !reference.isEmpty())
+                  return reference.getTrait();
+
+            for (TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> type : ALL_TRAITS) {
+                  GenericTraits traits = stack.get(type);
+                  if (traits != null)
+                        return Optional.of(traits);
+            }
+
+//            EnderTraits enderTraits = stack.get(ENDER);
+//            if (enderTraits != null) {
+//                  return enderTraits.getTrait();
+//            }
+
+            return Optional.empty();
+      }
+
+      static void runIfPresent(ItemStack stack, Consumer<GenericTraits> runnable) {
+            if (!stack.isEmpty()) {
+                  Optional<GenericTraits> traits = get(stack);
+                  traits.ifPresent(runnable);
+            }
+      }
+
+      static boolean testIfPresent(ItemStack stack, Predicate<GenericTraits> predicate) {
+            return !stack.isEmpty() && testIfPresent((DataComponentHolder) stack, predicate);
+      }
+
+      static boolean testIfPresent(DataComponentHolder stack, Predicate<GenericTraits> predicate) {
+            Optional<GenericTraits> genericTraits = get(stack);
+            if (genericTraits.isEmpty()) return false;
+
+            GenericTraits traits = genericTraits.get();
+            return predicate.test(traits);
+      }
+
+      static void runIfEquipped(Player player, BiPredicate<GenericTraits, EquipmentSlot> runnable) {
+            NonNullList<Slot> slots = player.inventoryMenu.slots;
+            for (int i = slots.size() - 1; i > 4 ; i--) {
+                  Slot slot = slots.get(i);
+                  if (slot instanceof EquipmentSlotAccess access) {
+                        ItemStack stack = slot.getItem();
+                        if (stack.isEmpty())
+                              continue;
+
+                        Optional<GenericTraits> traits = get(stack);
+                        if (traits.isEmpty())
+                              continue;
+
+                        if (runnable.test(traits.get(), access.getSlot()))
+                              return;
+                  }
+            }
+      }
+
+      static Fraction getWeight(List<ItemStack> stacks) {
+            if (stacks.isEmpty())
+                  return Fraction.ZERO;
+
+            Fraction fraction = Fraction.ZERO;
+            for (ItemStack stack : stacks) {
+                  Fraction stackWeight = getItemWeight(stack).multiplyBy(Fraction.getFraction(stack.getCount(), 1));
+                  fraction = fraction.add(stackWeight);
+            }
+            return fraction;
+      }
+
+      static Fraction getWeight(List<ItemStack> stacks, int denominator) {
+            return getWeight(stacks).multiplyBy(Fraction.getFraction(1, denominator));
+      }
+
+      static Fraction getItemWeight(ItemStack stack) {
+            return Fraction.getFraction(1, stack.getMaxStackSize());
+      }
+
+      static void register() {
+
+      }
+
+}

@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "beansbackpacks:item/experience_vial_empty"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "fullness": 0.1
+      },
+      "model": "beansbackpacks:item/experience_vial_partial"
+    },
+    {
+      "predicate": {
+        "fullness": 1
+      },
+      "model": "beansbackpacks:item/experience_vial_full"
+    }
+  ]
+}

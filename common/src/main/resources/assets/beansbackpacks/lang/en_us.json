@@ -1,0 +1,70 @@
+{
+  "itemGroup.beansbackpacks": "Bean's Backpacks",
+  "pack.chest_backpacks.description": "Changes Beans' Backpacks from a interface similar to bundles to one of chests",
+
+  "item.beansbackpacks.backpack": "Backpack",
+  "item.beansbackpacks.iron_backpack": "Iron Backpack",
+  "item.beansbackpacks.gold_backpack": "Gold Backpack",
+  "item.beansbackpacks.netherite_backpack": "Netherite Backpack",
+  "item.beansbackpacks.empty_ender_pouch": "Ender Pouch",
+  "item.beansbackpacks.ender_pouch": "Ender Pouch",
+  "item.beansbackpacks.bundle": "Bundle",
+  "item.beansbackpacks.netherite_bucket": "Netherite Bucket",
+  "item.beansbackpacks.lunch_box": "Lunch Box",
+  "item.beansbackpacks.copper_leggings": "Copper Leggings",
+  "item.beansbackpacks.experience_vial": "Vial o' Enchanting",
+  "item.beansbackpacks.quiver": "Quiver",
+  "item.beansbackpacks.alchemy_bag": "Alchemist Bag",
+  "item.beansbackpacks.rose_boots": "Rose Boots",
+
+  "traits.beansbackpacks.inventory.bundle.solo": "§0.§r 1 Stack",
+  "traits.beansbackpacks.inventory.bundle.size": "§0.§r %d Stacks",
+  "traits.beansbackpacks.equipment.bundle.solo": "§0.§r 1 Stack",
+  "traits.beansbackpacks.equipment.bundle.size": "§0.§r %d Stacks",
+
+  "traits.beansbackpacks.inventory.bulk.solo": "§0.§r 1 Item Stack",
+  "traits.beansbackpacks.inventory.bulk.size": "§0.§r %d× Item Stacks",
+  "traits.beansbackpacks.equipment.bulk.solo": "§0.§r 1 Item Stack",
+  "traits.beansbackpacks.equipment.bulk.size": "§0.§r %d× Item Stacks",
+
+  "traits.beansbackpacks.inventory.quiver.solo": "§0.§r 1 Arrow Slot",
+  "traits.beansbackpacks.inventory.quiver.size": "§0.§r %d Arrow Slots",
+  "traits.beansbackpacks.equipment.quiver.solo": "§0.§r 1 Arrow Slot",
+  "traits.beansbackpacks.equipment.quiver.size": "§0.§r %d Arrow Slots",
+
+  "traits.beansbackpacks.inventory.alchemy.solo": "§0.§r 1 Potion",
+  "traits.beansbackpacks.inventory.alchemy.size": "§0.§r %d Potions",
+  "traits.beansbackpacks.equipment.alchemy.solo": "§0.§r 1 Potion",
+  "traits.beansbackpacks.equipment.alchemy.size": "§0.§r %d Potions",
+
+  "traits.beansbackpacks.inventory.chest.size": "§0.§r %dx%d Slots",
+  "traits.beansbackpacks.inventory.chest.solo": "§0.§r 1 Slot",
+  "traits.beansbackpacks.inventory.chest.line": "§0.§r %d Slots",
+  "traits.beansbackpacks.equipment.chest.size": "§0.§r %dx%d Slots",
+  "traits.beansbackpacks.equipment.chest.solo": "§0.§r 1 Slot",
+  "traits.beansbackpacks.equipment.chest.line": "§0.§r %d Slots",
+
+  "traits.beansbackpacks.inventory.lunch.solo": "§0.§r 1 Edible Stack",
+  "traits.beansbackpacks.inventory.lunch.size": "§0.§r %d Edible Stacks",
+  "traits.beansbackpacks.equipment.lunch.solo": "§0.§r 1 Edible Stack",
+  "traits.beansbackpacks.equipment.lunch.size": "§0.§r %d Edible Stacks",
+
+  "traits.beansbackpacks.inventory.bucket.solo": "§0.§r 1 Bucket",
+  "traits.beansbackpacks.inventory.bucket.size": "§0.§r %d Buckets",
+  "traits.beansbackpacks.equipment.bucket.solo": "§0.§r 1 Bucket",
+  "traits.beansbackpacks.equipment.bucket.size": "§0.§r %d Buckets",
+
+  "traits.beansbackpacks.inventory.battery.size": "§0.§r %dE",
+  "traits.beansbackpacks.equipment.battery.size": "§0.§r %dE",
+
+  "traits.beansbackpacks.inventory.experience.solo": "§0.§r %d Level",
+  "traits.beansbackpacks.inventory.experience.size": "§0.§r %d Levels",
+  "traits.beansbackpacks.equipment.experience.solo": "§0.§r %d Level",
+  "traits.beansbackpacks.equipment.experience.size": "§0.§r %d Levels",
+
+  "ender.beansbackpacks.trait_prefix": "Ender %d",
+  "ender.beansbackpacks.bound_player": "§0.§r Bound to %d",
+
+  "tooltip.beansbackpacks.advanced.kind": "backpack_kind:%d",
+  "tooltip.beansbackpacks.advanced.reference": "§o%d"
+}

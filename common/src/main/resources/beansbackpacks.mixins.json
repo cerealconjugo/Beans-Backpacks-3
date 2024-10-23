@@ -1,0 +1,33 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.beansgalaxy.backpacks.mixin",
+  "refmap": "${mod_id}.refmap.json",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "common.AbstractMenuMixin",
+    "common.ArmorSlotMixin",
+    "common.BowMixin",
+    "common.CrossbowMixin",
+    "common.DataResourcesMixin",
+    "common.InventoryMenuMixin",
+    "common.InventoryMixin",
+    "common.ItemMixin",
+    "common.ItemStackMixin",
+    "common.PlayerMixin",
+    "common.ServerPlayerMixin"
+  ],
+  "client": [
+    "client.AbstractScreenMixin",
+    "client.BlockStateModelMixin",
+    "client.KeyBindEntriesMixin",
+    "client.LocalPlayerMixin",
+    "client.MinecraftMixin",
+    "client.SimpleBakedModelMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+

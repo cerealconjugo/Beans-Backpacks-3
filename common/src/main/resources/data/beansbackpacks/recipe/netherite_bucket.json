@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "n n",
+    " n "
+  ],
+  "key": {
+    "n": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "id": "beansbackpacks:netherite_bucket",
+    "count": 1
+  }
+}

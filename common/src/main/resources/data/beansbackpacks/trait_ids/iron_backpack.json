@@ -1,0 +1,16 @@
+{
+  "bundle": {
+    "size": 8
+  },
+  "equipable": {
+    "slots": "body",
+    "model": {
+      "body": {
+        "body": "beansbackpacks:backpack/iron"
+      }
+    }
+  },
+  "placeable": {
+    "model": "beansbackpacks:backpack/iron"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "beansbackpacks:quiver",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/quiver/1"
+  }
+}

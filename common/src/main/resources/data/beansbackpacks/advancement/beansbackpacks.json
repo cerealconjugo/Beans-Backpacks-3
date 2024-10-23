@@ -1,0 +1,41 @@
+{
+  "display": {
+    "icon": {
+      "id": "beansbackpacks:gold_backpack"
+    },
+    "title": "Beans Backpacks",
+    "description": "Overhaul your inventory with expanded bundle mechanics",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "background": "beansbackpacks:textures/gui/background.png"
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beansbackpacks:backpack",
+              "beansbackpacks:iron_backpack",
+              "beansbackpacks:gold_backpack",
+              "beansbackpacks:netherite_backpack",
+              "beansbackpacks:ender_pouch",
+              "beansbackpacks:empty_ender_pouch",
+              "beansbackpacks:bundle",
+              "beansbackpacks:lunch_box",
+              "beansbackpacks:copper_leggings",
+              "beansbackpacks:experience_vial",
+              "beansbackpacks:quiver",
+              "beansbackpacks:netherite_bucket",
+              "beansbackpacks:alchemy_bag",
+              "beansbackpacks:rose_boots",
+              "minecraft:decorated_pot",
+              "minecraft:leather_leggings"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

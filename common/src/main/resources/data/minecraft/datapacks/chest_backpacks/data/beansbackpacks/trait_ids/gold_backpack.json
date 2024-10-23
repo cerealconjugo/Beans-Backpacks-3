@@ -1,0 +1,9 @@
+{
+  "chest": {
+    "rows": 3,
+    "columns": 9,
+    "placeable": {
+      "layers": [1]
+    }
+  }
+}

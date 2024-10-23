@@ -1,0 +1,6 @@
+{
+  "parent": "beansbackpacks:default_boot_right",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/rose_boots"
+  }
+}

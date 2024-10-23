@@ -1,0 +1,16 @@
+{
+  "bundle": {
+    "size": 12
+  },
+  "equipable": {
+    "slots": "body",
+    "model": {
+      "body": {
+        "body": "beansbackpacks:backpack/netherite"
+      }
+    }
+  },
+  "placeable": {
+    "model": "beansbackpacks:backpack/netherite"
+  }
+}

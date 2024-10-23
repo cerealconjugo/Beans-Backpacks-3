@@ -1,0 +1,6 @@
+{
+  "parent": "beansbackpacks:default_backpack",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/netherite"
+  }
+}

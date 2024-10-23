@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "fullness=0": {
+      "model": "beansbackpacks:backpack/iron/body"
+    }
+  }
+}

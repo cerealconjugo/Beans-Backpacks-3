@@ -1,0 +1,6 @@
+{
+  "parent": "beansbackpacks:default_legging_body",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/copper_leggings"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "particle": "beansbackpacks:item/lunch_box_particles",
+    "layer0": "beansbackpacks:item/lunch_box"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "eating": 1
+      },
+      "model": "beansbackpacks:item/lunch_box_eating"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "beansbackpacks:item/bundle/empty",
+    "layer1": "beansbackpacks:item/bundle/empty_string"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "fullness": 0.1
+      },
+      "model": "beansbackpacks:item/bundle_filled"
+    }
+  ]
+}

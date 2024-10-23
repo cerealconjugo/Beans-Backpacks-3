@@ -1,0 +1,9 @@
+{
+  "bulk": {
+    "size": 64,
+    "sound": "clay"
+  },
+  "equipable": {
+    "slots": "body"
+  }
+}

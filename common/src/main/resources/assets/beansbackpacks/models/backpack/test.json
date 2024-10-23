@@ -1,0 +1,6 @@
+{
+  "parent": "beansbackpacks:model",
+  "textures": {
+    "texture": "beansbackpacks:item/backpack/test"
+  }
+}

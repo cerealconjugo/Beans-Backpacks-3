@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "beansbackpacks:item/quiver/empty"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "fullness": 0.1
+      },
+      "model": "beansbackpacks:item/quiver/1"
+    },
+    {
+      "predicate": {
+        "fullness": 0.4
+      },
+      "model": "beansbackpacks:item/quiver/2"
+    },
+    {
+      "predicate": {
+        "fullness": 0.7
+      },
+      "model": "beansbackpacks:item/quiver/3"
+    },
+    {
+      "predicate": {
+        "fullness": 0.9
+      },
+      "model": "beansbackpacks:item/quiver/4"
+    },
+    {
+      "predicate": {
+        "fullness": 1
+      },
+      "model": "beansbackpacks:item/quiver/full"
+    }
+  ]
+}

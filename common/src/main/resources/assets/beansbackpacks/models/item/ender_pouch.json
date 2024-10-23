@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "beansbackpacks:item/bundle/ender/empty"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "fullness": 0.1
+      },
+      "model": "beansbackpacks:item/ender_pouch_filled"
+    },
+    {
+      "predicate": {
+        "searching": 1
+      },
+      "model": "beansbackpacks:item/ender_pouch_searching"
+    }
+  ]
+}
