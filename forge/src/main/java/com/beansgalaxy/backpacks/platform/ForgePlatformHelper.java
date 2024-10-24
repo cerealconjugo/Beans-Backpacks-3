@@ -14,14 +14,15 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.network.SimpleChannel;
 
-public class NeoForgePlatformHelper implements IPlatformHelper {
+public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public String getPlatformName() {
-        return "NeoForge";
+        return "Forge";
     }
 
     @Override
@@ -34,7 +35,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         return !FMLLoader.isProduction();
     }
 
-      @Override
+    @Override
     public void register(ModItems value) {
 
     }

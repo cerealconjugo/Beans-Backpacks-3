@@ -1,12 +1,16 @@
 package com.beansgalaxy.backpacks.registry;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,6 +28,10 @@ public enum ModSound implements StringRepresentable {
       private final byte i;
       ModSound(int i) {
             this.i = (byte) i;
+      }
+
+      public static void register() {
+
       }
 
       public SoundEvent get(Type type) {
@@ -243,14 +251,15 @@ public enum ModSound implements StringRepresentable {
             LOCK           ("lock_backpack"),
             UNLOCK         ("unlock_backpack");
 
-            public final String id;
-
+            public final SoundEvent event;
             Events(String id) {
-                  this.id = id;
+                  ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
+                  SoundEvent event = SoundEvent.createVariableRangeEvent(location);
+                  this.event = Registry.register(BuiltInRegistries.SOUND_EVENT, location, event);
             }
 
             public SoundEvent get() {
-                  return Services.PLATFORM.soundEvent(id);
+                  return event;
             }
 
             private Playable playable(float volume, float pitch) {

@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.ModMain;
+import com.beansgalaxy.backpacks.FabricMain;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -23,7 +23,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -48,13 +47,8 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public SoundEvent soundEvent(String id) {
-        return ModMain.SOUNDS.get(id);
-    }
-
-    @Override
     public void register(ModItems item) {
-        ModMain.registerItem(item.id, item.item);
+        FabricMain.registerItem(item.id, item.item);
     }
 
     @Override
@@ -76,14 +70,14 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public void openBundleMenu(Player player, BackpackEntity backpack, BundleTraits.Mutable mutable) {
-        ExtendedScreenHandlerFactory<ModMain.BundleMenuRecord> factory = new ExtendedScreenHandlerFactory<>() {
+        ExtendedScreenHandlerFactory<FabricMain.BundleMenuRecord> factory = new ExtendedScreenHandlerFactory<>() {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
                 if (player.isSpectator())
                     return null;
 
-                return new BundleMenu(ModMain.BUNDLE_MENU, i, inventory, backpack, mutable);
+                return new BundleMenu(FabricMain.BUNDLE_MENU, i, inventory, backpack, mutable);
             }
 
             @Override
@@ -92,8 +86,8 @@ public class FabricPlatformHelper implements IPlatformHelper {
             }
 
             @Override
-            public ModMain.BundleMenuRecord getScreenOpeningData(ServerPlayer player) {
-                return new ModMain.BundleMenuRecord(backpack.getId(), mutable.freeze());
+            public FabricMain.BundleMenuRecord getScreenOpeningData(ServerPlayer player) {
+                return new FabricMain.BundleMenuRecord(backpack.getId(), mutable.freeze());
             }
         };
         player.openMenu(factory);

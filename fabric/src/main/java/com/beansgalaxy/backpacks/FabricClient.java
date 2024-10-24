@@ -12,9 +12,7 @@ import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
 import com.beansgalaxy.backpacks.util.Tint;
-import com.mojang.datafixers.kinds.App;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -26,10 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
 import org.apache.commons.lang3.math.Fraction;
 
-import java.util.Collection;
 import java.util.Optional;
 
-public class ModClient implements ClientModInitializer {
+public class FabricClient implements ClientModInitializer {
 
       @Override
       public void onInitializeClient() {
@@ -53,7 +50,7 @@ public class ModClient implements ClientModInitializer {
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
             EntityRendererRegistry.register(CommonClass.BACKPACK_ENTITY, EntityRender::new);
-            MenuScreens.register(ModMain.BUNDLE_MENU, BundleScreen::new);
+            MenuScreens.register(FabricMain.BUNDLE_MENU, BundleScreen::new);
       }
 
       private static int componentTint(ItemStack itemStack, int rgbBase) {

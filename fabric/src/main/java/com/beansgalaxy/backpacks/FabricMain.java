@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.events.NetworkPackages;
 import com.beansgalaxy.backpacks.events.SyncDataEvent;
 import com.beansgalaxy.backpacks.registry.ModItems;
-import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
 import com.beansgalaxy.backpacks.components.EnderTraits;
@@ -25,25 +24,20 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.HashMap;
 import java.util.Optional;
 
-public class ModMain implements ModInitializer {
-    public static final HashMap<String, SoundEvent> SOUNDS = new HashMap<>();
+public class FabricMain implements ModInitializer {
 
     @Override
     public void onInitialize() {
         NetworkPackages.registerCommon();
-        registerSounds();
         ModItems.register();
-        Traits.register();
 
         EnergyStorage.ITEM.registerFallback((stack, ctx) -> {
             BatteryTraits batteryTraits = (BatteryTraits) stack.get(Traits.BATTERY);
@@ -92,16 +86,6 @@ public class ModMain implements ModInitializer {
         CommonClass.init();
     }
 
-    public static void registerSounds() {
-        for (ModSound.Events value : ModSound.Events.values()) {
-            String id = value.id;
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
-            SoundEvent event = SoundEvent.createVariableRangeEvent(location);
-            SoundEvent register = Registry.register(BuiltInRegistries.SOUND_EVENT, location, event);
-            SOUNDS.put(id, register);
-        }
-    }
-
     public static final CreativeModeTab BACKPACK_TAB = FabricItemGroup.builder()
                 .title(Component.translatable("itemGroup." + Constants.MOD_ID))
                 .icon(() -> ModItems.LEATHER_BACKPACK.get().getDefaultInstance())
@@ -141,7 +125,7 @@ public class ModMain implements ModInitializer {
                                             ? backpackEntity
                                             : null;
 
-                                return new BundleMenu(ModMain.BUNDLE_MENU, syncId, inventory, bundleEntity, data.bundleTraits.mutable());
+                                return new BundleMenu(FabricMain.BUNDLE_MENU, syncId, inventory, bundleEntity, data.bundleTraits.mutable());
                             }), BUNDLE_MENU_STREAM)
                 );
 }

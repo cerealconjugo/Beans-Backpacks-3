@@ -11,15 +11,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public enum Network2C {
-      ENDER_TRAIT_2C(SendEnderTraits.ID, SendEnderTraits::encode, SendEnderTraits::new, SendEnderTraits::handle),
-      ENDER_ENTRY_2C(SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::new, SendEnderEntry::handle),
-      OPEN_CHEST_2C(OpenChestTraits.ID, OpenChestTraits::encode, OpenChestTraits::new, OpenChestTraits::handle),
-      CONFIG_REFERENCES_2C(ConfigureReferences.ID, ConfigureReferences::encode, ConfigureReferences::new, ConfigureReferences::handle),
+      ENDER_TRAIT_2C(SendEnderTraits.class, SendEnderTraits.ID, SendEnderTraits::encode, SendEnderTraits::new, SendEnderTraits::handle),
+      ENDER_ENTRY_2C(SendEnderEntry.class, SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::new, SendEnderEntry::handle),
+      OPEN_CHEST_2C(OpenChestTraits.class, OpenChestTraits.ID, OpenChestTraits::encode, OpenChestTraits::new, OpenChestTraits::handle),
+      CONFIG_REFERENCES_2C(ConfigureReferences.class, ConfigureReferences.ID, ConfigureReferences::encode, ConfigureReferences::new, ConfigureReferences::handle),
       ;
 
       public final DynamicLoaderPacket<? super RegistryFriendlyByteBuf, ?> packet;
-      <T extends Packet2C> Network2C(CustomPacketPayload.Type<T> id, BiConsumer<T, RegistryFriendlyByteBuf> encoder, Function<RegistryFriendlyByteBuf, T> decoder, Consumer<T> handle) {
-            this.packet = new DynamicLoaderPacket<>(id, encoder, decoder, handle);
+      <T extends Packet2C> Network2C(Class<T> clazz, CustomPacketPayload.Type<T> id, BiConsumer<T, RegistryFriendlyByteBuf> encoder, Function<RegistryFriendlyByteBuf, T> decoder, Consumer<T> handle) {
+            this.packet = new DynamicLoaderPacket<>(clazz, id, encoder, decoder, handle);
       }
 
       public void debugMsgEncode() {
@@ -31,12 +31,14 @@ public enum Network2C {
       }
 
       public class DynamicLoaderPacket<B extends RegistryFriendlyByteBuf, T extends Packet2C> implements StreamCodec<B, T> {
+            public final Class<T> clazz;
             public final CustomPacketPayload.Type<T> type;
             private final BiConsumer<T, B> encoder;
             private final Function<B, T> decoder;
             private final Consumer<T> handle;
 
-            private DynamicLoaderPacket(CustomPacketPayload.Type<T> type, BiConsumer<T, B> encoder, Function<B, T> decoder, Consumer<T> handle) {
+            private DynamicLoaderPacket(Class<T> clazz, CustomPacketPayload.Type<T> type, BiConsumer<T, B> encoder, Function<B, T> decoder, Consumer<T> handle) {
+                  this.clazz = clazz;
                   this.type = type;
                   this.encoder = encoder;
                   this.decoder = decoder;

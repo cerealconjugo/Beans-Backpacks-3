@@ -16,10 +16,10 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "com.beansgalaxy.backpacks.ModMain"
+            "com.beansgalaxy.backpacks.FabricMain"
         ],
         "client": [
-            "com.beansgalaxy.backpacks.ModClient"
+          "com.beansgalaxy.backpacks.FabricClient"
         ]
     },
     "mixins": [

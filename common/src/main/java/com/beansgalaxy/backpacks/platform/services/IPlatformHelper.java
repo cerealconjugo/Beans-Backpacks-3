@@ -12,7 +12,6 @@ import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 
 public interface IPlatformHelper {
@@ -48,8 +47,6 @@ public interface IPlatformHelper {
 
         return isDevelopmentEnvironment() ? "development" : "production";
     }
-
-    SoundEvent soundEvent(String id);
 
     void register(ModItems value);
 
