@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.FabricMain;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -11,22 +11,15 @@ import com.beansgalaxy.backpacks.trait.battery.BatteryCodecs;
 import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.bundle.BundleMenu;
-import com.beansgalaxy.backpacks.traits.bundle.BundleTraits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.Nullable;
 
 public class FabricPlatformHelper implements IPlatformHelper {
 
@@ -42,13 +35,13 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public boolean isDevelopmentEnvironment() {
-
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     @Override
     public void register(ModItems item) {
-        FabricMain.registerItem(item.id, item.item);
+        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, item.id);
+        Registry.register(BuiltInRegistries.ITEM, resourceLocation, item.item);
     }
 
     @Override
@@ -69,37 +62,12 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void openBundleMenu(Player player, BackpackEntity backpack, BundleTraits.Mutable mutable) {
-        ExtendedScreenHandlerFactory<FabricMain.BundleMenuRecord> factory = new ExtendedScreenHandlerFactory<>() {
-            @Nullable
-            @Override
-            public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-                if (player.isSpectator())
-                    return null;
-
-                return new BundleMenu(FabricMain.BUNDLE_MENU, i, inventory, backpack, mutable);
-            }
-
-            @Override
-            public Component getDisplayName() {
-                return Component.empty();
-            }
-
-            @Override
-            public FabricMain.BundleMenuRecord getScreenOpeningData(ServerPlayer player) {
-                return new FabricMain.BundleMenuRecord(backpack.getId(), mutable.freeze());
-            }
-        };
-        player.openMenu(factory);
-    }
-
-    @Override
-    public TraitComponentKind<BucketTraits, ? extends IDeclaredFields> registerBucket() {
+    public TraitComponentKind<BucketTraits> registerBucket() {
         return TraitComponentKind.register(BucketTraits.NAME, BucketCodecs.INSTANCE);
     }
 
     @Override
-    public TraitComponentKind<BatteryTraits, ? extends IDeclaredFields> registerBattery() {
+    public TraitComponentKind<BatteryTraits> registerBattery() {
         return TraitComponentKind.register(BatteryTraits.NAME, BatteryCodecs.INSTANCE);
     }
 }

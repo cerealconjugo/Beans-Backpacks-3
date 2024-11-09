@@ -30,10 +30,6 @@ public enum ModSound implements StringRepresentable {
             this.i = (byte) i;
       }
 
-      public static void register() {
-
-      }
-
       public SoundEvent get(Type type) {
             return get(this, type);
       }
@@ -267,6 +263,10 @@ public enum ModSound implements StringRepresentable {
             }
 
             public record Playable(SoundEvent event, float volume, float pitch) {}
+
+            public static void register() {
+
+            }
       }
 
       public static Codec<ModSound> CODEC = new StringRepresentableCodec<>(ModSound.values(), in -> {

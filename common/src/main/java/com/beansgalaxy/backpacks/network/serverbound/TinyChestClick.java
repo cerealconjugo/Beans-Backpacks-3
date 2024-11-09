@@ -6,8 +6,8 @@ import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +52,7 @@ public class TinyChestClick implements Packet2S {
       }
 
       @Override
-      public void handle(ServerPlayer sender) {
+      public void handle(Player sender) {
             AbstractContainerMenu menu = sender.containerMenu;
             if (menu.containerId != containerId)
                   return;

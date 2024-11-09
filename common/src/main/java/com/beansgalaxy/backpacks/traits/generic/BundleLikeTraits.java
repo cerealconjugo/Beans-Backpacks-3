@@ -1,94 +1,189 @@
 package com.beansgalaxy.backpacks.traits.generic;
 
+import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
+import com.beansgalaxy.backpacks.network.serverbound.PickBlock;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
-import net.minecraft.util.Mth;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public abstract class BundleLikeTraits extends ItemStorageTraits {
-      public final SlotSelection slotSelection;
-      private final Fraction fullness;
+      private final int size;
+      public final SlotSelection selection = new SlotSelection();
 
-      public BundleLikeTraits(Fraction fullness) {
-            this.fullness = fullness;
-            this.slotSelection = new SlotSelection();
+      public BundleLikeTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
+            super(location, sound);
+            this.size = size;
       }
 
-      public BundleLikeTraits(Fraction fullness, SlotSelection slotSelection) {
-            this.fullness = fullness;
-            this.slotSelection = slotSelection;
+      public static Optional<BundleLikeTraits> get(DataComponentHolder stack) {
+            ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
+            if (referenceTrait != null && !referenceTrait.isEmpty())
+                  return referenceTrait.getTrait().map(traits -> {
+                        if (traits instanceof BundleLikeTraits storageTraits)
+                              return storageTraits;
+                        return null;
+                  });
+
+            for (TraitComponentKind<? extends BundleLikeTraits> type : Traits.BUNDLE_TRAITS) {
+                  BundleLikeTraits traits = stack.get(type);
+                  if (traits != null)
+                        return Optional.of(traits);
+            }
+
+            return Optional.empty();
       }
 
-      @Override
-      public Fraction fullness() {
-            return fullness;
-      }
-
-      @Override
-      public boolean isEmpty() {
-            return stacks().isEmpty();
-      }
-
-      public abstract MutableBundleLike mutable();
-
-      @Override
-      public int getSelectedSlot(Player player) {
-            return slotSelection.getSelectedSlot(player);
-      }
-
-      @Override
-      public int getSelectedSlotSafe(Player player) {
-            return slotSelection.getSelectedSlotSafe(player);
+      public int size() {
+            return size;
       }
 
       @Override
-      public void setSelectedSlot(Player player, int selectedSlot) {
-            slotSelection.setSelectedSlot(player, selectedSlot);
+      public Fraction fullness(PatchedComponentHolder holder) {
+            List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
+            if (stacks == null) {
+                  return Fraction.ZERO;
+            }
+
+            return Traits.getWeight(stacks, size());
       }
 
       @Override
-      public void limitSelectedSlot(int slot, int size) {
-            slotSelection.limit(slot, size);
+      public boolean isEmpty(PatchedComponentHolder holder) {
+            List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
+            return stacks == null || stacks.isEmpty();
+      }
+
+      @Override @Nullable
+      public ItemStack getFirst(PatchedComponentHolder holder) {
+            List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
+            return stacks == null ? null : stacks.getFirst();
+      }
+
+      public SlotSelection getSlotSelection(PatchedComponentHolder holder) {
+            SlotSelection slotSelection = holder.get(ITraitData.SLOT_SELECTION);
+            if (slotSelection != null)
+                  return slotSelection;
+
+            SlotSelection selection = new SlotSelection();
+            holder.set(ITraitData.SLOT_SELECTION, selection);
+            return selection;
+      }
+
+      public int getSelectedSlot(PatchedComponentHolder holder, Player player) {
+            return getSlotSelection(holder).getSelectedSlot(player);
+      }
+
+      public int getSelectedSlotSafe(PatchedComponentHolder holder, Player player) {
+            int selectedSlot = getSlotSelection(holder).getSelectedSlot(player);
+            return selectedSlot == 0 ? selectedSlot : selectedSlot - 1;
+      }
+
+      public void setSelectedSlot(PatchedComponentHolder holder, Player player, int selectedSlot) {
+            getSlotSelection(holder).setSelectedSlot(player, selectedSlot);
+      }
+
+      public void limitSelectedSlot(PatchedComponentHolder holder, int slot, int size) {
+            getSlotSelection(holder).limit(slot, size);
       }
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            MutableBundleLike mutable = mutable();
+            MutableBundleLike<?> mutable = newMutable(backpack);
             boolean empty = !EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable());
             if (empty) {
                   if (ClickAction.SECONDARY.equals(click)) {
                         if (other.isEmpty()) {
-                              if (mutable().getItemStacks().isEmpty())
+                              if (mutable.isEmpty())
                                     return;
 
-                              int selectedSlot = getSelectedSlotSafe(player);
-
-                              access.set(mutable.removeItemNoUpdate(selectedSlot));
+                              List<ItemStack> stacks = mutable.stacks.get();
+                              int selectedSlot = getSelectedSlotSafe(backpack, player);
+                              ItemStack removedItem = mutable.removeItem(selectedSlot);
                               sound().atClient(player, ModSound.Type.REMOVE);
 
-                              int size = mutable.stacks.size();
-                              limitSelectedSlot(selectedSlot, size);
-                        }
-                        else if (mutable.addItem(other, getSelectedSlot(player), player) != null) {
-                              sound().atClient(player, ModSound.Type.INSERT);
-                        }
+                              if (BackData.get(player).isMenuKeyDown()) {
+                                    Inventory inventory = player.getInventory();
+                                    int matchingSlot = inventory.getSlotWithRemainingSpace(removedItem);
+                                    while (matchingSlot != -1) {
+                                          ItemStack matchingStack = inventory.getItem(matchingSlot);
+                                          int count = Math.min(matchingStack.getMaxStackSize() - matchingStack.getCount(), removedItem.getCount());
+                                          matchingStack.grow(count);
+                                          removedItem.shrink(count);
 
-                        freezeAndCancel(backpack, cir, mutable);
+                                          if (removedItem.isEmpty()) {
+                                                int size = stacks.size();
+                                                limitSelectedSlot(backpack, selectedSlot, size);
+                                                mutable.push(cir);
+                                                return;
+                                          }
+
+                                          matchingSlot = inventory.findSlotMatchingItem(removedItem);
+                                    }
+
+                                    NonNullList<ItemStack> items = inventory.items;
+                                    for (int i = 9; i < items.size(); i++) {
+                                          ItemStack stack = items.get(i);
+                                          if (stack.isEmpty()) {
+                                                items.set(i, removedItem);
+                                                int size = stacks.size();
+                                                limitSelectedSlot(backpack, selectedSlot, size);
+                                                mutable.push(cir);
+                                                return;
+                                          }
+                                    }
+
+                                    for (int i = 0; i < 9; i++) {
+                                          ItemStack stack = items.get(i);
+                                          if (stack.isEmpty()) {
+                                                items.set(i, removedItem);
+                                                int size = stacks.size();
+                                                limitSelectedSlot(backpack, selectedSlot, size);
+                                                mutable.push(cir);
+                                                return;
+                                          }
+                                    }
+
+                                    cir.setReturnValue(true);
+                                    return;
+                              }
+                              else access.set(removedItem);
+
+                              int size = stacks.size();
+                              limitSelectedSlot(backpack, selectedSlot, size);
+                              mutable.push(cir);
+                        }
+                        else if (mutable.addItem(other, getSelectedSlot(backpack, player), player) != null) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                              mutable.push(cir);
+                        }
                   }
             }
             else if (EquipableComponent.canEquip(backpack, slot)) {
@@ -96,21 +191,20 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         if (mutable.isEmpty())
                               return;
 
-
-                        int selectedSlot = getSelectedSlotSafe(player);
+                        int selectedSlot = getSelectedSlotSafe(backpack, player);
                         ItemStack stack = ClickAction.SECONDARY.equals(click)
                                     ? mutable.splitItem(selectedSlot)
-                                    : mutable.removeItemNoUpdate(selectedSlot);
+                                    : mutable.removeItem(selectedSlot);
 
                         if (stack != null) {
                               access.set(stack);
                               sound().atClient(player, ModSound.Type.REMOVE);
-                              int size = mutable.stacks.size();
-                              limitSelectedSlot(selectedSlot, size);
+                              int size = mutable.stacks.get().size();
+                              limitSelectedSlot(backpack, selectedSlot, size);
                         }
                   } else {
                         ItemStack returned;
-                        int selectedSlot = getSelectedSlot(player);
+                        int selectedSlot = getSelectedSlot(backpack, player);
                         if (ClickAction.PRIMARY.equals(click)) {
                               returned = mutable.addItem(other, selectedSlot, player);
                         } else {
@@ -123,12 +217,12 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         if (returned == null) {
                               cir.setReturnValue(true);
                               return;
-                        } else {
-                              sound().atClient(player, ModSound.Type.INSERT);
                         }
+
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
 
-                  freezeAndCancel(backpack, cir, mutable);
+                  mutable.push(cir);
             }
       }
 
@@ -140,17 +234,17 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
             boolean equals = ClickAction.SECONDARY.equals(click);
             if (equals && empty) {
-                  MutableBundleLike mutable = mutable();
+                  MutableBundleLike<?> mutable = newMutable(backpack);
                   ModSound sound = sound();
                   if (other.isEmpty()) {
-                        ItemStack stack = mutable.removeItemNoUpdate(other, player);
+                        ItemStack stack = mutable.removeItem(other, player);
                         if (stack.isEmpty() || !slot.mayPlace(stack))
                               return;
 
                         slot.set(stack);
                         sound.atClient(player, ModSound.Type.REMOVE);
-                        int size = mutable.stacks.size();
-                        limitSelectedSlot(0, size);
+                        int size = mutable.stacks.get().size();
+                        limitSelectedSlot(backpack, 0, size);
                   }
                   else if (slot.mayPickup(player)) {
                         if (mutable.addItem(other, player) != null)
@@ -158,117 +252,259 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                   }
                   else return;
 
-                  freezeAndCancel(backpack, cir, mutable);
+                  mutable.push(cir);
             }
       }
 
       @Override
-      public boolean canItemFit(ItemStack inserted) {
-            return !inserted.isEmpty() && super.canItemFit(inserted);
+      public boolean canItemFit(PatchedComponentHolder holder, ItemStack inserted) {
+            return !inserted.isEmpty() && super.canItemFit(holder, inserted);
       }
 
-      public abstract class MutableBundleLike implements MutableItemStorage {
-            protected final List<ItemStack> stacks;
-            private final int size;
+      public abstract MutableBundleLike<?> newMutable(PatchedComponentHolder holder);
 
-            public MutableBundleLike(BundleLikeTraits traits) {
-                  this.stacks = new ArrayList<>(traits.stacks());
-                  this.size = traits.size();
+      @Override
+      public void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci) {
+            if (selectedEquipment == null) {
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(slot.getItem());
+                  MutableBundleLike<?> mutable = newMutable(holder);
+                  if (mutable.isEmpty()) {
+                        ci.cancel();
+                        return;
+                  }
+
+                  Inventory inventory = player.getInventory();
+                  int selectedSlot = getSelectedSlotSafe(holder, player);
+                  if (ClickType.PICKUP_ALL.equals(actionType)) {
+                        ItemStack carried = player.containerMenu.getCarried();
+                        List<ItemStack> stacks = mutable.getItemStacks();
+                        ItemStack selectedStack = stacks.get(selectedSlot);
+                        if (!ItemStack.isSameItemSameComponents(carried, selectedStack) || !canItemFit(holder, carried)) {
+                              ci.cancel();
+                              return;
+                        }
+
+                        for (int i = stacks.size() - 1; i >= 0  && !mutable.isFull(); i--) {
+                              ItemStack stack = stacks.get(i);
+                              boolean same = ItemStack.isSameItemSameComponents(carried, stack);
+                              if (same) {
+                                    int stackableSlot = inventory.getSlotWithRemainingSpace(stack);
+                                    if (stackableSlot == -1) {
+                                          stackableSlot = inventory.getFreeSlot();
+                                    }
+                                    if (stackableSlot == -1)
+                                          continue;
+
+                                    ItemStack removed = mutable.removeItem(i);
+                                    if (inventory.add(-1, removed)) {
+                                          ci.cancel();
+                                    }
+                              }
+                        }
+
+                        boolean cancelled = ci.isCancelled();
+                        if (cancelled) {
+                              sound().atClient(player, ModSound.Type.REMOVE);
+                              getSlotSelection(holder).limit(0, stacks.size());
+                              mutable.push();
+                        }
+                        return;
+                  }
+
+                  ItemStack stack = mutable.removeItem(selectedSlot);
+                  int stackableSlot = inventory.getSlotWithRemainingSpace(stack);
+                  if (stackableSlot == -1) {
+                        stackableSlot = inventory.getFreeSlot();
+                  }
+                  if (stackableSlot != -1 && inventory.add(-1, stack)) {
+                        sound().atClient(player, ModSound.Type.REMOVE);
+                        int size = mutable.getItemStacks().size();
+                        getSlotSelection(holder).limit(0, size);
+                        mutable.push();
+                        ci.cancel();
+                  }
+            } else {
+                  ItemStack backpack = player.getItemBySlot(selectedEquipment);
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+                  MutableBundleLike<?> mutable = newMutable(holder);
+                  if (mutable.isFull())
+                        return;
+
+                  if (ClickType.PICKUP_ALL.equals(actionType)) {
+                        List<ItemStack> stacks = mutable.getItemStacks();
+                        ItemStack carried = player.containerMenu.getCarried();
+                        if (stacks.isEmpty()
+                        || !ItemStack.isSameItemSameComponents(carried, stacks.getFirst())
+                        || !canItemFit(holder, carried)
+                        ) {
+                              ci.cancel();
+                              return;
+                        }
+
+                        Inventory inventory = player.getInventory();
+                        NonNullList<ItemStack> items = inventory.items;
+                        for (int i = items.size() - 1; i >= 0 && !mutable.isFull(); i--) {
+                              ItemStack stack = items.get(i);
+                              if (ItemStack.isSameItemSameComponents(carried, stack)) {
+                                    int toAdd = mutable.getMaxAmountToAdd(stack.copy());
+                                    int count = Math.min(stack.getMaxStackSize(), toAdd);
+                                    ItemStack removed = stack.copyWithCount(count);
+                                    stack.shrink(count);
+                                    if (mutable.addItem(removed, player) != null) {
+                                          ci.cancel();
+                                    }
+                              }
+                        }
+
+                        boolean cancelled = ci.isCancelled();
+                        if (cancelled) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                              mutable.push();
+                        }
+                        return;
+                  }
+
+                  if (canItemFit(holder, slot.getItem())) {
+                        ItemStack slotItem = slot.getItem().copy();
+                        int toAdd = mutable.getMaxAmountToAdd(slotItem);
+                        ItemStack removed = slot.remove(toAdd);
+                        if (mutable.addItem(removed, player) != null) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                              mutable.push();
+                              ci.cancel();
+                        }
+                  }
             }
+      }
 
-            public int size() {
-                  return size;
+      @Override
+      public void hotkeyThrow(Slot slot, PatchedComponentHolder backpack, int button, Player player, boolean menuKeyDown, CallbackInfo ci) {
+            if (isEmpty(backpack))
+                  return;
+
+            MutableBundleLike<?> mutable = newMutable(backpack);
+            int selectedSlot = getSelectedSlotSafe(backpack, player);
+
+            ItemStack removed;
+            if (menuKeyDown)
+                  removed = mutable.removeItem(selectedSlot);
+            else if (EquipableComponent.get(backpack).isPresent())
+            {
+                  ItemStack itemStack = mutable.getItemStacks().get(selectedSlot);
+                  removed = itemStack.getCount() == 1 ? mutable.removeItem(selectedSlot) : itemStack.split(1);
             }
+            else return;
 
-            public List<ItemStack> getItemStacks() {
-                  return stacks;
-            }
+            player.drop(removed, true);
+            limitSelectedSlot(backpack, selectedSlot, mutable.getItemStacks().size());
 
-            @Override @Nullable
-            public ItemStack addItem(ItemStack stack, @Nullable Player player) {
-                  return addItem(stack, 0, player);
-            }
+            sound().atClient(player, ModSound.Type.REMOVE);
+            mutable.push();
+            ci.cancel();
+      }
 
-            @Nullable
-            public ItemStack addItem(ItemStack inserted, int slot, @Nullable Player player) {
-                  if (!canItemFit(inserted))
-                        return null;
+      @Override
+      public boolean pickupToBackpack(Player player, EquipmentSlot equipmentSlot, Inventory inventory, ItemStack backpack, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+            if (!isFull(backpack)) {
+                  inventory.items.forEach(stacks -> {
+                        if (ItemStack.isSameItemSameComponents(stacks, stack)) {
+                              int present = stacks.getCount();
+                              int inserted = stack.getCount();
+                              int count = present + inserted;
+                              int remainder = Math.max(0, count - stack.getMaxStackSize());
+                              count -= remainder;
 
-                  int spaceLeft = this.getMaxAmountToAdd(inserted);
-                  int toInsert = Math.min(inserted.getCount(), spaceLeft);
-                  if (toInsert == 0)
-                        return null;
+                              stacks.setCount(count);
+                              stack.setCount(remainder);
+                        }
+                  });
 
-                  int count = toInsert;
-                  if (inserted.isStackable()) {
-                        for (ItemStack stored : getItemStacks()) {
-                              if (inserted.isEmpty() || count < 1)
-                                    return ItemStack.EMPTY;
+                  if (stack.isEmpty()) {
+                        cir.setReturnValue(true);
+                        return true;
+                  }
 
-                              if (ItemStack.isSameItemSameComponents(stored, inserted)) {
-                                    int insert = Math.min(stored.getMaxStackSize() - stored.getCount(), count);
-                                    stored.grow(insert);
-                                    inserted.shrink(insert);
-                                    count -= insert;
+                  MutableBundleLike<?> mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  Iterator<ItemStack> iterator = mutable.getItemStacks().iterator();
+                  while (iterator.hasNext() && !stack.isEmpty()) {
+                        ItemStack itemStack = iterator.next();
+                        if (ItemStack.isSameItemSameComponents(itemStack, stack)) {
+                              ItemStack returnStack = mutable.addItem(stack, player);
+                              if (returnStack != null) {
+                                    cir.setReturnValue(true);
                               }
                         }
                   }
 
-                  if (!inserted.isEmpty()) {
-                        int selectedSlot = Math.min(getSelectedSlot(player), getItemStacks().size());
-                        ItemStack split = inserted.split(count);
-                        getItemStacks().add(selectedSlot, split);
-                        slotSelection.grow(selectedSlot);
+                  if (cir.isCancelled() && cir.getReturnValue()) {
+                        sound().toClient(player, ModSound.Type.INSERT, 1, 1);
+                        mutable.push();
+
+                        if (player instanceof ServerPlayer serverPlayer) {
+                              List<Pair<EquipmentSlot, ItemStack>> pSlots = List.of(Pair.of(equipmentSlot, backpack));
+                              ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(serverPlayer.getId(), pSlots);
+                              serverPlayer.serverLevel().getChunkSource().broadcastAndSend(serverPlayer, packet);
+                        }
                   }
 
-                  return inserted;
+                  return stack.isEmpty();
             }
+            return false;
+      }
 
-            @Override
-            public ItemStack removeItemNoUpdate(ItemStack carried, Player player) {
-                  return removeItemNoUpdate(0);
-            }
+      @Override
+      public void clientPickBlock(EquipmentSlot equipmentSlot, boolean instantBuild, Inventory inventory, ItemStack itemStack, Player player, CallbackInfo ci) {
+            if (instantBuild || inventory.getFreeSlot() == -1)
+                  return;
 
-            @Override @NotNull
-            public ItemStack removeItemNoUpdate(int slot) {
-                  ItemStack returned = ItemStack.EMPTY;
-                  List<ItemStack> stacks = getItemStacks();
-                  if (stacks.size() > slot) {
-                        ItemStack stack = stacks.get(slot);
-                        int maxCount = stack.getMaxStackSize();
-                        if (stack.getCount() > maxCount) {
-                              stack.shrink(maxCount);
-                              returned = stack.copyWithCount(maxCount);
-                        } else
-                              returned = stacks.remove(slot);
+            int slot = inventory.findSlotMatchingItem(itemStack);
+            if (slot > -1 || player == null)
+                  return;
+
+            ItemStack backpack = player.getItemBySlot(equipmentSlot);
+            List<ItemStack> stacks = backpack.get(ITraitData.ITEM_STACKS);
+            if (stacks == null)
+                  return;
+
+            for (int j = 0; j < stacks.size(); j++) {
+                  ItemStack backpackStack = stacks.get(j);
+                  if (ItemStack.isSameItem(itemStack, backpackStack)) {
+                        slot = j;
                   }
-                  return returned;
             }
 
-            public ItemStack splitItem(int slot) {
-                  List<ItemStack> stacks = getItemStacks();
-                  ItemStack stack = stacks.get(slot);
-                  ItemStack split = stack.split(Mth.ceil(stack.getCount() / 2f));
+            if (slot < 0)
+                  return;
 
-                  if (stack.isEmpty() && slot < stacks.size())
-                        stacks.remove(slot);
+            PickBlock.send(slot, equipmentSlot);
+            sound().atClient(player, ModSound.Type.REMOVE);
+            ci.cancel();
+      }
 
-                  return split;
-            }
+      @Override
+      public void breakTrait(ServerPlayer pPlayer, ItemStack instance) {
+            List<ItemStack> stacks = instance.get(ITraitData.ITEM_STACKS);
+            if (stacks == null)
+                  return;
 
-            @Override
-            public int getMaxAmountToAdd(ItemStack stack) {
-                  Fraction size = Fraction.getFraction(size(), 1);
-                  Fraction weight = Traits.getWeight(getItemStacks());
-                  Fraction weightLeft = size.subtract(weight);
-                  return Math.max(weightLeft.divideBy(Traits.getItemWeight(stack)).intValue(), 0);
-            }
+            stacks.forEach(stack -> {
+                  boolean success = pPlayer.getInventory().add(-1, stack);
+                  if (!success || !stack.isEmpty()) {
+                        pPlayer.drop(stack, true, true);
+                  }
+            });
+      }
 
-            public boolean isEmpty() {
-                  return this.getItemStacks().isEmpty();
-            }
+      @Override
+      public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof BundleLikeTraits that)) return false;
+            if (!super.equals(o)) return false;
+            return size == that.size && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
+      }
 
-            @Override
-            abstract public BundleLikeTraits trait();
+      @Override
+      public int hashCode() {
+            return Objects.hash(location(), sound(), size);
       }
 }

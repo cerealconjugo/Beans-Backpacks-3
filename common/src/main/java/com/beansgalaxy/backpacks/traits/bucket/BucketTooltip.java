@@ -1,4 +1,4 @@
-package com.beansgalaxy.backpacks.trait.bucket;
+package com.beansgalaxy.backpacks.traits.bucket;
 
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
 import com.beansgalaxy.backpacks.util.Tint;
@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class BucketTooltip implements ClientTooltipComponent {
@@ -25,6 +26,17 @@ public class BucketTooltip implements ClientTooltipComponent {
             this.stack = itemstack;
             this.title = title;
             this.sprite = sprite;
+            this.tint = tint;
+            this.buckets = buckets;
+            this.bottles = bottles;
+            this.droplets = droplets;
+      }
+
+      public BucketTooltip(ItemStack itemstack, Component title, ResourceLocation texture, Tint tint, int buckets, int bottles, int droplets) {
+            this.minecraft = Minecraft.getInstance();
+            this.stack = itemstack;
+            this.title = title;
+            this.sprite = minecraft.getGuiSprites().getSprite(texture);
             this.tint = tint;
             this.buckets = buckets;
             this.bottles = bottles;
@@ -60,11 +72,11 @@ public class BucketTooltip implements ClientTooltipComponent {
             int tooltipWidth = Math.max(font.width(title), getWidth(font));
             BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, mouseX, mouseY, tooltipWidth, stack);
 
-            int x = mouseX;
-            int y = mouseY - 2;
+            int x = mouseX + 1;
+            int y = mouseY - 1;
 
-            int xO = x + 20;
-            int yO = y + 6;
+            int xO = x + 19;
+            int yO = y + 5;
             if (buckets > 0) {
                   String icon = "\uD83E\uDEA3";
                   gui.drawString(font, icon, xO, yO - 1, 0xFFFFFFFF);
@@ -83,7 +95,6 @@ public class BucketTooltip implements ClientTooltipComponent {
                   gui.drawString(font, droplets + "mb", xO, yO, 0xFFFFFFFF);
             }
 
-            gui.blit(x + 1, y + 1, 16, 16, 16, sprite, tint.getRed() / 255f, tint.getGreen() / 255f, tint.getBlue() / 255f, 1);
-
+            gui.blit(x, y, 16, 16, 16, sprite, tint.getRed() / 255f, tint.getGreen() / 255f, tint.getBlue() / 255f, 1);
       }
 }

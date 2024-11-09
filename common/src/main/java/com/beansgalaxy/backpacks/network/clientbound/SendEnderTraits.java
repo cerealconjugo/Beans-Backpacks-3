@@ -4,9 +4,8 @@ import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.Network2C;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,26 +13,25 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 public class SendEnderTraits implements Packet2C {
-      private final GenericTraits traits;
       private final UUID owner;
       private final ResourceLocation location;
+      private final Reference2ObjectOpenHashMap<DataComponentType<?>, Object> map;
 
       public SendEnderTraits(RegistryFriendlyByteBuf buf) {
             this.owner = buf.readUUID();
             location = ResourceLocation.STREAM_CODEC.decode(buf);
 
-            TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
-            traits = kind.streamCodec().decode(buf);
+            map = EnderStorage.ENTRY_MAP_STREAM_CODEC.decode(buf);
       }
 
-      private SendEnderTraits(UUID owner, ResourceLocation location, GenericTraits traits) {
+      private SendEnderTraits(UUID owner, ResourceLocation location, Reference2ObjectOpenHashMap<DataComponentType<?>, Object> map) {
             this.owner = owner;
             this.location = location;
-            this.traits = traits;
+            this.map = map;
       }
 
       public static void send(ServerPlayer sender, UUID owner, ResourceLocation location) {
-            GenericTraits traits = EnderStorage.get(sender.level()).get(owner, location);
+            Reference2ObjectOpenHashMap<DataComponentType<?>, Object> traits = EnderStorage.get(sender.level()).get(owner, location);
             new SendEnderTraits(owner, location, traits).send2C(sender);
       }
 
@@ -47,14 +45,12 @@ public class SendEnderTraits implements Packet2C {
             buf.writeUUID(owner);
             ResourceLocation.STREAM_CODEC.encode(buf, location);
 
-            TraitComponentKind<GenericTraits, ? extends IDeclaredFields> kind = traits.kind();
-            TraitComponentKind.STREAM_CODEC.encode(buf, kind);
-            kind.encode(buf, traits);
+            EnderStorage.ENTRY_MAP_STREAM_CODEC.encode(buf, map);
       }
 
       @Override
       public void handle() {
-            CommonAtClient.getEnderStorage().set(owner, location, traits);
+            CommonAtClient.getEnderStorage().set(owner, location, map);
       }
 
       public static Type<SendEnderTraits> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_ender_traits_c"));

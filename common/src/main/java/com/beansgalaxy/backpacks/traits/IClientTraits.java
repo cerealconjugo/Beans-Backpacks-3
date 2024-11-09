@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.traits;
 
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,28 +20,23 @@ import java.util.function.Consumer;
 
 public interface IClientTraits {
 
-      void renderTooltip(GenericTraits trait, ItemStack itemstack, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci);
+      void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci);
 
-      default void isBarVisible(GenericTraits trait, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-            if (!trait.isEmpty())
+      default void isBarVisible(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
+            if (!trait.isEmpty(holder))
                   cir.setReturnValue(true);
       }
-      void getBarWidth(GenericTraits trait, ItemStack stack, CallbackInfoReturnable<Integer> cir);
 
-      void getBarColor(GenericTraits trait, ItemStack stack, CallbackInfoReturnable<Integer> cir);
+      void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
 
-      default void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            int size = traits.size();
-            lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
-      }
+      void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
 
-      default void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            int size = traits.size();
-            pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
-      }
+      void appendTooltipLines(GenericTraits traits, List<Component> lines);
+
+      void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder);
 
       default void appendAdvancedLines(GenericTraits traits, List<Component> list) {
-            traits.fields().location().ifPresent(location -> {
+            traits.location().ifPresent(location -> {
                   list.add(Component.translatable("tooltip.beansbackpacks.advanced.reference", location).withStyle(ChatFormatting.DARK_GRAY).withStyle(ChatFormatting.ITALIC));
             });
       }

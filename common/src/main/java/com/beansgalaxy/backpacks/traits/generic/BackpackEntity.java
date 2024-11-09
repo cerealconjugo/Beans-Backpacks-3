@@ -7,13 +7,12 @@ import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -53,7 +52,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class BackpackEntity extends Entity {
+public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.ITEM_STACK);
       public static final EntityDataAccessor<PlaceableComponent> PLACEABLE = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
 
@@ -65,43 +64,6 @@ public class BackpackEntity extends Entity {
             @Override
             public PlaceableComponent copy(PlaceableComponent placeableComponent) {
                   return new PlaceableComponent(placeableComponent.modelLocation);
-            }
-      });
-
-      public static final EntityDataAccessor<GenericTraits.MutableTraits> TRAIT = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
-            public static final StreamCodec<RegistryFriendlyByteBuf, GenericTraits.MutableTraits> STREAM_CODEC = new StreamCodec<>() {
-                  @Override
-                  public GenericTraits.MutableTraits decode(RegistryFriendlyByteBuf buf) {
-                        boolean isNon = buf.readBoolean();
-                        if (isNon)
-                              return NonTrait.INSTANCE;
-
-                        TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> decode = TraitComponentKind.STREAM_CODEC.decode(buf);
-                        return decode.streamCodec().decode(buf).mutable();
-                  }
-
-                  @Override
-                  public void encode(RegistryFriendlyByteBuf buf, GenericTraits.MutableTraits mute) {
-                        boolean isNon = NonTrait.is(mute);
-                        if (isNon)
-                              buf.writeBoolean(true);
-                        else {
-                              buf.writeBoolean(false);
-                              GenericTraits traits = mute.freeze();
-                              TraitComponentKind.STREAM_CODEC.encode(buf, traits.kind());
-                              traits.kind().encode(buf, traits);
-                        }
-                  }
-            };
-
-            @Override
-            public StreamCodec<? super RegistryFriendlyByteBuf, GenericTraits.MutableTraits> codec() {
-                  return STREAM_CODEC;
-            }
-
-            @Override @NotNull
-            public GenericTraits.MutableTraits copy(@NotNull GenericTraits.MutableTraits mute) {
-                  return mute.freeze().mutable();
             }
       });
 
@@ -120,12 +82,9 @@ public class BackpackEntity extends Entity {
             blocksBuilding = true;
       }
 
-      private Optional<GenericTraits.MutableTraits> tryTraits() {
-            GenericTraits.MutableTraits value = entityData.get(TRAIT);
-            if (NonTrait.is(value))
-                  return Optional.empty();
-            else
-                  return Optional.of(value);
+      private Optional<MutableTraits> tryTraits() {
+            ItemStack stack = entityData.get(ITEM_STACK);
+            return Traits.get(stack).map(traits -> traits.newMutable(this));
       }
 
       public Optional<EquipableComponent> getEquipable() {
@@ -189,9 +148,9 @@ public class BackpackEntity extends Entity {
 
             backpackEntity.entityData.set(PLACEABLE, placeable);
 
-            GenericTraits.MutableTraits mute = traits.map(GenericTraits::mutable).orElse(NonTrait.INSTANCE);
+            MutableTraits mute = traits.map(trait -> trait.newMutable(backpackEntity)).orElse(NonTrait.INSTANCE);
             mute.onPlace(backpackEntity, ctx.getPlayer(), backpackStack);
-            backpackEntity.entityData.set(TRAIT, mute);
+//            backpackEntity.entityData.set(TRAIT, mute);
 
             backpackEntity.entityData.set(ITEM_STACK, backpackStack.copyWithCount(1));
             backpackStack.shrink(1);
@@ -251,7 +210,7 @@ public class BackpackEntity extends Entity {
             ItemStack itemStack = entityData.get(ITEM_STACK);
             tryTraits().ifPresent(mute -> {
                   if (!NonTrait.is(mute))
-                        mute.trait().kind().freezeAndCancel(PatchedComponentHolder.of(itemStack), mute);
+                        mute.push();
             });
             return itemStack;
       }
@@ -327,7 +286,7 @@ public class BackpackEntity extends Entity {
       @Override
       protected void defineSynchedData(SynchedEntityData.Builder builder) {
             builder.define(ITEM_STACK, ModItems.IRON_BACKPACK.get().getDefaultInstance());
-            builder.define(TRAIT, NonTrait.INSTANCE);
+//            builder.define(TRAIT, NonTrait.INSTANCE);
             builder.define(PLACEABLE, new PlaceableComponent());
       }
 
@@ -335,9 +294,9 @@ public class BackpackEntity extends Entity {
       protected void readAdditionalSaveData(CompoundTag tag) {
             ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.get("as_stack")).getOrThrow();
             entityData.set(ITEM_STACK, stack);
-            Traits.runIfPresent(stack, traits ->
-                  entityData.set(TRAIT, traits.mutable())
-            );
+//            Traits.runIfPresent(stack, traits ->
+//                  entityData.set(TRAIT, traits.mutable())
+//            );
             PlaceableComponent.get(stack).ifPresent(placeable ->
                   entityData.set(PLACEABLE, placeable)
             );
@@ -484,11 +443,11 @@ public class BackpackEntity extends Entity {
                   breakAndDropContents();
             else {
                   tryTraits().ifPresent(mute ->
-                              mute.damageTrait(this, damage, silent)
+                              mute.onDamage(this, damage, silent)
                   );
                   if (!silent) {
                         float pitch = random.nextFloat() * 0.3f;
-                        ModSound modSound = tryTraits().map(GenericTraits.MutableTraits::sound).orElse(ModSound.SOFT);
+                        ModSound modSound = tryTraits().map(MutableTraits::sound).orElse(ModSound.SOFT);
                         modSound.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
                   }
                   return hop(0.1);
@@ -500,7 +459,7 @@ public class BackpackEntity extends Entity {
             boolean dropItems = level().getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
             ModSound modSound = tryTraits().map(mute -> {
                   if (dropItems)
-                        mute.dropItems(this);
+                        mute.onBreak(this);
 
                   return mute.sound();
             }).orElse(ModSound.SOFT);
@@ -530,7 +489,7 @@ public class BackpackEntity extends Entity {
                               this.markHurt();
                         }
 
-                        ModSound modSound = tryTraits().map(GenericTraits.MutableTraits::sound).orElse(ModSound.SOFT);
+                        ModSound modSound = tryTraits().map(MutableTraits::sound).orElse(ModSound.SOFT);
                         modSound.at(player, ModSound.Type.EQUIP);
                         return InteractionResult.SUCCESS;
                   }
@@ -538,4 +497,25 @@ public class BackpackEntity extends Entity {
             }
             return useTraitInteraction(player, hand);
       }
+
+      @Override
+      public <T> @Nullable T remove(DataComponentType<? extends T> type) {
+            ItemStack stack = entityData.get(ITEM_STACK);
+            T removed = stack.remove(type);
+            entityData.set(ITEM_STACK, stack);
+            return removed;
+      }
+
+      @Override
+      public <T> void set(DataComponentType<? super T> type, T data) {
+            ItemStack stack = entityData.get(ITEM_STACK);
+            stack.set(type, data);
+            entityData.set(ITEM_STACK, stack);
+      }
+
+      @Override
+      public <T> T get(DataComponentType<? extends T> type) {
+            return entityData.get(ITEM_STACK).get(type);
+      }
+
 }

@@ -4,9 +4,11 @@ import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.Network2C;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -14,32 +16,40 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-public class SendEnderEntry implements Packet2C {
-      private final GenericTraits traits;
-      private final UUID owner;
+public class SendEnderEntry<T extends GenericTraits> implements Packet2C {
+      private final Reference2ObjectOpenHashMap<DataComponentType<?>, Object> map;
+      private final TraitComponentKind<T> kind;
+      private final T trait;
       private final ResourceLocation location;
       private final Component name;
+      private final UUID owner;
 
-      public SendEnderEntry(RegistryFriendlyByteBuf buf) {
-            this.owner = buf.readUUID();
-            location = ResourceLocation.STREAM_CODEC.decode(buf);
-
-            TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
-            traits = kind.streamCodec().decode(buf);
-
-            String name = buf.readUtf();
-            this.name = Component.Serializer.fromJson(name, buf.registryAccess());
+      public static SendEnderEntry<?> decode(RegistryFriendlyByteBuf buf) {
+            return new SendEnderEntry<>(
+                        buf.readUUID(),
+                        ResourceLocation.STREAM_CODEC.decode(buf),
+                        TraitComponentKind.STREAM_CODEC.decode(buf)
+                                    .streamCodec().decode(buf),
+                        EnderStorage.ENTRY_MAP_STREAM_CODEC.decode(buf),
+                        Component.Serializer.fromJson(buf.readUtf(), buf.registryAccess())
+            );
       }
 
-      private SendEnderEntry(UUID owner, ResourceLocation location, GenericTraits traits, Component name) {
+      public SendEnderEntry(UUID owner, ResourceLocation location, T trait, Reference2ObjectOpenHashMap<DataComponentType<?>, Object> data, Component name) {
+            this(owner, location, (TraitComponentKind<T>) trait.kind(), trait, data, name);
+      }
+
+      private SendEnderEntry(UUID owner, ResourceLocation location, TraitComponentKind<T> kind, T trait, Reference2ObjectOpenHashMap<DataComponentType<?>, Object> data, Component name) {
             this.owner = owner;
             this.location = location;
-            this.traits = traits;
+            this.kind = kind;
+            this.trait = trait;
+            this.map = data;
             this.name = name;
       }
 
-      public static void send(ServerPlayer sender, UUID owner, ResourceLocation location, GenericTraits traits, Component name) {
-            new SendEnderEntry(owner, location, traits, name).send2C(sender);
+      public static <T extends GenericTraits> void send(ServerPlayer sender, UUID owner, ResourceLocation location, TraitComponentKind<T> kind, T trait, Reference2ObjectOpenHashMap<DataComponentType<?>, Object> data, Component displayName) {
+            new SendEnderEntry<>(owner, location, kind, trait, data, displayName).send2C(sender);
       }
 
       @Override
@@ -52,9 +62,10 @@ public class SendEnderEntry implements Packet2C {
             buf.writeUUID(owner);
             ResourceLocation.STREAM_CODEC.encode(buf, location);
 
-            TraitComponentKind<GenericTraits, ? extends IDeclaredFields> kind = traits.kind();
             TraitComponentKind.STREAM_CODEC.encode(buf, kind);
-            kind.encode(buf, traits);
+            TraitComponentKind.encode(buf, trait);
+
+            EnderStorage.ENTRY_MAP_STREAM_CODEC.encode(buf, map);
 
             String json = Component.Serializer.toJson(name, buf.registryAccess());
             buf.writeUtf(json);
@@ -63,7 +74,7 @@ public class SendEnderEntry implements Packet2C {
       @Override
       public void handle() {
             EnderStorage enderStorage = CommonAtClient.getEnderStorage();
-            enderStorage.set(owner, location, traits, name);
+            enderStorage.set(owner, location, kind, trait, map, name);
       }
 
       public static Type<SendEnderEntry> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_ender_entry_c"));

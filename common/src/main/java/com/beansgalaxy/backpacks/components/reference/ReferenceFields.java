@@ -2,7 +2,6 @@ package com.beansgalaxy.backpacks.components.reference;
 
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
@@ -10,15 +9,15 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 
-public record ReferenceFields(IDeclaredFields fields, ItemAttributeModifiers modifiers,
+public record ReferenceFields(GenericTraits traits, ItemAttributeModifiers modifiers,
                               PlaceableComponent placeable, EquipableComponent equipable
 ) {
       public static StreamCodec<RegistryFriendlyByteBuf, ReferenceFields> STREAM_CODEC = new StreamCodec<>() {
             @Override
             public void encode(RegistryFriendlyByteBuf buf, ReferenceFields reference) {
-                  TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = reference.fields.kind();
+                  TraitComponentKind<? extends GenericTraits> kind = reference.traits.kind();
                   TraitComponentKind.STREAM_CODEC.encode(buf, kind);
-                  encode(buf, kind.declaredCodec(), reference.fields);
+                  encode(buf, kind.codec(), reference.traits);
 
                   ItemAttributeModifiers.STREAM_CODEC.encode(buf, reference.modifiers);
 
@@ -33,14 +32,14 @@ public record ReferenceFields(IDeclaredFields fields, ItemAttributeModifiers mod
                         EquipableComponent.STREAM_CODEC.encode(buf, reference.equipable);
             }
 
-            private <T extends IDeclaredFields> void encode(RegistryFriendlyByteBuf buf, Codec<T> codec, IDeclaredFields fields) {
+            private <T extends GenericTraits> void encode(RegistryFriendlyByteBuf buf, Codec<T> codec, GenericTraits fields) {
                   buf.writeJsonWithCodec(codec, (T) fields);
             }
 
             @Override
             public ReferenceFields decode(RegistryFriendlyByteBuf buf) {
-                  TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
-                  IDeclaredFields fields = buf.readJsonWithCodec(kind.declaredCodec());
+                  TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
+                  GenericTraits fields = buf.readJsonWithCodec(kind.codec());
 
                   ItemAttributeModifiers modifiers = ItemAttributeModifiers.STREAM_CODEC.decode(buf);
 

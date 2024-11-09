@@ -1,7 +1,9 @@
 package com.beansgalaxy.backpacks.trait.bucket;
 
+import com.beansgalaxy.backpacks.FabricMain;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -31,40 +33,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
-public class BucketTraits implements GenericTraits {
+public class BucketTraits extends GenericTraits {
       public static final String NAME = "bucket";
-      private final BucketFields fields;
-      protected final FluidVariant fluid;
-      protected final long amount;
-      private final Fraction weight;
+      private final int size;
 
-      public BucketTraits(BucketFields fields, FluidVariant fluid, long amount) {
-            this(fields, fluid, amount, Fraction.getFraction((int) amount, (int) FluidConstants.BUCKET));
-      }
-
-      public BucketTraits(BucketFields fields, FluidVariant fluid, long amount, Fraction weight) {
-            this.fields = fields;
-            this.fluid = fluid;
-            this.amount = amount;
-            this.weight = weight;
-      }
-
-      public FluidVariant fluid() {
-            return fluid;
-      }
-
-      public long amount() {
-            return amount;
+      public BucketTraits(ResourceLocation location, ModSound sound, int size) {
+            super(location, sound);
+            this.size = size;
       }
 
       @Override
       public String name() {
             return NAME;
-      }
-
-      @Override
-      public BucketFields fields() {
-            return fields;
       }
 
       @Override
@@ -74,22 +54,25 @@ public class BucketTraits implements GenericTraits {
 
       @Override
       public BucketTraits toReference(ResourceLocation location) {
-            return new BucketTraits(fields.toReference(location), fluid, amount);
+            return new BucketTraits(location, sound(), size);
       }
 
-      @Override
       public int size() {
-            return fields().size();
+            return size;
       }
 
       @Override
-      public Fraction fullness() {
-            return weight.multiplyBy(Fraction.getFraction(1, size()));
+      public Fraction fullness(PatchedComponentHolder holder) {
+            Long stacks = holder.get(ITraitData.LONG);
+            if (stacks == null)
+                  return Fraction.ZERO;
+
+            return Fraction.getFraction((int) (stacks / FluidConstants.BUCKET), size());
       }
 
       @Override
-      public boolean isEmpty() {
-            return amount == 0 || fluid.isBlank();
+      public boolean isEmpty(PatchedComponentHolder holder) {
+            return !holder.has(ITraitData.LONG) || !holder.has(FabricMain.DATA_FLUID);
       }
 
       @Override
@@ -104,12 +87,13 @@ public class BucketTraits implements GenericTraits {
             if (storage == null)
                   return;
 
-            BucketMutable mutable = mutable();
-            boolean success = !isEmpty() && mutable.transferTo(storage, resource -> {
+            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+            BucketMutable mutable = newMutable(holder);
+            boolean success = !isEmpty(holder) && mutable.transferTo(storage, resource -> {
                   SoundEvent sound = FluidVariantAttributes.getEmptySound(resource);
                   player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
                   cir.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide()));
-                  freezeAndCancel(PatchedComponentHolder.of(backpack), mutable);
+                  mutable.push();
             });
 
             if (!success) {
@@ -117,18 +101,18 @@ public class BucketTraits implements GenericTraits {
                         SoundEvent sound = FluidVariantAttributes.getFillSound(resource);
                         player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
                         cir.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide()));
-                        freezeAndCancel(PatchedComponentHolder.of(backpack), mutable);
+                        mutable.push();
                   });
             }
 
             if (!success) {
-                  GenericTraits.super.useOn(ctx, backpack, cir);
+                  super.useOn(ctx, backpack, cir);
             }
       }
 
       @Override
       public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            BucketMutable mutable = mutable();
+            BucketMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
 
             if (player.isDiscrete()
                         ? mutable.tryPlace(level, player, backpack) || mutable.tryPickup(level, player, backpack)
@@ -136,7 +120,7 @@ public class BucketTraits implements GenericTraits {
             ) {
                   player.awardStat(Stats.ITEM_USED.get(backpack.getItem()));
                   cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide()));
-                  freezeAndCancel(PatchedComponentHolder.of(backpack), mutable);
+                  mutable.push();
                   return;
             }
 
@@ -146,79 +130,75 @@ public class BucketTraits implements GenericTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            BucketMutable mutable = mutable();
+            BucketMutable mutable = newMutable(backpack);
             if (EquipableComponent.canEquip(backpack, slot)) {
                   ItemStack itemStack = mutable.addItem(other, player);
 
                   if (itemStack == null)
-                        itemStack = mutable.removeItemNoUpdate(other, player);
+                        itemStack = mutable.removeItem(other, player);
 
                   if (itemStack == other) return;
                   access.set(itemStack);
-                  freezeAndCancel(backpack, cir, mutable);
+                  mutable.push(cir);
             } else if (ClickAction.SECONDARY.equals(click)) {
                   ItemStack itemStack = mutable.addItem(other, player);
                   if (itemStack == null)
-                        itemStack = mutable.removeItemNoUpdate(other, player);
+                        itemStack = mutable.removeItem(other, player);
 
                   if (itemStack == other) return;
                   access.set(itemStack);
-                  freezeAndCancel(backpack, cir, mutable);
+                  mutable.push(cir);
             }
       }
 
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
             if (ClickAction.SECONDARY.equals(click) && EquipableComponent.get(backpack).isEmpty()) {
-                  BucketMutable mutable = mutable();
+                  BucketMutable mutable = newMutable(backpack);
                   ItemStack itemStack = null;
                   if (slot.mayPickup(player))
                         itemStack = mutable.addItem(other, player);
 
                   if (itemStack == null) {
-                        itemStack = mutable.removeItemNoUpdate(other, player);
+                        itemStack = mutable.removeItem(other, player);
                         if (!slot.mayPlace(itemStack)) return;
                   }
 
                   if (itemStack == other) return;
                   slot.set(itemStack);
-                  freezeAndCancel(backpack, cir, mutable);
+                  mutable.push(cir);
             }
       }
 
-      private void freezeAndCancel(PatchedComponentHolder backpack, CallbackInfoReturnable<Boolean> cir, BucketMutable mutable) {
-            freezeAndCancel(backpack, mutable);
-            cir.setReturnValue(true);
-      }
-
-      private void freezeAndCancel(PatchedComponentHolder backpack, BucketMutable mutable) {
-            kind().freezeAndCancel(backpack, mutable);
+      @Override
+      public BucketMutable newMutable(PatchedComponentHolder holder) {
+            return new BucketMutable(this, holder);
       }
 
       @Override
-      public BucketMutable mutable() {
-            return new BucketMutable(this);
+      public TraitComponentKind<? extends GenericTraits> kind() {
+            return Traits.BUCKET;
       }
 
       @Override
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof BucketTraits that)) return false;
-            return amount == that.amount && Objects.equals(fluid, that.fluid) && Objects.equals(fields, that.fields);
+            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(fields, fluid, amount);
+            return Objects.hash(size(), sound(), location());
       }
 
       @Override
       public String toString() {
             return "BucketTraits{" +
-                        "fields=" + fields +
-                        ", fluid=" + fluid +
-                        ", amount=" + amount +
-                        ", weight=" + weight +
-                        '}';
+                        "size=" + size() +
+                        "sound=" + sound() +
+                        location().map(
+                                    location -> "location=" + location + '}')
+                                    .orElse("}");
       }
 }

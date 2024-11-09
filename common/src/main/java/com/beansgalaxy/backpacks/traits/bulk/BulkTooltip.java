@@ -1,6 +1,8 @@
 package com.beansgalaxy.backpacks.traits.bulk;
 
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
+import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,16 +14,23 @@ import org.jetbrains.annotations.NotNull;
 public class BulkTooltip implements ClientTooltipComponent {
       private final int amount;
       private final ItemStack item;
-      private final ItemStack backpack;
       private final Minecraft minecraft;
       private final Component title;
+      private final ItemStack itemstack;
 
-      public BulkTooltip(BulkTraits bulkTraits, ItemStack backpack, Component title) {
-            this.amount = bulkTraits.amount();
-            this.backpack = backpack;
-            this.title = title;
-            this.item = bulkTraits.item.value().getDefaultInstance();
+      public BulkTooltip(TraitTooltip<?> tooltip) {
             this.minecraft = Minecraft.getInstance();
+            this.title = tooltip.title();
+            this.itemstack = tooltip.itemStack();
+            BulkMutable.BulkStacks bulkStacks = tooltip.holder().get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null || bulkStacks.isEmpty()) {
+                  this.item = ItemStack.EMPTY;
+                  this.amount = 0;
+            }
+            else {
+                  this.item = bulkStacks.emptyStacks().getFirst().withItem(bulkStacks.itemHolder());
+                  this.amount = bulkStacks.amount();
+            }
       }
 
       @Override
@@ -38,7 +47,7 @@ public class BulkTooltip implements ClientTooltipComponent {
       public void renderImage(@NotNull Font font, int x, int y, @NotNull GuiGraphics gui) {
             int firstWidth = font.width(title);
             int tooltipWidth = Math.max(firstWidth, getWidth(font));
-            BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, x, y, tooltipWidth, backpack);
+            BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, x, y, tooltipWidth, itemstack);
 
             gui.drawString(font, "x" + this.amount, x + 22, y + 3, 0xFFFFFFFF);
             gui.renderFakeItem(item, x + 3, y - 1);

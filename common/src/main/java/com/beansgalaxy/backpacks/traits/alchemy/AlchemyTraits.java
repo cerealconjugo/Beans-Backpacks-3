@@ -1,8 +1,11 @@
 package com.beansgalaxy.backpacks.traits.alchemy;
 
+import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -18,10 +21,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
@@ -31,48 +32,25 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class AlchemyTraits extends BundleLikeTraits {
       public static final String NAME = "alchemy";
-      private final AlchemyFields fields;
-      private final List<ItemStack> stacks;
 
-      public AlchemyTraits(AlchemyFields fields, List<ItemStack> stacks) {
-            super(Fraction.getFraction(stacks.size(), fields.size()));
-            this.fields = fields;
-            this.stacks = stacks;
+      public AlchemyTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
+            super(location, sound, size, new SlotSelection());
       }
 
-      public AlchemyTraits(AlchemyTraits traits, List<ItemStack> stacks) {
-            this(traits.fields, traits.slotSelection, stacks);
-      }
-
-      public AlchemyTraits(AlchemyFields fields, SlotSelection selection, List<ItemStack> stacks) {
-            super(Fraction.getFraction(stacks.size(), fields.size()), selection);
-            this.fields = fields;
-            this.stacks = stacks;
-      }
-
-      @Override
-      public List<ItemStack> stacks() {
-            return stacks;
+      public AlchemyTraits(ResourceLocation location, ModSound decode, int size, SlotSelection selection) {
+            super(location, decode, size, selection);
       }
 
       @Override
       public String name() {
             return NAME;
-      }
-
-      @Override
-      public AlchemyFields fields() {
-            return fields;
       }
 
       @Override
@@ -82,33 +60,29 @@ public class AlchemyTraits extends BundleLikeTraits {
 
       @Override
       public AlchemyTraits toReference(ResourceLocation location) {
-            return new AlchemyTraits(fields.toReference(location), slotSelection, stacks);
+            return new AlchemyTraits(location, sound(), size());
       }
 
       @Override
-      public int size() {
-            return fields.size();
-      }
-
-      @Override
-      public Mutable mutable() {
-            return new Mutable();
-      }
-
-      @Override
-      public boolean canItemFit(ItemStack inserted) {
+      public boolean canItemFit(PatchedComponentHolder holder, ItemStack inserted) {
             Item item = inserted.getItem();
             boolean isPotion = item instanceof PotionItem || Items.HONEY_BOTTLE.equals(item) || Items.MILK_BUCKET.equals(item);
-            return isPotion && super.canItemFit(inserted);
+            return isPotion && super.canItemFit(holder, inserted);
+      }
+
+      @Override
+      public AlchemyMutable newMutable(PatchedComponentHolder holder) {
+            return new AlchemyMutable(this, holder);
       }
 
       @Override
       public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            if (isEmpty())
+            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+            if (isEmpty(holder))
                   return;
 
-            Mutable mutable = mutable();
-            int selectedSlot = getSelectedSlotSafe(player);
+            AlchemyMutable mutable = newMutable(holder);
+            int selectedSlot = getSelectedSlotSafe(holder, player);
             ItemStack selected = mutable.getItemStacks().get(selectedSlot);
             Item item = selected.getItem();
 
@@ -119,7 +93,7 @@ public class AlchemyTraits extends BundleLikeTraits {
                   FoodProperties foodproperties = selected.get(DataComponents.FOOD);
                   if (foodproperties == null) {
                         player.drop(selected, true);
-                        freezeAndCancel(PatchedComponentHolder.of(backpack), mutable);
+                        mutable.push();
                         cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide));
                         return;
                   }
@@ -157,8 +131,8 @@ public class AlchemyTraits extends BundleLikeTraits {
                   usePotionLikeItem(level, player, selected, item);
 
             int size = mutable.getItemStacks().size();
-            limitSelectedSlot(selectedSlot, size);
-            freezeAndCancel(PatchedComponentHolder.of(backpack), mutable);
+            limitSelectedSlot(holder, selectedSlot, size);
+            mutable.push();
             cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide));
       }
 
@@ -257,142 +231,18 @@ public class AlchemyTraits extends BundleLikeTraits {
             player.playSound(SoundEvents.GLASS_BREAK);
       }
 
-      public class Mutable extends MutableBundleLike {
-
-            public Mutable() {
-                  super(AlchemyTraits.this);
-            }
-
-            @Nullable
-            public ItemStack addItem(ItemStack inserted, int slot, @Nullable Player player) {
-                  if (!canItemFit(inserted))
-                        return null;
-
-                  int i = fullness().compareTo(Fraction.ONE);
-                  boolean hasSpace = i < 0;
-                  if (!hasSpace && !inserted.isStackable())
-                        return null;
-
-                  int insertedCount = inserted.getCount();
-                  int count = insertedCount;
-                  for (ItemStack stored : getItemStacks()) {
-                        if (inserted.isEmpty())
-                              return ItemStack.EMPTY;
-
-                        if (ItemStack.isSameItemSameComponents(stored, inserted)) {
-                              int maxStackSize = stored.getMaxStackSize();
-                              int storedCount = stored.getCount();
-                              int insert = Math.min(maxStackSize - storedCount, count);
-                              stored.grow(insert);
-                              inserted.shrink(insert);
-                              count -= insert;
-                        }
-                  }
-
-                  if (!inserted.isEmpty() && getItemStacks().size() < fields.size()) {
-                        ItemStack split = inserted.split(count);
-                        count = 0;
-                        int selectedSlot = getSelectedSlot(player);
-                        getItemStacks().add(selectedSlot, split);
-                  }
-
-                  return insertedCount == count ? null : inserted;
-            }
-
-            @Override
-            public AlchemyTraits freeze() {
-                  List<ItemStack> stacks = getItemStacks();
-                  stacks.removeIf(ItemStack::isEmpty);
-                  return new AlchemyTraits(AlchemyTraits.this, stacks);
-            }
-
-            @Override
-            public void dropItems(Entity backpackEntity) {
-
-            }
-
-            @Override
-            public InteractionResult interact(BackpackEntity backpackEntity, Player player, InteractionHand hand) {
-                  Level level = backpackEntity.level();
-                  List<ItemStack> stacks = getItemStacks();
-                  if (stacks.isEmpty())
-                        return InteractionResult.FAIL;
-
-                  int i = 0;
-                  ItemStack selected = stacks.get(i);
-                  Item item = selected.getItem();
-
-                  if (Items.HONEY_BOTTLE.equals(item)) {
-                        if (player.canEat(false)) {
-                              FoodProperties foodproperties = selected.get(DataComponents.FOOD);
-                              if (foodproperties == null) {
-                                    player.drop(selected, true);
-                                    stacks.remove(i);
-                                    return InteractionResult.FAIL;
-                              }
-
-                              player.eat(level, selected, foodproperties);
-                              player.playSound(SoundEvents.GLASS_BREAK);
-                              if (player instanceof ServerPlayer serverplayer) {
-                                    CriteriaTriggers.CONSUME_ITEM.trigger(serverplayer, selected);
-                                    serverplayer.awardStat(Stats.ITEM_USED.get(item));
-                                    player.removeEffect(MobEffects.POISON);
-                              }
-
-                              if (selected.isEmpty())
-                                    stacks.remove(i);
-
-                              return InteractionResult.SUCCESS;
-                        }
-                        else {
-                              int size = stacks.size();
-                              while (Items.HONEY_BOTTLE.equals(item)) {
-                                    i++;
-                                    if (i == size) {
-                                          backpackEntity.wobble = 8;
-                                          return InteractionResult.FAIL;
-                                    }
-
-                                    selected = stacks.get(i);
-                                    item = selected.getItem();
-                              }
-                        }
-                  }
-                  else if (Items.MILK_BUCKET.equals(item))
-                        useMilkBucketItem(level, player, item, selected);
-                  else 
-                        usePotionLikeItem(level, player, selected, item);
-
-
-                  if (selected.isEmpty())
-                        stacks.remove(i);
-
-                  return InteractionResult.SUCCESS;
-            }
-
-            @Override
-            public AlchemyTraits trait() {
-                  return AlchemyTraits.this;
-            }
-      }
-
-      @Override
-      public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof AlchemyTraits that)) return false;
-            return Objects.equals(fields, that.fields) && Objects.equals(stacks(), that.stacks());
-      }
-
-      @Override
-      public int hashCode() {
-            return Objects.hash(fields, stacks());
-      }
-
       @Override
       public String toString() {
             return "AlchemyTraits{" +
-                        "fields=" + fields +
-                        ", stacks=" + stacks() +
-                        '}';
+                        "size=" + size() +
+                        ", sound=" + sound() +
+                        location().map(
+                                    location -> ", location=" + location + '}')
+                                    .orElse("}");
+      }
+
+      @Override
+      public TraitComponentKind<? extends GenericTraits> kind() {
+            return Traits.ALCHEMY;
       }
 }

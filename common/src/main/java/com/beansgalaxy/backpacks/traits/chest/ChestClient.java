@@ -1,8 +1,8 @@
 package com.beansgalaxy.backpacks.traits.chest;
 
 import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.bundle.BundleClient;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -26,14 +26,14 @@ public class ChestClient implements IClientTraits {
       static final ChestClient INSTANCE = new ChestClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemstack, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
 
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-            Fraction fullness = trait.fullness();
-            if (trait.isFull())
+      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+            Fraction fullness = trait.fullness(holder);
+            if (trait.isFull(holder))
                   cir.setReturnValue(14);
             else {
                   float value = fullness.multiplyBy(Fraction.getFraction(13, 1)).floatValue();
@@ -42,8 +42,8 @@ public class ChestClient implements IClientTraits {
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-            if (trait.isFull())
+      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+            if (trait.isFull(holder))
                   cir.setReturnValue(Mth.color(0.9F, 0.2F, 0.3F));
             else
                   cir.setReturnValue(Mth.color(0.4F, 0.4F, 1.0F));
@@ -52,18 +52,17 @@ public class ChestClient implements IClientTraits {
       @Override
       public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
             ChestTraits chestTraits = (ChestTraits) traits;
-            ChestFields fields = chestTraits.fields();
             MutableComponent line;
-            boolean columnIsOne = fields.columns == 1;
-            boolean rowIsOne = fields.rows == 1;
+            boolean columnIsOne = chestTraits.columns == 1;
+            boolean rowIsOne = chestTraits.rows == 1;
             if (columnIsOne && rowIsOne)
                   line = Component.translatable("traits.beansbackpacks.inventory.chest.solo");
             else if (columnIsOne)
-                  line = Component.translatable("traits.beansbackpacks.inventory.chest.line", fields.columns);
+                  line = Component.translatable("traits.beansbackpacks.inventory.chest.line", chestTraits.columns);
             else if (rowIsOne)
-                  line = Component.translatable("traits.beansbackpacks.inventory.chest.line", fields.rows);
+                  line = Component.translatable("traits.beansbackpacks.inventory.chest.line", chestTraits.rows);
             else
-                  line = Component.translatable("traits.beansbackpacks.inventory.chest.size", fields.columns, fields.rows);
+                  line = Component.translatable("traits.beansbackpacks.inventory.chest.size", chestTraits.columns, chestTraits.rows);
 
             lines.add(line.withStyle(ChatFormatting.GOLD));
       }
@@ -71,18 +70,17 @@ public class ChestClient implements IClientTraits {
       @Override
       public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
             ChestTraits chestTraits = (ChestTraits) traits;
-            ChestFields fields = chestTraits.fields();
             MutableComponent line;
-            boolean columnIsOne = fields.columns == 1;
-            boolean rowIsOne = fields.rows == 1;
+            boolean columnIsOne = chestTraits.columns == 1;
+            boolean rowIsOne = chestTraits.rows == 1;
             if (columnIsOne && rowIsOne)
                   line = Component.translatable("traits.beansbackpacks.equipment.chest.solo");
             else if (columnIsOne)
-                  line = Component.translatable("traits.beansbackpacks.equipment.chest.line", fields.columns);
+                  line = Component.translatable("traits.beansbackpacks.equipment.chest.line", chestTraits.columns);
             else if (rowIsOne)
-                  line = Component.translatable("traits.beansbackpacks.equipment.chest.line", fields.rows);
+                  line = Component.translatable("traits.beansbackpacks.equipment.chest.line", chestTraits.rows);
             else
-                  line = Component.translatable("traits.beansbackpacks.equipment.chest.size", fields.columns, fields.rows);
+                  line = Component.translatable("traits.beansbackpacks.equipment.chest.size", chestTraits.columns, chestTraits.rows);
 
             pTooltipAdder.accept(line.withStyle(ChatFormatting.GOLD));
       }
@@ -95,7 +93,7 @@ public class ChestClient implements IClientTraits {
       public void openTinyMenu(ChestTraits chestTraits, Slot slot) {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.screen instanceof AbstractContainerScreen<?> screen) {
-                  ChestTraitScreen chestScreen = new ChestTraitScreen(screen, slot, chestTraits.fields());
+                  ChestTraitScreen chestScreen = new ChestTraitScreen(screen, slot, chestTraits);
                   minecraft.setScreen(chestScreen);
             }
       }

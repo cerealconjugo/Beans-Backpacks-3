@@ -8,12 +8,10 @@ import com.mojang.serialization.DynamicOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
-public interface ITraitCodec<A extends GenericTraits, B extends IDeclaredFields> {
+public interface ITraitCodec<A extends GenericTraits> {
       Codec<A> codec();
 
       StreamCodec<RegistryFriendlyByteBuf, A> streamCodec();
-
-      Codec<B> fieldCodec();
 
       default <T> DataResult<T> encode(final A input, final DynamicOps<T> ops, final T prefix) {
             return codec().encode(input, ops, prefix);

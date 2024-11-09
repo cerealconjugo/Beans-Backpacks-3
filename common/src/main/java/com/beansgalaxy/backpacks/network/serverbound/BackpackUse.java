@@ -5,10 +5,10 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.Traits;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -37,7 +37,7 @@ public class BackpackUse implements Packet2S {
       }
 
       @Override
-      public void handle(ServerPlayer sender) {
+      public void handle(Player sender) {
             ItemStack backStack = sender.getItemBySlot(EquipmentSlot.BODY);
 
             Traits.runIfPresent(backStack, traits -> {

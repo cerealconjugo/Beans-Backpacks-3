@@ -8,6 +8,7 @@
     "ItemsMixin"
   ],
   "client": [
+    "CreativeInventoryMixin"
   ],
   "server": [],
   "injectors": {

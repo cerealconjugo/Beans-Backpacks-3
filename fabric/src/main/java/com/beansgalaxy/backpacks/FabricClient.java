@@ -11,6 +11,8 @@ import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
@@ -45,6 +47,9 @@ public class FabricClient implements ClientModInitializer {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("fullness"), FULLNESS_ITEM_PREDICATE);
             ItemProperties.register(ModItems.ENDER_POUCH.item, ResourceLocation.withDefaultNamespace("searching"), ENDER_SEARCHING_PREDICATE);
             ItemProperties.register(ModItems.LUNCH_BOX.item, ResourceLocation.withDefaultNamespace("eating"), (itemStack, clientLevel, livingEntity, i) ->
+                        livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
+            );
+            ItemProperties.register(ModItems.NETHERITE_LUNCH_BOX.item, ResourceLocation.withDefaultNamespace("eating"), (itemStack, clientLevel, livingEntity, i) ->
                         livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
             );
 
@@ -88,19 +93,33 @@ public class FabricClient implements ClientModInitializer {
             return tintHsl;
       }
 
-      ClampedItemPropertyFunction FULLNESS_ITEM_PREDICATE = (itemStack, clientLevel, livingEntity, i) ->
-                  Traits.get(itemStack).or(() -> Optional.ofNullable(itemStack.get(Traits.ENDER)).map(trait -> trait.getTrait(clientLevel))).map(trait ->
-                  {
-                        if (trait.isFull())
-                              return 1f;
+      ClampedItemPropertyFunction FULLNESS_ITEM_PREDICATE = (itemStack, clientLevel, livingEntity, i) -> {
+            Optional<GenericTraits> optional = Traits.get(itemStack);
+            GenericTraits traits;
+            PatchedComponentHolder holder;
+            if (optional.isPresent()) {
+                  traits = optional.get();
+                  holder = PatchedComponentHolder.of(itemStack);
+            }
+            else {
+                  EnderTraits enderTraits = itemStack.get(Traits.ENDER);
+                  if (enderTraits == null)
+                        return 0f;
 
-                        Fraction fullness = trait.fullness();
-                        if (trait.isEmpty() || fullness.equals(Fraction.ZERO))
-                              return 0f;
+                  traits = enderTraits.getTrait(clientLevel);
+                  holder = enderTraits;
+            }
 
-                        float v = fullness.floatValue();
-                        return v * 0.89f + 0.1f;
-                  }).orElse(0f);
+            if (traits.isFull(holder))
+                  return 1f;
+
+            Fraction fullness = traits.fullness(holder);
+            if (traits.isEmpty(holder) || fullness.equals(Fraction.ZERO))
+                  return 0f;
+
+            float v = fullness.floatValue();
+            return v * 0.89f + 0.1f;
+      };
 
       ClampedItemPropertyFunction ENDER_SEARCHING_PREDICATE = (itemStack, clientLevel, livingEntity, i) -> {
             EnderTraits enderTraits = itemStack.get(Traits.ENDER);

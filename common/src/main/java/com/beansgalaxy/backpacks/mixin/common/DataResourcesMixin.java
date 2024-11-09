@@ -5,7 +5,6 @@ import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.reference.ReferenceFields;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
@@ -57,7 +56,7 @@ public class DataResourcesMixin {
                         PlaceableComponent placeable = null;
                         EquipableComponent equipable = null;
                         ItemAttributeModifiers attributes = ItemAttributeModifiers.EMPTY;
-                        IDeclaredFields fields = NonTrait.INSTANCE;
+                        GenericTraits fields = NonTrait.INSTANCE;
 
                         while (iterator.hasNext()) {
                               String type = iterator.next();
@@ -110,14 +109,14 @@ public class DataResourcesMixin {
                                     case null -> {
                                     }
                                     default -> {
-                                          TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = TraitComponentKind.get(type);
+                                          TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.get(type);
                                           if (kind == null) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; The trait \"" + type + "\" does not exist!";
                                                 Constants.LOG.warn(message);
                                                 continue;
                                           }
 
-                                          DataResult<? extends IDeclaredFields> result = kind.declaredCodec().parse(registryOps, json);
+                                          DataResult<? extends GenericTraits> result = kind.codec().parse(registryOps, json);
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
@@ -142,7 +141,7 @@ public class DataResourcesMixin {
       }
 
       @Unique
-      private static <T extends GenericTraits> void parseAndSaveReference(TraitComponentKind<T, ? extends IDeclaredFields> bundle, RegistryOps<JsonElement> registryOps, JsonElement json, ResourceLocation location) {
+      private static <T extends GenericTraits> void parseAndSaveReference(TraitComponentKind<T> bundle, RegistryOps<JsonElement> registryOps, JsonElement json, ResourceLocation location) {
 
       }
 }

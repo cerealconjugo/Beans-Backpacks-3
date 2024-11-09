@@ -3,8 +3,6 @@ package com.beansgalaxy.backpacks.components;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.clientbound.SendEnderTraits;
 import com.beansgalaxy.backpacks.registry.ModItems;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
@@ -25,39 +23,35 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 public final class EnderTraits implements PatchedComponentHolder {
       private final UUID uuid;
       private final ResourceLocation location;
       private @Nullable Level level = null;
-      private @Nullable ItemStack stack = null;
 
       public EnderTraits(UUID uuid, ResourceLocation location) {
             this.uuid = uuid;
             this.location = location;
       }
 
-      public void reload(Level level, ItemStack stack) {
+      public void reload(Level level) {
             this.level = level;
-            this.stack = stack;
       }
 
       public boolean isLoaded() {
-            return level != null && stack != null;
+            return level != null;
       }
 
-      public <T> Optional<T> mapLoaded(BiFunction<Level, ItemStack, T> map) {
+      public <T> Optional<T> mapLoaded(Function<Level, T> map) {
             return isLoaded()
-                        ? Optional.ofNullable(map.apply(level, stack))
+                        ? Optional.ofNullable(map.apply(level))
                         : Optional.empty();
       }
 
-      public void runLoaded(BiConsumer<Level, ItemStack> run) {
+      public void runLoaded(Consumer<Level> run) {
             if (isLoaded())
-                  run.accept(level, stack);
+                  run.accept(level);
       }
 
       public static Optional<ItemStorageTraits> getItemStorage(ItemStack stack) {
@@ -70,14 +64,6 @@ public final class EnderTraits implements PatchedComponentHolder {
                               return null;
                   });
             }
-
-            return Optional.empty();
-      }
-
-      public static Optional<GenericTraits> get(ItemStack stack) {
-            EnderTraits enderTraits = stack.get(Traits.ENDER);
-            if (enderTraits != null)
-                  return enderTraits.getTrait();
 
             return Optional.empty();
       }
@@ -104,15 +90,15 @@ public final class EnderTraits implements PatchedComponentHolder {
       }
 
       public Optional<GenericTraits> getTrait() {
-            return mapLoaded((level, stack) ->
-                        EnderStorage.get(level).get(uuid, location)
+            return mapLoaded((level) ->
+                        EnderStorage.get(level).getTrait(uuid, location)
             );
       }
 
       public GenericTraits getTrait(Level level) {
             if (this.level == null)
                   this.level = level;
-            return EnderStorage.get(this.level).get(uuid, location);
+            return EnderStorage.get(this.level).getTrait(uuid, location);
       }
 
       @Override
@@ -160,28 +146,25 @@ public final class EnderTraits implements PatchedComponentHolder {
       };
 
       @Override
-      public <T extends GenericTraits> void set(DataComponentType<? super T> type, @Nullable T trait) {
-            runLoaded((level, stack) ->
-                        EnderStorage.get(level).set(uuid, location, trait)
+      public <T> @Nullable T remove(DataComponentType<? extends T> type) {
+            return mapLoaded((level) ->
+                        EnderStorage.get(level).remove(uuid, location, type)
+            ).orElse(null);
+      }
+
+      @Override
+      public <T> void set(DataComponentType<? super T> type, T trait) {
+            runLoaded((level) ->
+                        EnderStorage.get(level).set(uuid, location, type, trait)
             );
       }
 
       @Override
       public <T> T get(DataComponentType<? extends T> type) {
-            return mapLoaded((level, stack) -> {
+            return mapLoaded((level) -> {
                   EnderStorage enderStorage = EnderStorage.get(level);
-                  GenericTraits genericTraits = enderStorage.get(uuid, location);
-                  TraitComponentKind<GenericTraits, ? extends IDeclaredFields> kind = genericTraits.kind();
-                  if (type.equals(kind)) {
-                        return (T) genericTraits;
-                  }
-                  return null;
+                  return (T) enderStorage.get(uuid, location).get(type);
             }).orElse(null);
-      }
-
-      @Override
-      public ItemStack getStack() {
-            return isLoaded() ? stack : ItemStack.EMPTY;
       }
 
       public void broadcastChanges(ServerPlayer player) {
@@ -213,7 +196,7 @@ public final class EnderTraits implements PatchedComponentHolder {
       }
 
       public Component getDisplayName() {
-            return mapLoaded((level, stack) ->
+            return mapLoaded((level) ->
                         EnderStorage.get(level).getDisplayName(uuid)
             ).orElse(Component.literal("§kPlayer"));
       }

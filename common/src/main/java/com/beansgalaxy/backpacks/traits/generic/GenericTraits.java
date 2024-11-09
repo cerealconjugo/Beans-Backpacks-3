@@ -2,9 +2,9 @@ package com.beansgalaxy.backpacks.traits.generic;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,91 +21,89 @@ import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-public interface GenericTraits {
+import java.util.Optional;
 
-      String name();
+public abstract class GenericTraits {
+      private final ResourceLocation location;
+      private final ModSound sound;
 
-      IDeclaredFields fields();
-
-      IClientTraits client();
-
-      default <T extends GenericTraits> TraitComponentKind<T, ? extends IDeclaredFields> kind() {
-            return (TraitComponentKind<T, ? extends IDeclaredFields>) fields().kind();
+      public GenericTraits(ResourceLocation location, ModSound sound) {
+            this.location = location;
+            this.sound = sound;
       }
 
-      <T extends GenericTraits> T toReference(ResourceLocation location);
-
-      default ModSound sound() {
-            return fields().sound();
+      public static void encodeLocation(RegistryFriendlyByteBuf buf, GenericTraits fields) {
+            fields.location().ifPresentOrElse(location -> {
+                  buf.writeBoolean(true);
+                  ResourceLocation.STREAM_CODEC.encode(buf, location);
+            }, () -> buf.writeBoolean(false));
       }
 
-      int size();
+      @Nullable
+      public static ResourceLocation decodeLocation(RegistryFriendlyByteBuf buf) {
+            if (buf.readBoolean())
+                  return ResourceLocation.STREAM_CODEC.decode(buf);
 
-      Fraction fullness();
+            return null;
+      }
 
-      default boolean isFull() {
-            Fraction fullness = fullness();
+      public abstract String name();
+
+      public abstract IClientTraits client();
+
+      abstract public <T extends GenericTraits> T toReference(ResourceLocation location);
+
+      public abstract Fraction fullness(PatchedComponentHolder holder);
+
+      public Fraction fullness(ItemStack stack) {
+            return fullness(PatchedComponentHolder.of(stack));
+      }
+
+      public boolean isFull(ItemStack stack) {
+            return isFull(PatchedComponentHolder.of(stack));
+      }
+
+      public boolean isFull(PatchedComponentHolder holder) {
+            Fraction fullness = fullness(holder);
             int i = fullness.compareTo(Fraction.ONE);
             return i >= 0;
       }
 
-      void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir);
+      public boolean isEmpty(ItemStack stack) {
+            return isEmpty(PatchedComponentHolder.of(stack));
+      }
 
-      void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir);
+      public abstract boolean isEmpty(PatchedComponentHolder holder);
 
-      boolean isEmpty();
+      public abstract void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir);
 
-      default void useOn(UseOnContext ctx, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      public abstract void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir);
+
+      public void useOn(UseOnContext ctx, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
 
       }
 
-      default void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
 
       }
 
-      default void inventoryTick(PatchedComponentHolder stack, Level level, Entity entity, int slot, boolean selected) {
+      public void inventoryTick(PatchedComponentHolder backpack, Level level, Entity entity, int slot, boolean selected) {
 
       }
 
-      MutableTraits mutable();
+      public abstract MutableTraits newMutable(PatchedComponentHolder holder);
 
-      default boolean isStackable() {
+      public boolean isStackable(PatchedComponentHolder holder) {
             return false;
       }
 
-      interface MutableTraits {
+      public ModSound sound() {
+            return sound;
+      }
 
-            GenericTraits freeze();
+      abstract public TraitComponentKind<? extends GenericTraits> kind();
 
-            @Nullable
-            ItemStack addItem(ItemStack stack, Player player);
-
-            ItemStack removeItemNoUpdate(ItemStack carried, Player player);
-
-            void dropItems(Entity backpackEntity);
-
-            InteractionResult interact(BackpackEntity backpackEntity, Player player, InteractionHand hand);
-
-            GenericTraits trait();
-
-            default ModSound sound() {
-                  return trait().sound();
-            }
-
-            default void damageTrait(BackpackEntity backpackEntity, int damage, boolean silent) {
-
-            }
-
-            default void entityTick(BackpackEntity backpackEntity) {
-
-            }
-
-            default void onPlace(BackpackEntity backpackEntity, Player player, ItemStack backpackStack) {
-
-            }
-
-            default void onPickup(BackpackEntity backpackEntity, Player player) {
-
-            }
+      public Optional<ResourceLocation> location() {
+            return Optional.ofNullable(location);
       }
 }

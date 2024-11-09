@@ -3,12 +3,15 @@ package com.beansgalaxy.backpacks.network.serverbound;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.network.Network2S;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.beansgalaxy.backpacks.util.SlotSelection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +50,7 @@ public class SyncSelectedSlot implements Packet2S {
       }
 
       @Override
-      public void handle(ServerPlayer sender) {
+      public void handle(Player sender) {
             AbstractContainerMenu containerMenu = sender.containerMenu;
             if (containerMenu.containerId != containerId) {
                   return;
@@ -55,16 +58,25 @@ public class SyncSelectedSlot implements Packet2S {
 
             Slot slot = containerMenu.getSlot(slotIndex);
             ItemStack stack = slot.getItem();
-            ItemStorageTraits.runIfPresent(stack, traits -> {
-                  traits.setSelectedSlot(sender, selectedSlot);
-            }, () -> {
-                  EnderTraits enderTraits = stack.get(Traits.ENDER);
-                  if (enderTraits != null) enderTraits.getTrait().ifPresent(traits -> {
-                        if (traits instanceof ItemStorageTraits storageTraits) {
-                              storageTraits.setSelectedSlot(sender, selectedSlot);
-                        }
-                  });
-            });
+            if (stack.isEmpty()) {
+                  return;
+            }
+
+            EnderTraits enderTraits = stack.get(Traits.ENDER);
+            PatchedComponentHolder holder;
+            if (enderTraits != null) {
+                  holder = enderTraits;
+                  enderTraits.reload(sender.level());
+            }
+            else holder = PatchedComponentHolder.of(stack);
+
+            SlotSelection slotSelection = holder.get(ITraitData.SLOT_SELECTION);
+            if (slotSelection == null) {
+                  slotSelection = new SlotSelection();
+                  holder.set(ITraitData.SLOT_SELECTION, slotSelection);
+            }
+
+            slotSelection.setSelectedSlot(sender, selectedSlot);
       }
 
       public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_selected_slot_s"));

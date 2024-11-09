@@ -18,7 +18,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -27,12 +29,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Optional;
 
 public class FabricMain implements ModInitializer {
+
+    public static final DataComponentType<FluidVariant>
+                DATA_FLUID = Traits.register("data_fluid", FluidVariant.CODEC, FluidVariant.PACKET_CODEC);
 
     @Override
     public void onInitialize() {
@@ -42,20 +46,20 @@ public class FabricMain implements ModInitializer {
         EnergyStorage.ITEM.registerFallback((stack, ctx) -> {
             BatteryTraits batteryTraits = (BatteryTraits) stack.get(Traits.BATTERY);
             if (batteryTraits != null)
-                return batteryTraits.energyMutable(PatchedComponentHolder.of(stack));
+                return batteryTraits.newMutable(PatchedComponentHolder.of(stack)).getStorage();
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
             if (reference != null && !reference.isEmpty()) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
-                    return battery.energyMutable(PatchedComponentHolder.of(stack));
+                    return battery.newMutable(PatchedComponentHolder.of(stack)).getStorage();
             }
 
             EnderTraits enderTraits = stack.get(Traits.ENDER);
             if (enderTraits != null) {
                 Optional<GenericTraits> trait = enderTraits.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
-                    return battery.energyMutable(PatchedComponentHolder.of(stack));
+                    return battery.newMutable(PatchedComponentHolder.of(stack)).getStorage();
             }
             return null;
         });
@@ -63,20 +67,20 @@ public class FabricMain implements ModInitializer {
         FluidStorage.ITEM.registerFallback((stack, ctx) -> {
             BucketTraits bucketTraits = (BucketTraits) stack.get(Traits.BUCKET);
             if (bucketTraits != null)
-                return bucketTraits.mutable();
+                return bucketTraits.newMutable(PatchedComponentHolder.of(stack));
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
             if (reference != null && !reference.isEmpty()) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
-                    return bucket.mutable();
+                    return bucket.newMutable(PatchedComponentHolder.of(stack));
             }
 
             EnderTraits enderTraits = stack.get(Traits.ENDER);
             if (enderTraits != null) {
                 Optional<GenericTraits> trait = enderTraits.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
-                    return bucket.mutable();
+                    return bucket.newMutable(PatchedComponentHolder.of(stack));
             }
 
             return null;
@@ -95,11 +99,6 @@ public class FabricMain implements ModInitializer {
                 Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
                             ResourceLocation.parse(Constants.MOD_ID + ":backpacks"), BACKPACK_TAB);
 
-
-    public static Item registerItem(String name, Item item) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        return Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
-    }
 
     public record BundleMenuRecord(int entityId, BundleTraits bundleTraits) { }
 
@@ -125,7 +124,7 @@ public class FabricMain implements ModInitializer {
                                             ? backpackEntity
                                             : null;
 
-                                return new BundleMenu(FabricMain.BUNDLE_MENU, syncId, inventory, bundleEntity, data.bundleTraits.mutable());
+                                return new BundleMenu(FabricMain.BUNDLE_MENU, syncId, inventory, bundleEntity, data.bundleTraits.newMutable(bundleEntity));
                             }), BUNDLE_MENU_STREAM)
                 );
 }

@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "backpack": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beansbackpacks:netherite_lunch_box"
+            ]
+          }
+        ]
+      }
+    },
+    "bucket": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:netherite_ingot"
+            ]
+          }
+        ]
+      }
+    },
+    "recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "beansbackpacks:netherite_lunch_box"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "backpack",
+      "bucket",
+      "recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beansbackpacks:netherite_lunch_box"
+    ]
+  },
+  "sends_telemetry_event": false
+}

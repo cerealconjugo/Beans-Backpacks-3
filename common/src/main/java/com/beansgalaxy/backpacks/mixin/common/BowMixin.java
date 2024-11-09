@@ -1,5 +1,7 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.quiver.QuiverMutable;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
@@ -42,12 +44,15 @@ public abstract class BowMixin extends ProjectileWeaponItem {
             Player player = (Player) pEntityLiving;
             Predicate<ItemStack> predicate = getAllSupportedProjectiles();
             QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
-                  QuiverTraits.Mutable mutable = traits.mutable();
+                  ItemStack quiver = player.getItemBySlot(slot);
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
+                  QuiverMutable mutable = traits.newMutable(holder);
                   List<ItemStack> stacks = mutable.getItemStacks();
                   if (stacks.isEmpty())
                         return false;
 
-                  ItemStack stack = mutable.getSelectedStackSafe(player);
+                  int slotSafe = mutable.getSelectedSlotSafe(player);
+                  ItemStack stack = stacks.get(slotSafe);
                   if (predicate.test(stack)) {
                         int i = this.getUseDuration(bowStack, player) - pTimeLeft;
                         float f = BowItem.getPowerForTime(i);
@@ -61,12 +66,12 @@ public abstract class BowMixin extends ProjectileWeaponItem {
 
                               level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F);
                               player.awardStat(Stats.ITEM_USED.get(this));
-                              ItemStack quiver = player.getItemBySlot(slot);
-                              PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
-                              traits.kind().freezeAndCancel(holder, mutable);
+                              mutable.push();
 
-                              int selectedSlotSafe = mutable.trait().getSelectedSlot(player);
-                              traits.limitSelectedSlot(selectedSlotSafe, traits.stacks().size());
+                              int selectedSlotSafe = mutable.getSelectedSlotSafe(player);
+                              List<ItemStack> finalStacks = holder.get(ITraitData.ITEM_STACKS);
+                              int size = finalStacks == null ? 0 : finalStacks.size();
+                              traits.limitSelectedSlot(holder, selectedSlotSafe, size);
                               ci.cancel();
 
                               if (player instanceof ServerPlayer serverPlayer) {

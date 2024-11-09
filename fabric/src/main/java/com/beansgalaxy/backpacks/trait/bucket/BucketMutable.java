@@ -1,7 +1,10 @@
 package com.beansgalaxy.backpacks.trait.bucket;
 
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.FabricMain;
+import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -21,9 +24,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -41,130 +41,50 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class BucketMutable extends SingleFluidStorage implements GenericTraits.MutableTraits {
-      private final BucketFields fields;
+public class BucketMutable extends SingleFluidStorage implements MutableTraits {
+      private final BucketTraits traits;
+      private final PatchedComponentHolder holder;
 
-      public BucketMutable(BucketTraits traits) {
-            this.fields = traits.fields();
-            variant = traits.fluid;
-            amount = traits.amount;
+      public BucketMutable(BucketTraits traits, PatchedComponentHolder holder) {
+            this.traits = traits;
+            this.holder = holder;
+            amount = holder.getOrElse(ITraitData.LONG, () -> 0L);
+            variant = holder.getOrElse(FabricMain.DATA_FLUID, FluidVariant::blank);
+      }
+      @Override
+      public void push() {
+            if (isEmpty()) {
+                  holder.remove(ITraitData.LONG);
+                  holder.remove(FabricMain.DATA_FLUID);
+            } else {
+                  holder.set(ITraitData.LONG, amount);
+                  holder.set(FabricMain.DATA_FLUID, variant);
+            }
+      }
+
+      @Override
+      public ModSound sound() {
+            return traits.sound();
+      }
+
+      @Override
+      public Fraction fullness() {
+            return Fraction.getFraction((int) (amount / FluidConstants.BUCKET), traits.size());
       }
 
       @Override
       protected long getCapacity(FluidVariant variant) {
-            return FluidConstants.BUCKET * fields.size();
+            return FluidConstants.BUCKET * traits.size();
       }
 
       public boolean isEmpty() {
-            return FluidVariant.blank().equals(variant);
-      }
-
-      @Override
-      public BucketTraits freeze() {
-            return new BucketTraits(fields, variant, amount);
-      }
-
-      @Override @Nullable
-      public ItemStack addItem(ItemStack stack, Player player) {
-            TempSlot slot = new TempSlot(stack);
-            Storage<FluidVariant> from = ContainerItemContext.ofPlayerSlot(player, slot).find(FluidStorage.ITEM);
-
-            if (from == null) return null;
-
-            Storage<FluidVariant> to = this;
-
-            if (transfer(from, to, variant -> {
-                  SoundEvent sound = FluidVariantAttributes.getEmptySound(variant);
-                  if (variant.isOf(Fluids.WATER) && stack.is(Items.POTION))
-                        sound = SoundEvents.BOTTLE_EMPTY;
-
-                  player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
-            })) return slot.getStack();
-
-            return null;
-      }
-
-      @Override
-      @NotNull
-      public ItemStack removeItemNoUpdate(ItemStack carried, Player player) {
-            TempSlot slot = new TempSlot(carried);
-            Storage<FluidVariant> to = ContainerItemContext.ofPlayerSlot(player, slot).find(FluidStorage.ITEM);
-            if (to == null) return carried;
-
-            Storage<FluidVariant> from = this;
-
-            transfer(from, to, variant -> {
-                  SoundEvent sound = FluidVariantAttributes.getFillSound(variant);
-
-                  if (variant.isOf(Fluids.WATER) && carried.is(Items.GLASS_BOTTLE))
-                        sound = SoundEvents.BOTTLE_FILL;
-
-                  player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
-            });
-
-            return slot.getStack();
-      }
-
-      @Override
-      public void dropItems(Entity backpackEntity) {
-
-      }
-
-      @Override
-      public InteractionResult interact(BackpackEntity backpackEntity, Player player, InteractionHand hand) {
-            return InteractionResult.SUCCESS;
-      }
-
-      @Override
-      public GenericTraits trait() {
-            return null;
-      }
-
-      public boolean transferFrom(Storage<FluidVariant> storage, Consumer<FluidVariant> success) {
-            return transfer(storage, this, success);
-      }
-
-      public boolean transferTo(Storage<FluidVariant> storage, Consumer<FluidVariant> success) {
-            return transfer(this, storage, success);
-      }
-
-      private static boolean transfer(Storage<FluidVariant> from, Storage<FluidVariant> to, Consumer<FluidVariant> success) {
-            for (StorageView<FluidVariant> view : from) {
-                  if (view.isResourceBlank()) continue;
-                  FluidVariant resource = view.getResource();
-
-                  long maxExtracted;
-
-                  // check how much can be extracted
-                  try (Transaction extractionTestTransaction = Transaction.openOuter()) {
-                        maxExtracted = view.extract(resource, Long.MAX_VALUE, extractionTestTransaction);
-                        extractionTestTransaction.abort();
-                  }
-
-                  try (Transaction transferTransaction = Transaction.openOuter()) {
-                        // check how much can be inserted
-                        long accepted = to.insert(resource, maxExtracted, transferTransaction);
-
-                        // extract it, or rollback if the amounts don't match
-                        if (accepted > 0 && view.extract(resource, accepted, transferTransaction) == accepted) {
-                              transferTransaction.commit();
-                              success.accept(resource);
-                              return true;
-                        }
-                  }
-            }
-            return false;
-      }
-
-      private static BlockHitResult getPlayerPOVHitResult(Level $$0, Player $$1, ClipContext.Fluid $$2) {
-            Vec3 $$3 = $$1.getEyePosition();
-            Vec3 $$4 = $$3.add($$1.calculateViewVector($$1.getXRot(), $$1.getYRot()).scale($$1.blockInteractionRange()));
-            return $$0.clip(new ClipContext($$3, $$4, net.minecraft.world.level.ClipContext.Block.OUTLINE, $$2, $$1));
+            return amount == 0 || FluidVariant.blank().equals(variant);
       }
 
       protected boolean tryPlace(Level level, Player player, ItemStack backpack) {
@@ -231,6 +151,35 @@ public class BucketMutable extends SingleFluidStorage implements GenericTraits.M
                   }
             }
             return false;
+      }
+
+      private boolean canPickupFluidState(FluidState fluidState) {
+            Fluid type = fluidState.getType();
+            return isEmpty() || variant.isOf(type);
+      }
+
+      private long removeAmount(long block) {
+            long extractedAmount = Math.min(amount, block);
+
+            amount -= extractedAmount;
+
+            if (amount == 0) {
+                  variant = getBlankVariant();
+            }
+
+            return extractedAmount;
+      }
+
+      private long insertAmount(long block) {
+            long extractedAmount = Math.min(getCapacity() - amount, block);
+
+            amount += extractedAmount;
+
+            if (amount == 0) {
+                  variant = getBlankVariant();
+            }
+
+            return extractedAmount;
       }
 
       private boolean emptyContents(@Nullable Player $$0, Level $$1, BlockPos $$2, @Nullable BlockHitResult $$3) {
@@ -306,34 +255,86 @@ public class BucketMutable extends SingleFluidStorage implements GenericTraits.M
             }
       }
 
-
-      private long removeAmount(long block) {
-            long extractedAmount = Math.min(amount, block);
-
-            amount -= extractedAmount;
-
-            if (amount == 0) {
-                  variant = getBlankVariant();
-            }
-
-            return extractedAmount;
+      private static BlockHitResult getPlayerPOVHitResult(Level $$0, Player $$1, ClipContext.Fluid $$2) {
+            Vec3 $$3 = $$1.getEyePosition();
+            Vec3 $$4 = $$3.add($$1.calculateViewVector($$1.getXRot(), $$1.getYRot()).scale($$1.blockInteractionRange()));
+            return $$0.clip(new ClipContext($$3, $$4, net.minecraft.world.level.ClipContext.Block.OUTLINE, $$2, $$1));
       }
 
-      private long insertAmount(long block) {
-            long extractedAmount = Math.min(getCapacity() - amount, block);
-
-            amount += extractedAmount;
-
-            if (amount == 0) {
-                  variant = getBlankVariant();
-            }
-
-            return extractedAmount;
+      public boolean transferFrom(Storage<FluidVariant> storage, Consumer<FluidVariant> success) {
+            return transfer(storage, this, success);
       }
 
-      private boolean canPickupFluidState(FluidState fluidState) {
-            Fluid type = fluidState.getType();
-            return isEmpty() || variant.isOf(type);
+      public boolean transferTo(Storage<FluidVariant> storage, Consumer<FluidVariant> success) {
+            return transfer(this, storage, success);
+      }
+
+      private static boolean transfer(Storage<FluidVariant> from, Storage<FluidVariant> to, Consumer<FluidVariant> success) {
+            for (StorageView<FluidVariant> view : from) {
+                  if (view.isResourceBlank()) continue;
+                  FluidVariant resource = view.getResource();
+
+                  long maxExtracted;
+
+                  // check how much can be extracted
+                  try (Transaction extractionTestTransaction = Transaction.openOuter()) {
+                        maxExtracted = view.extract(resource, Long.MAX_VALUE, extractionTestTransaction);
+                        extractionTestTransaction.abort();
+                  }
+
+                  try (Transaction transferTransaction = Transaction.openOuter()) {
+                        // check how much can be inserted
+                        long accepted = to.insert(resource, maxExtracted, transferTransaction);
+
+                        // extract it, or rollback if the amounts don't match
+                        if (accepted > 0 && view.extract(resource, accepted, transferTransaction) == accepted) {
+                              transferTransaction.commit();
+                              success.accept(resource);
+                              return true;
+                        }
+                  }
+            }
+            return false;
+      }
+
+      @Nullable
+      public ItemStack addItem(ItemStack stack, Player player) {
+            TempSlot slot = new TempSlot(stack);
+            Storage<FluidVariant> from = ContainerItemContext.ofPlayerSlot(player, slot).find(FluidStorage.ITEM);
+
+            if (from == null) return null;
+
+            Storage<FluidVariant> to = this;
+
+            if (transfer(from, to, variant -> {
+                  SoundEvent sound = FluidVariantAttributes.getEmptySound(variant);
+                  if (variant.isOf(Fluids.WATER) && stack.is(Items.POTION))
+                        sound = SoundEvents.BOTTLE_EMPTY;
+
+                  player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
+            })) return slot.getStack();
+
+            return null;
+      }
+
+      @NotNull
+      public ItemStack removeItem(ItemStack carried, Player player) {
+            TempSlot slot = new TempSlot(carried);
+            Storage<FluidVariant> to = ContainerItemContext.ofPlayerSlot(player, slot).find(FluidStorage.ITEM);
+            if (to == null) return carried;
+
+            Storage<FluidVariant> from = this;
+
+            transfer(from, to, variant -> {
+                  SoundEvent sound = FluidVariantAttributes.getFillSound(variant);
+
+                  if (variant.isOf(Fluids.WATER) && carried.is(Items.GLASS_BOTTLE))
+                        sound = SoundEvents.BOTTLE_FILL;
+
+                  player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
+            });
+
+            return slot.getStack();
       }
 
       static class TempSlot extends SingleStackStorage {

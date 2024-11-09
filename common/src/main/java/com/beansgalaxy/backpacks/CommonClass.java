@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks;
 
 import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import net.minecraft.core.Registry;
@@ -21,14 +22,10 @@ public class CommonClass {
 
     public static void init() {
         Traits.register();
-        ModSound.register();
+        ITraitData.register();
+        ModSound.Events.register();
 
-        EntityDataSerializers.registerSerializer(BackpackEntity.TRAIT.serializer());
         EntityDataSerializers.registerSerializer(BackpackEntity.PLACEABLE.serializer());
-
-
-        Constants.LOG.info("Hello from Common init on {}! we are currently in a {} environment!", Services.PLATFORM.getPlatformName(), Services.PLATFORM.getEnvironmentName());
-        Constants.LOG.info("The ID for diamonds is {}", BuiltInRegistries.ITEM.getKey(Items.DIAMOND));
     }
 
 }

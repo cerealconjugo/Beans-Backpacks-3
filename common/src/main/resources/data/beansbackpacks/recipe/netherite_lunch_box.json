@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_trim",
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "beansbackpacks:lunch_box"
+  },
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
+  "result": {
+    "id": "beansbackpacks:netherite_lunch_box"
+  }
+}

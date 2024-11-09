@@ -6,7 +6,6 @@ import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.ReferenceFields;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
 import com.beansgalaxy.backpacks.network.Network2C;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
@@ -32,8 +31,8 @@ public class ConfigureReferences implements Packet2C {
             for (int i = 0; i < size; i++) {
                   ResourceLocation location = ResourceLocation.STREAM_CODEC.decode(buf);
 
-                  TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
-                  IDeclaredFields fields = buf.readJsonWithCodec(kind.declaredCodec()).toReference(location);
+                  TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
+                  GenericTraits fields = buf.readJsonWithCodec(kind.codec()).toReference(location);
 
                   ItemAttributeModifiers modifiers = ItemAttributeModifiers.STREAM_CODEC.decode(buf);
 
@@ -65,9 +64,9 @@ public class ConfigureReferences implements Packet2C {
             buf.writeInt(size);
             references.forEach(((location, reference) -> {
                   ResourceLocation.STREAM_CODEC.encode(buf, location);
-                  TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> kind = reference.fields().kind();
+                  TraitComponentKind<? extends GenericTraits> kind = reference.traits().kind();
                   TraitComponentKind.STREAM_CODEC.encode(buf, kind);
-                  encode(buf, kind.declaredCodec(), reference.fields());
+                  encode(buf, kind.codec(), reference.traits());
 
                   ItemAttributeModifiers.STREAM_CODEC.encode(buf, reference.modifiers());
 
@@ -83,7 +82,7 @@ public class ConfigureReferences implements Packet2C {
             }));
       }
 
-      private <T extends IDeclaredFields> void encode(RegistryFriendlyByteBuf buf, Codec<T> codec, IDeclaredFields fields) {
+      private <T extends GenericTraits> void encode(RegistryFriendlyByteBuf buf, Codec<T> codec, GenericTraits fields) {
             buf.writeJsonWithCodec(codec, (T) fields);
       }
 

@@ -1,9 +1,10 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
 import com.beansgalaxy.backpacks.components.EnderTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -54,17 +55,16 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
       protected void renderTooltip(GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             if (this.hoveredSlot != null) {
                   ItemStack itemstack = this.hoveredSlot.getItem();
-                  GenericTraits traits = Traits.get(itemstack).orElseGet(() -> {
+                  Traits.get(itemstack).ifPresentOrElse(trait -> {
+                        trait.client().renderTooltip(trait, itemstack, PatchedComponentHolder.of(itemstack), gui, mouseX, mouseY, ci);
+                  }, () -> {
                         EnderTraits enderTraits = itemstack.get(Traits.ENDER);
                         if (enderTraits != null) {
-                              return enderTraits.getTrait().orElse(null);
+                              enderTraits.getTrait().ifPresent(trait -> {
+                                    trait.client().renderTooltip(trait, itemstack, enderTraits, gui, mouseX, mouseY, ci);
+                              });
                         }
-                        return null;
                   });
-
-                  if (traits != null) {
-                        traits.client().renderTooltip(traits, itemstack, gui, mouseX, mouseY, ci);
-                  }
             }
       }
 
@@ -92,7 +92,7 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
 
       @Unique private int backpackDragType = 0;
       @Unique private Slot backpackDraggedSlot = null;
-      @Unique private HashMap<Slot, ItemStack> backpackDraggedSlots = new HashMap<>();
+      @Unique private final HashMap<Slot, ItemStack> backpackDraggedSlots = new HashMap<>();
 
       @Inject(method = "mouseDragged", at = @At("HEAD"), cancellable = true)
       public void backpackDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY, CallbackInfoReturnable<Boolean> cir) {
@@ -102,36 +102,34 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
                   return;
 
             if (slot != lastClickSlot && slot != backpackDraggedSlot) {
-                  ItemStorageTraits.runIfPresent(backpack, traits -> {
-                        beans_Backpacks_3$dragTrait(pButton, cir, traits, slot);
-                  }, () -> {
-                        EnderTraits enderTraits = backpack.get(Traits.ENDER);
-                        if (enderTraits != null)
-                              enderTraits.getTrait().ifPresent(traits -> {
-                                    if (traits instanceof ItemStorageTraits storageTraits) {
-                                          beans_Backpacks_3$dragTrait(pButton, cir, storageTraits, slot);
-                                    }
-                              });
+                  EnderTraits enderTraits = backpack.get(Traits.ENDER);
+                  if (enderTraits != null) {
+                        GenericTraits trait = enderTraits.getTrait(minecraft.level);
+                        if (trait instanceof ItemStorageTraits storageTraits)
+                              beans_Backpacks_3$dragTrait(pButton, storageTraits, slot, cir, enderTraits);
+                  }
+                  else ItemStorageTraits.runIfPresent(backpack, traits -> {
+                        beans_Backpacks_3$dragTrait(pButton, traits, slot, cir, PatchedComponentHolder.of(backpack));
                   });
             }
       }
 
       @Unique
-      private void beans_Backpacks_3$dragTrait(int pButton, CallbackInfoReturnable<Boolean> cir, ItemStorageTraits traits, Slot slot) {
+      private void beans_Backpacks_3$dragTrait(int pButton, ItemStorageTraits traits, Slot slot, CallbackInfoReturnable<Boolean> cir, PatchedComponentHolder holder) {
             isQuickCrafting = false;
             skipNextRelease = true;
             if (backpackDraggedSlots.isEmpty()) {
                   backpackDragType = pButton;
 
                   if (backpackDraggedSlot != null)
-                        clickSlot(traits, backpackDraggedSlot);
+                        clickSlot(traits, backpackDraggedSlot, holder);
                   else if (lastClickSlot != null) {
                         backpackDraggedSlot = lastClickSlot;
-                        clickSlot(traits, backpackDraggedSlot);
+                        clickSlot(traits, backpackDraggedSlot, holder);
                   }
             }
             else if (backpackDraggedSlot != null)
-                  clickSlot(traits, backpackDraggedSlot);
+                  clickSlot(traits, backpackDraggedSlot, holder);
 
             backpackDraggedSlot = slot;
             cir.setReturnValue(true);
@@ -142,16 +140,14 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
             if (!backpackDraggedSlots.isEmpty()) {
                   if (backpackDraggedSlot != null) {
                         ItemStack backpack = menu.getCarried();
-                        ItemStorageTraits.runIfPresent(backpack, traits ->
-                                    clickSlot(traits, backpackDraggedSlot)
-                        , () -> {
-                              EnderTraits enderTraits = backpack.get(Traits.ENDER);
-                              if (enderTraits != null) enderTraits.getTrait().ifPresent(traits -> {
-                                    if (traits instanceof ItemStorageTraits storageTraits) {
-                                          clickSlot(storageTraits, backpackDraggedSlot);
-                                    }
-                              });
-                        });
+                        EnderTraits enderTraits = backpack.get(Traits.ENDER);
+                        if (enderTraits != null) {
+                              GenericTraits trait = enderTraits.getTrait(minecraft.level);
+                              if (trait instanceof ItemStorageTraits storageTraits)
+                                    clickSlot(storageTraits, backpackDraggedSlot, enderTraits);
+                        }
+                        else ItemStorageTraits.runIfPresent(backpack, traits ->
+                                    clickSlot(traits, backpackDraggedSlot, PatchedComponentHolder.of(backpack)));
                         backpackDraggedSlot = null;
                   }
                   backpackDraggedSlots.clear();
@@ -159,11 +155,10 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
       }
 
       @Unique
-      private void clickSlot(ItemStorageTraits traits, Slot slot) {
+      private void clickSlot(ItemStorageTraits traits, Slot slot, PatchedComponentHolder holder) {
             if (backpackDragType == 0) {
-                  List<ItemStack> stacks = traits.stacks();
-                  if (!stacks.isEmpty() && !slot.hasItem()) {
-                        ItemStack itemStack = stacks.getFirst();
+                  ItemStack itemStack = traits.getFirst(holder);
+                  if (itemStack != null && !slot.hasItem()) {
                         if (AbstractContainerMenu.canItemQuickReplace(slot, itemStack, true) && slot.mayPlace(itemStack)) {
                               backpackDraggedSlots.put(backpackDraggedSlot, ItemStack.EMPTY);
                               this.slotClicked(slot, slot.index, 1, ClickType.PICKUP);
@@ -173,8 +168,8 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
                   ItemStack stack = slot.getItem();
                   boolean mayPickup = slot.mayPickup(minecraft.player);
                   boolean hasItem = slot.hasItem();
-                  boolean canFit = traits.canItemFit(stack);
-                  boolean isFull = traits.isFull();
+                  boolean canFit = traits.canItemFit(holder, stack);
+                  boolean isFull = traits.isFull(holder);
                   if (mayPickup && hasItem && canFit && !isFull) {
                         backpackDraggedSlots.put(backpackDraggedSlot, stack.copyWithCount(1));
                         this.slotClicked(slot, slot.index, 1, ClickType.PICKUP);

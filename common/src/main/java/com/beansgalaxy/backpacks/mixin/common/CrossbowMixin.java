@@ -1,5 +1,7 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.quiver.QuiverMutable;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
@@ -36,12 +38,14 @@ public abstract class CrossbowMixin extends ProjectileWeaponItem {
                   ProjectileWeaponItem projectileWeaponItem = (ProjectileWeaponItem) pCrossbowStack.getItem();
                   Predicate<ItemStack> predicate = projectileWeaponItem.getAllSupportedProjectiles();
                   QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
-                        QuiverTraits.Mutable mutable = traits.mutable();
+                        ItemStack quiver = player.getItemBySlot(slot);
+                        PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
+                        QuiverMutable mutable = traits.newMutable(holder);
                         List<ItemStack> stacks = mutable.getItemStacks();
                         if (stacks.isEmpty())
                               return false;
 
-                        int selectedSlotSafe = traits.getSelectedSlotSafe(player);
+                        int selectedSlotSafe = traits.getSelectedSlotSafe(holder, player);
                         ItemStack stack = stacks.get(selectedSlotSafe);
                         if (!predicate.test(stack))
                               return false;
@@ -52,10 +56,11 @@ public abstract class CrossbowMixin extends ProjectileWeaponItem {
 
                         pCrossbowStack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(list));
 
-                        ItemStack quiver = player.getItemBySlot(slot);
-                        PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
-                        traits.kind().freezeAndCancel(holder, mutable);
+                        mutable.push();
                         cir.setReturnValue(true);
+                        List<ItemStack> finalStacks = holder.get(ITraitData.ITEM_STACKS);
+                        int size = finalStacks == null ? 0 : finalStacks.size();
+                        traits.limitSelectedSlot(holder, selectedSlotSafe, size);
 
                         if (player instanceof ServerPlayer serverPlayer) {
                               List<Pair<EquipmentSlot, ItemStack>> pSlots = List.of(Pair.of(slot, quiver));

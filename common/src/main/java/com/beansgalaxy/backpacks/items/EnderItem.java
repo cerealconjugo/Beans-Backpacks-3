@@ -63,7 +63,7 @@ public class EnderItem extends BackpackItem {
       public void inventoryTick(ItemStack ender, Level level, Entity entity, int slot, boolean selected) {
             getEnderTrait(ender).ifPresent(enderTraits -> {
                   if (!enderTraits.isLoaded())
-                        enderTraits.reload(level, ender);
+                        enderTraits.reload(level);
 
                   enderTraits.getTrait(level).inventoryTick(enderTraits, level, entity, slot, selected);
 
@@ -93,27 +93,42 @@ public class EnderItem extends BackpackItem {
 
       @Override
       public boolean isBarVisible(ItemStack ender) {
-            return getEnderTrait(ender)
-                        .flatMap(EnderTraits::getTrait)
-                        .map(genericTraits -> !genericTraits.isEmpty())
-                        .orElse(false);
+
+            EnderTraits enderTraits = ender.get(Traits.ENDER);
+            if (enderTraits == null)
+                  return false;
+
+            EnderCallback<Boolean> enderCallback = EnderCallback.of(false);
+            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            trait.client().isBarVisible(trait, enderTraits, enderCallback);
+            return enderCallback.getReturnValue();
+
       }
 
       @Override
       public int getBarWidth(ItemStack ender) {
+            EnderTraits enderTraits = ender.get(Traits.ENDER);
+            if (enderTraits == null)
+                  return 13;
+
             EnderCallback<Integer> cir = EnderCallback.of(13);
-            getEnderTrait(ender)
-                        .flatMap(EnderTraits::getTrait)
-                        .ifPresent(genericTraits -> genericTraits.client().getBarWidth(genericTraits, ender, cir));
+            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            trait.client().getBarWidth(trait, enderTraits, cir);
             return cir.getReturnValue();
       }
 
       @Override
       public int getBarColor(ItemStack ender) {
+
+
+            EnderTraits enderTraits = ender.get(Traits.ENDER);
+            if (enderTraits == null)
+                  return 0x000000;
+
             EnderCallback<Integer> cir = EnderCallback.of(0x000000);
-            getEnderTrait(ender)
-                        .flatMap(EnderTraits::getTrait)
-                        .ifPresent(genericTraits -> genericTraits.client().getBarColor(genericTraits, ender, cir));
+            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            trait.client().getBarColor(trait, enderTraits, cir);
+
             return cir.getReturnValue();
       }
 

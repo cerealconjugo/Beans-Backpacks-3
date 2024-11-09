@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +33,7 @@ public class ArmorSlotMixin extends Slot implements EquipmentSlotAccess {
       @Inject(method = "mayPickup", at = @At("HEAD"), cancellable = true)
       private void disableBackpackPickup(Player player, CallbackInfoReturnable<Boolean> cir) {
             ItemStack stack = getItem();
-            if (EquipableComponent.testIfPresent(stack, EquipableComponent::traitRemovable) || Traits.testIfPresent(stack, traits -> !traits.isEmpty()))
+            if (EquipableComponent.testIfPresent(stack, EquipableComponent::traitRemovable) || Traits.testIfPresent(stack, traits -> !traits.isEmpty(stack)))
                   cir.setReturnValue(false);
       }
 

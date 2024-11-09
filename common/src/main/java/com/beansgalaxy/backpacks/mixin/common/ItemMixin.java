@@ -91,8 +91,7 @@ public class ItemMixin {
       private void backpackBarVisible(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
             if (!stack.isDamageableItem()) {
                   Traits.runIfPresent(stack, traits -> {
-                        traits.client().isBarVisible(traits, stack, cir);
-//                        cir.setReturnValue(!traits.isEmpty());
+                        traits.client().isBarVisible(traits, PatchedComponentHolder.of(stack), cir);
             });
             }
       }
@@ -101,8 +100,7 @@ public class ItemMixin {
       private void backpackBarWidth(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
             if (!stack.isDamageableItem()) {
                   Traits.runIfPresent(stack, traits -> {
-                        traits.client().getBarWidth(traits, stack, cir);
-//                        traits.setBarWidth(cir);
+                        traits.client().getBarWidth(traits, PatchedComponentHolder.of(stack), cir);
                   });
             }
       }
@@ -111,7 +109,7 @@ public class ItemMixin {
       private void backpackBarColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
             if (!stack.isDamageableItem()) {
                   Traits.runIfPresent(stack, traits -> {
-                        traits.client().getBarColor(traits, stack, cir);
+                        traits.client().getBarColor(traits, PatchedComponentHolder.of(stack), cir);
 //                        traits.setBarColor(cir);
                   });
             }

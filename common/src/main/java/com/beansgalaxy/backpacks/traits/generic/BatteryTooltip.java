@@ -1,6 +1,8 @@
-package com.beansgalaxy.backpacks.trait.battery;
+package com.beansgalaxy.backpacks.traits.generic;
 
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
+import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,15 +12,13 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class BatteryTooltip implements ClientTooltipComponent {
-      private final ItemStack backpack;
+      private final TraitTooltip<?> tooltip;
       private final Minecraft minecraft;
-      private final BatteryTraits batteryTraits;
       private final Component title;
 
-      public BatteryTooltip(BatteryTraits batteryTraits, ItemStack backpack, Component title) {
-            this.backpack = backpack;
-            this.batteryTraits = batteryTraits;
-            this.title = title;
+      public BatteryTooltip(TraitTooltip<?> tooltip) {
+            this.tooltip = tooltip;
+            this.title = tooltip.title();
             this.minecraft = Minecraft.getInstance();
       }
 
@@ -29,15 +29,19 @@ public class BatteryTooltip implements ClientTooltipComponent {
 
       @Override
       public int getWidth(@NotNull Font font) {
-            return 19 + font.width("x" + this.batteryTraits.amount());
+            Long amount = tooltip.getOrDefault(ITraitData.LONG, 0L);
+            return 19 + font.width("x" + amount);
       }
 
       @Override
       public void renderImage(@NotNull Font font, int x, int y, @NotNull GuiGraphics gui) {
             int tooltipWidth = Math.max(font.width(title), getWidth(font));
-            BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, x, y, tooltipWidth, backpack);
+            BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, x, y, tooltipWidth, tooltip.itemStack());
 
-            ItemStack stack = this.batteryTraits.stack();
+            ItemStack stack = tooltip.get(ITraitData.SOLO_STACK);
+            if (stack == null || stack.isEmpty())
+                  return;
+
             gui.renderFakeItem(stack, x + 3, y - 1);
             gui.renderItemDecorations(font, stack, x + 3, y - 1);
       }

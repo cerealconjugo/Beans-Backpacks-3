@@ -21,9 +21,9 @@ public class BundleMenu extends AbstractContainerMenu {
       public final BackpackEntity backpack;
       private final int inventorySize;
       private final Player viewer;
-      private BundleTraits.Mutable mutable;
+      private final BundleMutable mutable;
 
-      public BundleMenu(@Nullable MenuType<?> menuType, int id, Inventory playerInventory, BackpackEntity entity, BundleTraits.Mutable trait) {
+      public BundleMenu(@Nullable MenuType<?> menuType, int id, Inventory playerInventory, BackpackEntity entity, BundleMutable trait) {
             super(menuType, id);
             this.viewer = playerInventory.player;
             this.mutable = trait;
@@ -98,7 +98,7 @@ public class BundleMenu extends AbstractContainerMenu {
                         mutable.sound().at(player, ModSound.Type.REMOVE);
 
                   if (clickedStack.isEmpty())
-                        mutable.removeItemNoUpdate(mutableIndex);
+                        mutable.removeItem(mutableIndex);
             }
             else if (mutable.addItem(clickedStack, player) != null)
                   mutable.sound().at(player, ModSound.Type.INSERT);

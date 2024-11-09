@@ -5,14 +5,10 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
 import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.registry.ModItems;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.bundle.BundleTraits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 
 public interface IPlatformHelper {
 
@@ -56,9 +52,7 @@ public interface IPlatformHelper {
 
     void send(Network2S network, Packet2S packet2S);
 
-    void openBundleMenu(Player player, BackpackEntity backpack, BundleTraits.Mutable mutable);
+    <T extends GenericTraits> TraitComponentKind<T> registerBucket();
 
-    <T extends GenericTraits> TraitComponentKind<T, ? extends IDeclaredFields> registerBucket();
-
-    <T extends GenericTraits> TraitComponentKind<T, ? extends IDeclaredFields> registerBattery();
+    <T extends GenericTraits> TraitComponentKind<T> registerBattery();
 }

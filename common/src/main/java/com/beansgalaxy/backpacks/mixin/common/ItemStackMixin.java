@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -62,7 +63,7 @@ public abstract class ItemStackMixin {
       @Inject(method = "isStackable", at = @At("HEAD"), cancellable = true)
       private void backpackIsStackable(CallbackInfoReturnable<Boolean> cir) {
             Traits.runIfPresent(instance, traits -> {
-                  if (!traits.isStackable())
+                  if (!traits.isStackable(PatchedComponentHolder.of(instance)))
                         cir.setReturnValue(false);
             });
       }

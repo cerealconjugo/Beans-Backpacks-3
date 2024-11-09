@@ -1,56 +1,30 @@
 package com.beansgalaxy.backpacks.traits.experience;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
+import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.Optional;
 
 public class XpTooltip implements ClientTooltipComponent {
       private final ItemStack backpack;
       private final Minecraft minecraft;
       private final int levels;
       private final float toNextLevel;
-      private final boolean isFull;
 
-      public XpTooltip(XpTraits xpTraits, ItemStack backpack) {
-            this.isFull = xpTraits.isFull();
-            int points = xpTraits.points();
+      public XpTooltip(TraitTooltip<?> tooltip) {
+            int points = tooltip.getOrDefault(ITraitData.AMOUNT, 0);
+            XpPackagable packagable = new XpPackagable(points);
 
-            int level = 0;
-            float toNextLevel = 0;
-            int xp = points;
-            while (xp > 0) {
-                  int lostXp;
-                  if (level >= 30)
-                        lostXp = 112 + (level - 30) * 9;
-                  else if (level >= 15)
-                        lostXp = 37 + (level - 15) * 5;
-                  else
-                        lostXp = 7 + level * 2;
-
-                  if (lostXp > xp) {
-                        toNextLevel = (float) xp / lostXp;
-                        xp = 0;
-                  }
-                  else {
-                        xp -= lostXp;
-                        level++;
-                  }
-            }
-
-            this.levels = level;
-            this.toNextLevel = toNextLevel;
-            this.backpack = backpack;
+            this.levels = packagable.experienceLevel;
+            this.toNextLevel = packagable.experienceProgress;
+            this.backpack = tooltip.itemStack();
             this.minecraft = Minecraft.getInstance();
       }
 
@@ -68,7 +42,7 @@ public class XpTooltip implements ClientTooltipComponent {
       public void renderImage(@NotNull Font font, int x, int y, @NotNull GuiGraphics gui) {
             BundleTooltip.renderHoveredItemTooltip(minecraft, gui, font, x, y + 12, getWidth(font), backpack);
 
-            int color = 0;// isFull ? 0x17753b : 0;
+            int color = 0;
             String s = this.levels + " Levels";
             gui.drawString(font, s, x + 1, y, color, false);
             gui.drawString(font, s, x - 1, y, color, false);

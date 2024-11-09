@@ -4,7 +4,7 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.platform.Services;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public interface Packet2S extends CustomPacketPayload {
       Network2S getNetwork();
@@ -17,5 +17,5 @@ public interface Packet2S extends CustomPacketPayload {
 
       void encode(RegistryFriendlyByteBuf buf);
 
-      void handle(ServerPlayer sender);
+      void handle(Player sender);
 }

@@ -3,7 +3,7 @@ package com.beansgalaxy.backpacks.components.reference;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.*;
@@ -92,15 +92,14 @@ public class ReferenceTrait {
                               if (reference == null)
                                     return Optional.empty();
 
-                              IDeclaredFields fields = reference.fields();
-                              if (fields == null) {
+                              GenericTraits traits = reference.traits();
+                              if (traits == null) {
                                     return Optional.empty();
                               }
 
-                              GenericTraits blankTrait = fields.asBlankTrait();
-                              this.trait = blankTrait;
+                              this.trait = traits;
                               loadFromReferenceFields(reference);
-                              return Optional.ofNullable(blankTrait);
+                              return Optional.of(traits);
                         });
       }
 
@@ -157,7 +156,7 @@ public class ReferenceTrait {
             @Override
             public <T> RecordBuilder<T> encode(ReferenceTrait input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
                   RecordBuilder<T> suffix = input.getTrait().map(traits ->
-                              traits.kind().encode(traits, ops, prefix)
+                                    TraitComponentKind.encode(traits, ops, prefix)
                   ).orElse(prefix);
 
                   return LOCATION_CODEC.encode(input.location, ops, suffix);
@@ -170,7 +169,7 @@ public class ReferenceTrait {
                         if (referenceFields == null)
                               return DataResult.error(() -> "No trait is registered using the given location: " + location);
 
-                        IDeclaredFields reference = referenceFields.fields();
+                        GenericTraits reference = referenceFields.traits();
                         if (!NonTrait.is(reference))
                               return reference.kind().codec().fieldOf("trait").decode(ops, input).map(
                                           trait -> {
@@ -190,12 +189,9 @@ public class ReferenceTrait {
             @Override
             public void encode(RegistryFriendlyByteBuf buf, ReferenceTrait reference) {
                   ResourceLocation.STREAM_CODEC.encode(buf, reference.location);
-                  reference.getTrait().ifPresentOrElse(traits -> {
-                        buf.writeBoolean(true);
-                        traits.kind().encode(buf, traits);
-                  }, () -> {
-                        buf.writeBoolean(false);
-                  });
+                  boolean present = reference.getTrait().isPresent();
+                  buf.writeBoolean(present);
+
             }
 
             @Override
@@ -203,9 +199,8 @@ public class ReferenceTrait {
                   ResourceLocation location = ResourceLocation.STREAM_CODEC.decode(buf);
                   if (buf.readBoolean()) {
                         ReferenceFields reference = ReferenceTraitRegistry.get(location);
-                        IDeclaredFields fields = reference.fields();
-                        GenericTraits traits = fields.kind().streamCodec().decode(buf);
-                        return new ReferenceTrait(location, traits.toReference(location), reference.placeable(), reference.equipable());
+                        GenericTraits fields = reference.traits();
+                        return new ReferenceTrait(location, fields.toReference(location), reference.placeable(), reference.equipable());
                   }
                   return new ReferenceTrait(location);
             }

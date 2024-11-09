@@ -13,12 +13,10 @@ public class BundleSlots extends Slot {
       public static final int ADD_ROW = 9;
       public static final int MAX_SLOTS = 69;
       public static final ResourceLocation INPUT = ResourceLocation.withDefaultNamespace("sprites/empty_slot_input_large");
-      private final BundleTraits.Mutable mutable;
       public final State state;
 
-      public BundleSlots(BundleTraits.Mutable container, int slot, int x, int y, State state) {
+      public BundleSlots(BundleMutable container, int slot, int x, int y, State state) {
             super(container, slot, x, y);
-            this.mutable = container;
             this.state = state;
       }
 

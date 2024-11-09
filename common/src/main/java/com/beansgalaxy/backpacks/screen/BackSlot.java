@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +15,9 @@ public class BackSlot extends Slot implements EquipmentSlotAccess {
 
       public BackSlot(Inventory inv, int slot) {
             super(inv, slot, 59, 62);
+      }
+      public BackSlot(Inventory inv, int slot, int x, int y) {
+            super(inv, slot, x + 32 + 20 + 16, y - 29 - 13);
       }
 
       @Override
@@ -30,7 +34,7 @@ public class BackSlot extends Slot implements EquipmentSlotAccess {
             ItemStack stack = getItem();
             boolean standardCheck = stack.isEmpty();
             boolean equipment = EquipableComponent.testIfPresent(stack, EquipableComponent::traitRemovable);
-            boolean emptyTrait = !Traits.testIfPresent(stack, traits -> !traits.isEmpty());
+            boolean emptyTrait = !Traits.testIfPresent(stack, traits -> !traits.isEmpty(stack));
             return standardCheck || equipment || emptyTrait;
       }
 

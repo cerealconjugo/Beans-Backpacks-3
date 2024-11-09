@@ -1,53 +1,45 @@
 package com.beansgalaxy.backpacks.traits.bulk;
 
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.network.serverbound.PickBlock;
 import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.PrimitiveCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.beansgalaxy.backpacks.traits.*;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class BulkTraits extends BundleLikeTraits {
+public class BulkTraits extends ItemStorageTraits {
       public static final String NAME = "bulk";
-      private final BulkFields fields;
-      protected final Holder<Item> item;
-      protected final List<EmptyStack> emptyStacks;
+      private final int size;
 
-      public BulkTraits(BulkFields fields, Holder<Item> item, List<EmptyStack> emptyStacks) {
-            super(Traits.getWeight(stacks(item, emptyStacks), fields.size()));
-            this.fields = fields;
-            this.item = item;
-            this.emptyStacks = emptyStacks;
-      }
-
-      public BulkTraits(BulkTraits traits, Holder<Item> item, List<EmptyStack> emptyStacks) {
-            super(Traits.getWeight(stacks(item, emptyStacks), traits.fields.size()), traits.slotSelection);
-            this.fields = traits.fields;
-            this.item = item;
-            this.emptyStacks = emptyStacks;
+      public BulkTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
+            super(location, sound);
+            this.size = size;
       }
 
       @Override
@@ -57,7 +49,7 @@ public class BulkTraits extends BundleLikeTraits {
 
       @Override
       public BulkTraits toReference(ResourceLocation location) {
-            return new BulkTraits(fields.toReference(location), item, emptyStacks);
+            return new BulkTraits(location, sound(), size);
       }
 
       @Override
@@ -65,204 +57,398 @@ public class BulkTraits extends BundleLikeTraits {
             return NAME;
       }
 
-      @Override
-      public BulkFields fields() {
-            return fields;
-      }
-
-      @Override
       public int size() {
-            return fields.size();
+            return size;
       }
 
       @Override
-      public List<ItemStack> stacks() {
-            return stacks(item, emptyStacks);
+      public Fraction fullness(PatchedComponentHolder holder) {
+            BulkMutable.BulkStacks bulkStacks = holder.get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null || bulkStacks.isEmpty())
+                  return Fraction.ZERO;
+
+            return bulkStacks.fullness(this);
       }
 
-      public int amount() {
-            return emptyStacks.stream().mapToInt(EmptyStack::amount).sum();
+      @Override
+      public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
+            BulkMutable mutable = newMutable(backpack);
+            if (!EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable())) {
+                  if (ClickAction.SECONDARY.equals(click)) {
+                        if (other.isEmpty()) {
+                              if (mutable.isEmpty())
+                                    return;
+
+                              ItemStack stack = mutable.removeItem(0);
+                              access.set(stack);
+                              sound().atClient(player, ModSound.Type.REMOVE);
+                        } else if (mutable.addItem(other, player) != null) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                        }
+                  }
+            }
+            else if (EquipableComponent.canEquip(backpack, slot)) {
+                  if (other.isEmpty()) {
+                        if (mutable.isEmpty())
+                              return;
+
+                        ItemStack stack = ClickAction.SECONDARY.equals(click)
+                                    ? mutable.splitItem()
+                                    : mutable.removeItem(0);
+
+                        access.set(stack);
+                        sound().atClient(player, ModSound.Type.REMOVE);
+                  } else {
+                        ItemStack returned;
+                        if (ClickAction.PRIMARY.equals(click))
+                              returned = mutable.addItem(other, player);
+                        else {
+                              returned = mutable.addItem(other.copyWithCount(1), player);
+                              if (returned != null)
+                                    other.shrink(1);
+                        }
+
+                        if (returned == null) {
+                              return;
+                        }
+
+                        sound().atClient(player, ModSound.Type.INSERT);
+                  }
+            }
+            else return;
+
+            mutable.push(cir);
       }
 
-      private static List<ItemStack> stacks(Holder<Item> item, List<EmptyStack> emptyStacks) {
+      @Override
+      public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
+            boolean empty = !EquipableComponent.testIfPresent(backpack, equipable ->
+                        !equipable.slots().test(EquipmentSlot.OFFHAND)
+            );
+
+            if (empty && ClickAction.SECONDARY.equals(click)) {
+                  BulkMutable mutable = newMutable(backpack);
+                  ModSound sound = sound();
+                  if (other.isEmpty()) {
+                        ItemStack stack = mutable.removeItem(0);
+                        if (stack.isEmpty() || !slot.mayPlace(stack))
+                              return;
+
+                        slot.set(stack);
+                        sound.atClient(player, ModSound.Type.REMOVE);
+                  }
+                  else if (slot.mayPickup(player)) {
+                        if (mutable.addItem(other, player) != null)
+                              sound.atClient(player, ModSound.Type.INSERT);
+                        else return;
+                  }
+                  else return;
+
+                  cir.setReturnValue(true);
+                  mutable.push();
+            }
+      }
+
+      static List<ItemStack> stacks(BulkMutable.BulkStacks bulkStacks) {
+            return stacks(bulkStacks.itemHolder(), bulkStacks.emptyStacks());
+      }
+
+      static List<ItemStack> stacks(Holder<Item> item, List<BulkMutable.EmptyStack> emptyStacks) {
             return emptyStacks.stream().map(
-                        empty -> new ItemStack(item, empty.amount, empty.data)
+                        empty -> new ItemStack(item, empty.amount(), empty.data())
             ).toList();
       }
 
-      public int getSelectedSlot(Player player) {
-            return 0;
-      }
-
-      public int getSelectedSlotSafe(Player player) {
-            return 0;
-      }
-
-      public void setSelectedSlot(Player sender, int selectedSlot) {
-
-      }
-
-      public void limitSelectedSlot(int slot, int size) {
-
-      }
-
-      public record EmptyStack(int amount, DataComponentPatch data) {
-            public static final Codec<EmptyStack> EMPTY_STACK_CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(
-                        $$0 -> $$0.group(
-                                    ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(EmptyStack::amount),
-                                    DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(EmptyStack::data)
-                        ).apply($$0, EmptyStack::new)
-            ));
-
-            public static final StreamCodec<RegistryFriendlyByteBuf, EmptyStack> EMPTY_STACK_STREAM_CODEC = new StreamCodec<>() {
-                  @Override @NotNull
-                  public EmptyStack decode(RegistryFriendlyByteBuf buf) {
-                        int amount = buf.readInt();
-                        DataComponentPatch data = DataComponentPatch.STREAM_CODEC.decode(buf);
-                        return new EmptyStack(amount, data);
-                  }
-
-                  @Override
-                  public void encode(RegistryFriendlyByteBuf buf, EmptyStack ctx) {
-                        buf.writeInt(ctx.amount);
-                        DataComponentPatch.STREAM_CODEC.encode(buf, ctx.data);
-                  }
-            };
-
-            public static final StreamCodec<RegistryFriendlyByteBuf, List<EmptyStack>> LIST_EMPTY_STACK_STREAM_CODEC = EMPTY_STACK_STREAM_CODEC.apply(
-                        ByteBufCodecs.collection(NonNullList::createWithCapacity)
-            );
-      }
-
       public static final StreamCodec<RegistryFriendlyByteBuf, BulkTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
-            BulkFields.STREAM_CODEC.encode(buf, traits.fields);
-            BulkData.STREAM_CODEC.encode(buf, new BulkData(traits.item, traits.emptyStacks));
-      }, buf -> {
-            BulkFields fields = BulkFields.STREAM_CODEC.decode(buf);
-            BulkData data = BulkData.STREAM_CODEC.decode(buf);
-            return new BulkTraits(fields, data.item, data.stacks);
-      });
-
-      protected record BulkData(Holder<Item> item, List<EmptyStack> stacks) {
-            public static final Codec<BulkData> CODEC = RecordCodecBuilder.create(in ->
-                        in.group(
-                                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item").forGetter(BulkData::item),
-                                    EmptyStack.EMPTY_STACK_CODEC.listOf().fieldOf("stacks").forGetter(BulkData::stacks)
-                        ).apply(in, BulkData::new)
-            );
-
-            public static final StreamCodec<RegistryFriendlyByteBuf, BulkData> STREAM_CODEC = new StreamCodec<>() {
-                  @Override
-                  public void encode(RegistryFriendlyByteBuf buf, BulkData bulkData) {
-                        ByteBufCodecs.holderRegistry(Registries.ITEM).encode(buf, bulkData.item);
-                        EmptyStack.LIST_EMPTY_STACK_STREAM_CODEC.encode(buf, bulkData.stacks);
-                  }
-
-                  @Override @NotNull
-                  public BulkData decode(RegistryFriendlyByteBuf buf) {
-                        Holder<Item> item = ByteBufCodecs.holderRegistry(Registries.ITEM).decode(buf);
-                        List<EmptyStack> stacks = EmptyStack.LIST_EMPTY_STACK_STREAM_CODEC.decode(buf);
-                        return new BulkData(item, stacks);
-                  }
-            };
-      }
-
-      public static final Codec<BulkTraits> CODEC = RecordCodecBuilder.create(in ->
-            in.group(
-                        PrimitiveCodec.INT.fieldOf("size").forGetter(BulkTraits::size),
-                        ModSound.MAP_CODEC.forGetter(BulkTraits::sound),
-                        BulkData.CODEC.optionalFieldOf("data", new BulkData(BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR), List.of())).forGetter(traits -> new BulkData(traits.item, traits.emptyStacks))
-            ).apply(in, (size, sound, data) -> new BulkTraits(new BulkFields(size, sound), data.item, data.stacks))
-      );
+            buf.writeInt(traits.size());
+            ModSound.STREAM_CODEC.encode(buf, traits.sound());
+            GenericTraits.encodeLocation(buf, traits);
+      }, buf -> new BulkTraits(
+                  GenericTraits.decodeLocation(buf),
+                  ModSound.STREAM_CODEC.decode(buf),
+                  buf.readInt()
+      ));
 
       @Override
-      public Mutable mutable() {
-            return new Mutable();
-      }
-
-      @Override
-      public boolean isEmpty() {
-            return BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR).equals(item) || emptyStacks.isEmpty();
-      }
-
-      @Override
-      public boolean canItemFit(ItemStack inserted) {
-            return super.canItemFit(inserted) && (isEmpty() || inserted.is(item));
-      }
-
-      public class Mutable extends MutableBundleLike {
-            public Mutable() {
-                  super(BulkTraits.this);
-            }
-
-            @Override
-            public BulkTraits freeze() {
-                  List<ItemStack> stacks = getItemStacks();
-                  stacks.removeIf(ItemStack::isEmpty);
-                  if (stacks.isEmpty())
-                        return new BulkTraits(BulkTraits.this, BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR), List.of());
-
-                  Holder<Item> item = BuiltInRegistries.ITEM.wrapAsHolder(stacks.getFirst().getItem());
-                  List<EmptyStack> emptyStacks = stacks.stream().map(stack -> new EmptyStack(stack.getCount(), stack.getComponentsPatch())).toList();
-                  return new BulkTraits(BulkTraits.this, item, emptyStacks);
-            }
-
-            @Override
-            public void dropItems(Entity backpackEntity) {
-                  while (!isEmpty()) {
-                        ItemStack stack = removeItemNoUpdate(0);
-                        backpackEntity.spawnAtLocation(stack);
+      public void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci) {
+            if (selectedEquipment == null) {
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(slot.getItem());
+                  BulkMutable mutable = newMutable(holder);
+                  if (mutable.isEmpty()) {
+                        ci.cancel();
+                        return;
                   }
-            }
 
-            @Override
-            public InteractionResult interact(BackpackEntity backpackEntity, Player player, InteractionHand hand) {
-                  ItemStack other = player.getItemInHand(hand);
+                  Inventory inventory = player.getInventory();
+                  if (ClickType.PICKUP_ALL.equals(actionType)) {
+                        ItemStack carried = player.containerMenu.getCarried();
+                        if (!canItemFit(holder, carried)) {
+                              ci.cancel();
+                              return;
+                        }
 
-                  if (other.isEmpty()) {
-                        if (isEmpty() || InteractionHand.OFF_HAND.equals(hand))
-                              return InteractionResult.PASS;
+                        BulkMutable.BulkStacks bulkList = mutable.bulkList.get();
+                        Holder<Item> itemHolder = bulkList.itemHolder();
+                        List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
 
-                        ItemStack stack = removeItemNoUpdate(other, player);
-                        if (stack != null) {
-                              player.setItemInHand(hand, stack);
-                              sound().at(player, ModSound.Type.REMOVE);
-                              backpackEntity.wobble = 8;
-                              return InteractionResult.SUCCESS;
+                        Iterator<BulkMutable.EmptyStack> iterator = emptyStacks.iterator();
+                        BulkMutable.EmptyStack stack = iterator.next();
+                        ItemStack pStack = stack.withItem(itemHolder);
+                        int stackableSlot = inventory.getSlotWithRemainingSpace(pStack);
+                        if (stackableSlot == -1) {
+                              stackableSlot = inventory.getFreeSlot();
+                        }
+                        if (stackableSlot != -1) {
+                              ci.cancel();
+                              while (iterator.hasNext()) {
+                                    int maxStackSize = stack.getMaxStackSize(itemHolder);
+                                    ItemStack splitStack = stack.splitItem(itemHolder, maxStackSize);
+                                    do {
+                                          if (!inventory.add(-1, splitStack)) {
+                                                emptyStacks.addFirst(new BulkMutable.EmptyStack(splitStack.getCount(), splitStack.getComponentsPatch()));
+                                                return;
+                                          }
+                                          splitStack = stack.splitItem(itemHolder, maxStackSize);
+                                    }
+                                    while (!stack.isEmpty());
+
+                                    iterator.remove();
+                                    stack = iterator.next();
+                              }
+                        }
+
+                        boolean cancelled = ci.isCancelled();
+                        if (cancelled) {
+                              sound().atClient(player, ModSound.Type.REMOVE);
+                              mutable.bulkList.set(bulkList);
+                              mutable.push();
+                        }
+                        return;
+                  }
+
+                  ItemStack stack = mutable.removeItem(0);
+                  int stackableSlot = inventory.getSlotWithRemainingSpace(stack);
+                  if (stackableSlot == -1) {
+                        stackableSlot = inventory.getFreeSlot();
+                  }
+                  if (stackableSlot != -1 && inventory.add(-1, stack)) {
+                        sound().atClient(player, ModSound.Type.REMOVE);
+                        mutable.push();
+                        ci.cancel();
+                  }
+            } else {
+                  ItemStack backpack = player.getItemBySlot(selectedEquipment);
+                  if (isFull(backpack))
+                        return;
+
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+                  BulkMutable mutable = newMutable(holder);
+                  if (ClickType.PICKUP_ALL.equals(actionType)) {
+                        ItemStack carried = player.containerMenu.getCarried();
+                        if (mutable.isEmpty() || !carried.is(mutable.bulkList.get().itemHolder())) {
+                              ci.cancel();
+                              return;
+                        }
+
+                        Inventory inventory = player.getInventory();
+                        NonNullList<ItemStack> items = inventory.items;
+                        for (int i = items.size() - 1; i >= 0  && !mutable.isFull(); i--) {
+                              ItemStack stack = items.get(i);
+                              if (ItemStack.isSameItem(carried, stack)) {
+                                    int toAdd = mutable.getMaxAmountToAdd(stack.copy());
+                                    int count = Math.min(stack.getMaxStackSize(), toAdd);
+                                    ItemStack removed = stack.copyWithCount(count);
+                                    stack.shrink(count);
+                                    if (mutable.addItem(removed, player) != null) {
+                                          ci.cancel();
+                                    }
+                              }
+                        }
+
+                        boolean cancelled = ci.isCancelled();
+                        if (cancelled) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                              mutable.push();
+                        }
+                        return;
+                  }
+
+                  if (canItemFit(holder, slot.getItem())) {
+                        ItemStack slotItem = slot.getItem();
+                        if (mutable.addItem(slotItem, player) != null) {
+                              sound().atClient(player, ModSound.Type.INSERT);
+                              mutable.push();
+                              ci.cancel();
                         }
                   }
-                  else if (addItem(other, player) == null)
-                        return InteractionResult.PASS;
-
-                  backpackEntity.wobble = 8;
-                  sound().at(player, ModSound.Type.INSERT);
-                  return InteractionResult.SUCCESS;
             }
+      }
 
-            @Override
-            public BulkTraits trait() {
-                  return BulkTraits.this;
+      @Override
+      public void hotkeyThrow(Slot slot, PatchedComponentHolder backpack, int button, Player player, boolean menuKeyDown, CallbackInfo ci) {
+            if (isEmpty(backpack))
+                  return;
+
+            BulkMutable mutable = newMutable(backpack);
+
+            ItemStack removed;
+            if (menuKeyDown)
+                  removed = mutable.removeItem(0);
+            else if (EquipableComponent.get(backpack).isPresent())
+            {
+                  BulkMutable.BulkStacks bulkList = mutable.bulkList.get();
+                  List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
+                  BulkMutable.EmptyStack first = emptyStacks.getFirst();
+                  ItemStack stack = first.splitItem(bulkList.itemHolder(), 1);
+                  if (first.isEmpty())
+                        emptyStacks.removeFirst();
+
+                  mutable.bulkList.set(bulkList);
+                  removed = stack;
             }
+            else return;
+
+            player.drop(removed, true);
+
+            sound().atClient(player, ModSound.Type.REMOVE);
+            mutable.push();
+            ci.cancel();
+      }
+
+      @Override
+      public boolean pickupToBackpack(Player player, EquipmentSlot equipmentSlot, Inventory inventory, ItemStack backpack, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+            if (!isFull(backpack)) {
+                  inventory.items.forEach(stacks -> {
+                        if (ItemStack.isSameItemSameComponents(stacks, stack)) {
+                              int present = stacks.getCount();
+                              int inserted = stack.getCount();
+                              int count = present + inserted;
+                              int remainder = Math.max(0, count - stack.getMaxStackSize());
+                              count -= remainder;
+
+                              stacks.setCount(count);
+                              stack.setCount(remainder);
+                        }
+                  });
+
+                  if (stack.isEmpty()) {
+                        cir.setReturnValue(true);
+                        return true;
+                  }
+
+                  BulkMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  BulkMutable.BulkStacks bulkStacks = mutable.bulkList.get();
+                  Holder<Item> itemHolder = bulkStacks.itemHolder();
+                  if (stack.is(itemHolder)) {
+                        ItemStack returnStack = mutable.addItem(stack, player);
+                        if (returnStack != null) {
+                              cir.setReturnValue(true);
+                              sound().toClient(player, ModSound.Type.INSERT, 1, 1);
+                              mutable.push();
+
+                              if (player instanceof ServerPlayer serverPlayer) {
+                                    List<Pair<EquipmentSlot, ItemStack>> pSlots = List.of(Pair.of(equipmentSlot, backpack));
+                                    ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(serverPlayer.getId(), pSlots);
+                                    serverPlayer.serverLevel().getChunkSource().broadcastAndSend(serverPlayer, packet);
+                              }
+                        }
+                  }
+
+                  return stack.isEmpty();
+            }
+            return false;
+      }
+
+      @Override
+      public void clientPickBlock(EquipmentSlot equipmentSlot, boolean instantBuild, Inventory inventory, ItemStack itemStack, Player player, CallbackInfo ci) {
+            if (instantBuild || inventory.getFreeSlot() == -1)
+                  return;
+
+            int slot = inventory.findSlotMatchingItem(itemStack);
+            if (slot > -1 || player == null)
+                  return;
+
+            ItemStack backpack = player.getItemBySlot(equipmentSlot);
+            BulkMutable.BulkStacks bulkStacks = backpack.get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null || !itemStack.is(bulkStacks.itemHolder()))
+                  return;
+
+            PickBlock.send(0, equipmentSlot);
+            sound().atClient(player, ModSound.Type.REMOVE);
+            ci.cancel();
+      }
+
+      @Override
+      public void breakTrait(ServerPlayer pPlayer, ItemStack instance) {
+            BulkMutable.BulkStacks bulkStacks = instance.get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null)
+                  return;
+
+            stacks(bulkStacks).forEach(stack -> {
+                  boolean success = pPlayer.getInventory().add(-1, stack);
+                  if (!success || !stack.isEmpty()) {
+                        pPlayer.drop(stack, true, true);
+                  }
+            });
+      }
+
+      @Override @Nullable
+      public ItemStack getFirst(PatchedComponentHolder backpack) {
+            BulkMutable.BulkStacks bulkStacks = backpack.get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null)
+                  return null;
+
+            BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
+            Holder<Item> itemHolder = bulkStacks.itemHolder();
+            return first.withCappedStackSize(itemHolder);
+      }
+
+      @Override
+      public boolean isEmpty(PatchedComponentHolder holder) {
+            return !holder.has(ITraitData.BULK_STACKS);
+      }
+
+      @Override
+      public boolean canItemFit(PatchedComponentHolder holder, ItemStack inserted) {
+            if (!super.canItemFit(holder, inserted))
+                  return false;
+
+            if (isEmpty(holder))
+                  return true;
+
+            BulkMutable.BulkStacks bulkStacks = holder.get(ITraitData.BULK_STACKS);
+            return bulkStacks != null && inserted.is(bulkStacks.itemHolder());
+      }
+
+      @Override
+      public BulkMutable newMutable(PatchedComponentHolder holder) {
+            return new BulkMutable(this, holder);
+      }
+
+      @Override
+      public TraitComponentKind<? extends GenericTraits> kind() {
+            return Traits.BULK;
       }
 
       @Override
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof BulkTraits that)) return false;
-            return Objects.equals(fields, that.fields) && Objects.equals(item, that.item) && Objects.equals(emptyStacks, that.emptyStacks);
+            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(fields, item, emptyStacks);
+            return Objects.hash(size(), sound(), location());
       }
 
       @Override
       public String toString() {
             return "BulkTraits{" +
-                        "fields=" + fields +
-                        ", item=" + item +
-                        ", emptyStacks=" + emptyStacks +
-                        '}';
+                        "size=" + size() +
+                        ", sound=" + sound() +
+                        location().map(
+                                    location -> ", location=" + location + '}')
+                                    .orElse("}");
       }
 }

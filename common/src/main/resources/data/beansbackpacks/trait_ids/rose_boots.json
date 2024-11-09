@@ -11,14 +11,14 @@
   "modifiers": [
     {
       "type": "generic.scale",
-      "amount": 0.11,
+      "amount": 0.10,
       "slot": "feet",
       "id": "rose_boot_step",
       "operation": "add_multiplied_base"
     },
     {
       "type": "generic.movement_speed",
-      "amount": 0.11,
+      "amount": 0.10,
       "slot": "feet",
       "id": "rose_boot_step",
       "operation": "add_multiplied_base"

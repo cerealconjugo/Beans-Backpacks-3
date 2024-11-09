@@ -12,8 +12,7 @@ import java.util.function.Function;
 
 public enum Network2C {
       ENDER_TRAIT_2C(SendEnderTraits.class, SendEnderTraits.ID, SendEnderTraits::encode, SendEnderTraits::new, SendEnderTraits::handle),
-      ENDER_ENTRY_2C(SendEnderEntry.class, SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::new, SendEnderEntry::handle),
-      OPEN_CHEST_2C(OpenChestTraits.class, OpenChestTraits.ID, OpenChestTraits::encode, OpenChestTraits::new, OpenChestTraits::handle),
+      ENDER_ENTRY_2C(SendEnderEntry.class, SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::decode, SendEnderEntry::handle),
       CONFIG_REFERENCES_2C(ConfigureReferences.class, ConfigureReferences.ID, ConfigureReferences::encode, ConfigureReferences::new, ConfigureReferences::handle),
       ;
 

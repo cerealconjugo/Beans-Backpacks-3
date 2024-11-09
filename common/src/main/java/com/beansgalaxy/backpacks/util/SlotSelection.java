@@ -13,13 +13,12 @@ import java.util.function.IntUnaryOperator;
 public class SlotSelection {
       private final Int2IntArrayMap slots = defaultSlotMap();
 
-      public int getSelectedSlot(Player player) {
-            return slots.get(player.getId());
+      public void addAll(SlotSelection slotSelection) {
+            slots.putAll(slotSelection.slots);
       }
 
-      public int getSelectedSlotSafe(Player player) {
-            int selectedSlot = getSelectedSlot(player);
-            return selectedSlot == 0 ? 0 : selectedSlot - 1;
+      public int getSelectedSlot(Player player) {
+            return slots.get(player.getId());
       }
 
       public void setSelectedSlot(Player player, int selectedSlot) {
@@ -27,7 +26,7 @@ public class SlotSelection {
       }
 
       public int modSelectedSlot(Player player, @NotNull IntUnaryOperator operation) {
-            int selectedSlot = slots.getOrDefault(player.getId(), 0);
+            int selectedSlot = slots.get(player.getId());
             int i = operation.applyAsInt(selectedSlot);
             slots.put(player.getId(), i);
             return i;
@@ -93,7 +92,7 @@ public class SlotSelection {
                   if (slot == 0)
                         i = selectedSlot + 1;
                   else
-                        i = selectedSlot - 1 < slot ? selectedSlot : selectedSlot + 1;
+                        i = selectedSlot < slot ? selectedSlot : selectedSlot + 1;
 
                   slots.put(key, i);
             }

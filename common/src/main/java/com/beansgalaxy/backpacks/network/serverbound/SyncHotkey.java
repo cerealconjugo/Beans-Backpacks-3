@@ -6,7 +6,7 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class SyncHotkey implements Packet2S {
       final boolean actionKey;
@@ -38,7 +38,7 @@ public class SyncHotkey implements Packet2S {
       }
 
       @Override
-      public void handle(ServerPlayer sender) {
+      public void handle(Player sender) {
             BackData backData = BackData.get(sender);
             backData.setActionKey(actionKey);
             backData.setMenuKey(menuKey);

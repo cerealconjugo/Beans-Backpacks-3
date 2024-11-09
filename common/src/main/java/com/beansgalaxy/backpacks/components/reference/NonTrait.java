@@ -1,11 +1,10 @@
 package com.beansgalaxy.backpacks.components.reference;
 
 import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.IDeclaredFields;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -14,23 +13,18 @@ import com.mojang.serialization.DynamicOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-public class NonTrait extends IDeclaredFields implements GenericTraits, GenericTraits.MutableTraits, ITraitCodec<NonTrait, NonTrait> {
+public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, MutableTraits {
       public static final String NAME = "non";
       public static final NonTrait INSTANCE = new NonTrait();
-      public static final TraitComponentKind<NonTrait, ? extends IDeclaredFields> KIND = new TraitComponentKind<>(-1, NAME, INSTANCE);
+      public static final TraitComponentKind<NonTrait> KIND = new TraitComponentKind<>(-1, NAME, INSTANCE);
 
       private NonTrait() {
             super(null, null);
@@ -40,13 +34,8 @@ public class NonTrait extends IDeclaredFields implements GenericTraits, GenericT
             return INSTANCE.equals(trait);
       }
 
-      @Override @NotNull
-      public NonTrait asBlankTrait() {
-            return this;
-      }
-
       @Override
-      public TraitComponentKind<NonTrait, ? extends IDeclaredFields> kind() {
+      public TraitComponentKind<NonTrait> kind() {
             return KIND;
       }
 
@@ -61,22 +50,12 @@ public class NonTrait extends IDeclaredFields implements GenericTraits, GenericT
       }
 
       @Override
-      public IDeclaredFields fields() {
-            return this;
-      }
-
-      @Override
       public IClientTraits client() {
             return NonTraitClient.INSTANCE;
       }
 
       @Override
-      public int size() {
-            return 0;
-      }
-
-      @Override
-      public Fraction fullness() {
+      public Fraction fullness(PatchedComponentHolder holder) {
             return Fraction.ONE;
       }
 
@@ -91,12 +70,12 @@ public class NonTrait extends IDeclaredFields implements GenericTraits, GenericT
       }
 
       @Override
-      public boolean isEmpty() {
+      public boolean isEmpty(PatchedComponentHolder holder) {
             return true;
       }
 
       @Override
-      public MutableTraits mutable() {
+      public MutableTraits newMutable(PatchedComponentHolder holder) {
             return this;
       }
 
@@ -136,41 +115,6 @@ public class NonTrait extends IDeclaredFields implements GenericTraits, GenericT
       }
 
       @Override
-      public Codec<NonTrait> fieldCodec() {
-            return codec();
-      }
-
-      @Override
-      public GenericTraits freeze() {
-            return this;
-      }
-
-      @Override @Nullable
-      public ItemStack addItem(ItemStack stack, Player player) {
-            return null;
-      }
-
-      @Override
-      public ItemStack removeItemNoUpdate(ItemStack carried, Player player) {
-            return carried;
-      }
-
-      @Override
-      public void dropItems(Entity backpackEntity) {
-
-      }
-
-      @Override
-      public InteractionResult interact(BackpackEntity backpackEntity, Player player, InteractionHand hand) {
-            return InteractionResult.PASS;
-      }
-
-      @Override
-      public GenericTraits trait() {
-            return this;
-      }
-
-      @Override
       public String toString() {
             return "NonTrait{}";
       }
@@ -178,5 +122,20 @@ public class NonTrait extends IDeclaredFields implements GenericTraits, GenericT
       @Override
       public boolean equals(Object o) {
             return o == this;
+      }
+
+      @Override
+      public void push() {
+
+      }
+
+      @Override
+      public Fraction fullness() {
+            return Fraction.ONE;
+      }
+
+      @Override
+      public boolean isFull() {
+            return false;
       }
 }

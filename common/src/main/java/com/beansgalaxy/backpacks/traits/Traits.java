@@ -17,6 +17,7 @@ import com.beansgalaxy.backpacks.traits.chest.ChestCodecs;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import com.beansgalaxy.backpacks.traits.experience.XpCodecs;
 import com.beansgalaxy.backpacks.traits.experience.XpTraits;
+import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxCodecs;
@@ -24,6 +25,7 @@ import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverCodecs;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.serialization.*;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -60,42 +62,46 @@ public interface Traits {
       DataComponentType<EmptyEnderItem.UnboundEnderTraits>
                   EMPTY_ENDER = register("empty_ender", EmptyEnderItem.CODEC, EmptyEnderItem.STREAM_CODEC);
 
-      TraitComponentKind<BundleTraits, ? extends IDeclaredFields>
+      TraitComponentKind<BundleTraits>
                   BUNDLE = TraitComponentKind.register(BundleTraits.NAME, BundleCodecs.INSTANCE);
 
-      TraitComponentKind<BulkTraits, ? extends IDeclaredFields>
+      TraitComponentKind<BulkTraits>
                   BULK = TraitComponentKind.register(BulkTraits.NAME, BulkCodecs.INSTANCE);
 
-      TraitComponentKind<LunchBoxTraits, ? extends IDeclaredFields>
+      TraitComponentKind<LunchBoxTraits>
                   LUNCH_BOX = TraitComponentKind.register(LunchBoxTraits.NAME, LunchBoxCodecs.INSTANCE);
 
-      TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>
+      TraitComponentKind<? extends GenericTraits>
                   BUCKET = Services.PLATFORM.registerBucket();
 
-      TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>
+      TraitComponentKind<? extends GenericTraits>
                   BATTERY = Services.PLATFORM.registerBattery();
 
-      TraitComponentKind<XpTraits, ? extends IDeclaredFields>
+      TraitComponentKind<XpTraits>
                   EXPERIENCE = TraitComponentKind.register(XpTraits.NAME, XpCodecs.INSTANCE);
 
-      TraitComponentKind<QuiverTraits, ? extends IDeclaredFields>
+      TraitComponentKind<QuiverTraits>
                   QUIVER = TraitComponentKind.register(QuiverTraits.NAME, QuiverCodecs.INSTANCE);
 
-      TraitComponentKind<AlchemyTraits, ? extends IDeclaredFields>
+      TraitComponentKind<AlchemyTraits>
                   ALCHEMY = TraitComponentKind.register(AlchemyTraits.NAME, AlchemyCodecs.INSTANCE);
 
-      TraitComponentKind<ChestTraits, ? extends IDeclaredFields>
+      TraitComponentKind<ChestTraits>
                   CHEST = TraitComponentKind.register(ChestTraits.NAME, ChestCodecs.INSTANCE);
 
-      List<TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields>> ALL_TRAITS = List.of(
+      List<TraitComponentKind<? extends GenericTraits>> ALL_TRAITS = List.of(
                   BUNDLE,     LUNCH_BOX,        BULK,       BUCKET,
                   BATTERY,    EXPERIENCE,       QUIVER,     ALCHEMY,
                   CHEST
       );
 
-      List<TraitComponentKind<? extends ItemStorageTraits, ? extends IDeclaredFields>> STORAGE_TRAITS = List.of(
+      List<TraitComponentKind<? extends ItemStorageTraits>> STORAGE_TRAITS = List.of(
                   BUNDLE,     LUNCH_BOX,        BULK,       QUIVER,
                   ALCHEMY,    CHEST
+      );
+
+      List<TraitComponentKind<? extends BundleLikeTraits>> BUNDLE_TRAITS = List.of(
+                  BUNDLE,     LUNCH_BOX,        QUIVER,     ALCHEMY
       );
 
       static <T> DataComponentType<T> register(String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
@@ -106,15 +112,15 @@ public interface Traits {
       }
 
       static Optional<GenericTraits> get(ItemStack stack) {
-            return stack.isEmpty() ? Optional.empty() : get((DataComponentHolder) stack);
+            return stack.isEmpty() ? Optional.empty() : get(PatchedComponentHolder.of(stack));
       }
 
-      static Optional<GenericTraits> get(DataComponentHolder stack) {
+      static Optional<GenericTraits> get(PatchedComponentHolder stack) {
             ReferenceTrait reference = stack.get(REFERENCE);
             if (reference != null && !reference.isEmpty())
                   return reference.getTrait();
 
-            for (TraitComponentKind<? extends GenericTraits, ? extends IDeclaredFields> type : ALL_TRAITS) {
+            for (TraitComponentKind<? extends GenericTraits> type : ALL_TRAITS) {
                   GenericTraits traits = stack.get(type);
                   if (traits != null)
                         return Optional.of(traits);
@@ -136,10 +142,13 @@ public interface Traits {
       }
 
       static boolean testIfPresent(ItemStack stack, Predicate<GenericTraits> predicate) {
-            return !stack.isEmpty() && testIfPresent((DataComponentHolder) stack, predicate);
+            if (stack.isEmpty())
+                  return false;
+
+            return testIfPresent(PatchedComponentHolder.of(stack), predicate);
       }
 
-      static boolean testIfPresent(DataComponentHolder stack, Predicate<GenericTraits> predicate) {
+      static boolean testIfPresent(PatchedComponentHolder stack, Predicate<GenericTraits> predicate) {
             Optional<GenericTraits> genericTraits = get(stack);
             if (genericTraits.isEmpty()) return false;
 

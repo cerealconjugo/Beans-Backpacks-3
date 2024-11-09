@@ -3,7 +3,9 @@ package com.beansgalaxy.backpacks.traits.chest;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.network.serverbound.TinyChestClick;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -13,6 +15,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -21,6 +24,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,16 +34,16 @@ public class ChestTraitScreen extends Screen {
       private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.parse(Constants.MOD_ID + ":textures/gui/generic_scalable.png");
       private final AbstractContainerScreen<?> previousScreen;
       private final Slot slot;
-      private final ChestFields fields;
+      private final ChestTraits traits;
       private int leftPos;
       private int topPos;
       private boolean menuKeyLock = true;
 
-      public ChestTraitScreen(AbstractContainerScreen<?> previousScreen, Slot slot, ChestFields fields) {
-            super(Component.literal("Testing"));
+      public ChestTraitScreen(AbstractContainerScreen<?> previousScreen, Slot slot, ChestTraits traits) {
+            super(Component.literal(""));
             this.previousScreen = previousScreen;
             this.slot = slot;
-            this.fields = fields;
+            this.traits = traits;
       }
 
       @Override
@@ -48,14 +52,14 @@ public class ChestTraitScreen extends Screen {
             int scaledHeight = window.getGuiScaledHeight();
             int scaledWidth = window.getGuiScaledWidth();
 
-            int columns = fields.columns;
-            int rows = fields.rows;
+            int columns = traits.columns;
+            int rows = traits.rows;
             this.leftPos = scaledWidth / 2 - columns * 9;
             this.topPos = scaledHeight / 2 - rows * 9;
 
-            for(int y = 0; y < fields.rows; ++y) {
-                  for (int x = 0; x < fields.columns; ++x) {
-                        int index = y * fields.columns + x;
+            for(int y = 0; y < traits.rows; ++y) {
+                  for (int x = 0; x < traits.columns; ++x) {
+                        int index = y * traits.columns + x;
                         ChestTraitSlot chestTraitSlot = new ChestTraitSlot(x * 18 + leftPos, y * 18 + topPos, index);
                         addRenderableWidget(chestTraitSlot);
                   }
@@ -106,13 +110,13 @@ public class ChestTraitScreen extends Screen {
             int scaledWidth = window.getGuiScaledWidth();
 
             float distance = (float) pMouseX / scaledWidth;
-            float i = distance * fields.columns * 18;
+            float i = distance * traits.columns * 18;
             int lookX = Mth.floor(i);
             previousScreen.render(gui, leftPos + lookX, scaledHeight / 2, pPartialTick);
             pose.popPose();
 
-            for(int y = 0; y < fields.rows; ++y) {
-                  for(int x = 0; x < fields.columns; ++x) {
+            for(int y = 0; y < traits.rows; ++y) {
+                  for(int x = 0; x < traits.columns; ++x) {
                         gui.blit(CONTAINER_BACKGROUND, leftPos + x * 18, topPos + y * 18, 1, 0, 0, 18, 18, 256, 256);
                   }
             }
@@ -142,7 +146,7 @@ public class ChestTraitScreen extends Screen {
                   y = topPos - tooltipFromItem.size() * 12 + 6;
             }
             else {
-                  y = topPos - 5 + fields.columns * 4;
+                  y = topPos - 5 + traits.columns * 4;
             }
 
             gui.renderTooltip(font, tooltipFromItem, Optional.empty(), x, y);
@@ -164,7 +168,13 @@ public class ChestTraitScreen extends Screen {
             }
 
             public ItemStack getItem() {
-                  return getTraits().map(chestTraits -> chestTraits.stacks.get(index)).orElse(ItemStack.EMPTY);
+                  ItemContainerContents contents = slot.getItem().get(ITraitData.CHEST);
+                  if (contents == null)
+                        return ItemStack.EMPTY;
+
+                  NonNullList<ItemStack> pList = NonNullList.withSize(traits.size(), ItemStack.EMPTY);
+                  contents.copyInto(pList);
+                  return index < pList.size() ? pList.get(index) : ItemStack.EMPTY;
             }
 
             @Override
@@ -208,7 +218,7 @@ public class ChestTraitScreen extends Screen {
 
                         ChestTraits traits = optional.get();
                         AbstractContainerMenu menu = previousScreen.getMenu();
-                        if (!traits.canItemFit(menu.getCarried()))
+                        if (!traits.canItemFit(PatchedComponentHolder.of(slot.getItem()), menu.getCarried()))
                               return true;
 
                         SlotAccess carriedAccess = new SlotAccess() {

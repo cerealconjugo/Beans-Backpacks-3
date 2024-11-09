@@ -15,7 +15,7 @@
     "common.ItemMixin",
     "common.ItemStackMixin",
     "common.PlayerMixin",
-    "common.ServerPlayerMixin"
+    "common.ServerPlayMixin"
   ],
   "client": [
     "client.AbstractScreenMixin",

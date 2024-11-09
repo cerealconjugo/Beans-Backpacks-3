@@ -1,8 +1,9 @@
 package com.beansgalaxy.backpacks.traits.bundle;
 
 import com.beansgalaxy.backpacks.access.BackData;
-import com.beansgalaxy.backpacks.config.TooltipType;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -29,32 +30,29 @@ import java.util.List;
 import java.util.Optional;
 
 public class BundleTooltip implements ClientTooltipComponent {
-      private static final int MAX_DISPLAY = 60;
       private static final int SPACING = 17;
-      private static final int LIMIT_COL = 5;
       private final BundleLikeTraits traits;
       private final ArrayList<ItemStack> itemStacks;
       private final Minecraft minecraft;
       private final int size;
-      private final boolean isCuriosMenu;
-      private final TooltipType tooltipType;
-      private final ItemStack stack;
       private final boolean hasSpace;
       private final int columns;
       private final int rows;
+      private final PatchedComponentHolder holder;
+      private final ItemStack itemstack;
       private final Component title;
+      private final int selectedSlot;
 
-      public BundleTooltip(BundleLikeTraits traits, ItemStack itemstack, Component title) {
+      public BundleTooltip(BundleLikeTraits traits, ArrayList<ItemStack> stacks, TraitTooltip<?> tooltip) {
             this.traits = traits;
-            this.stack = itemstack;
-            this.title = title;
-            this.itemStacks = new ArrayList<>(traits.stacks());
+            this.holder = tooltip.holder();
+            this.itemstack = tooltip.itemStack();
+            this.title = tooltip.title();
+            this.itemStacks = stacks;
             this.minecraft = Minecraft.getInstance();
             this.size = itemStacks.size();
-            this.tooltipType = TooltipType.COMPACT;// Constants.CLIENT_CONFIG.tooltip_style.get();
-            this.isCuriosMenu = false;//Tooltip.isCuriosMenu();
 
-            this.hasSpace = traits.fullness().compareTo(Fraction.ONE) != 0;
+            this.hasSpace = traits.fullness(tooltip.holder()).compareTo(Fraction.ONE) != 0;
             int sudoSize = size + (hasSpace ? 1 : 0);
 
             boolean forCol = false;
@@ -72,7 +70,50 @@ public class BundleTooltip implements ClientTooltipComponent {
 
             this.columns = columns;
             this.rows = rows;
+
+            long window = Minecraft.getInstance().getWindow().getWindow();
+            LocalPlayer player = minecraft.player;
+            boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
+            boolean carriedEmpty = minecraft.player.containerMenu.getCarried().isEmpty();
+            boolean hideEmptySlot = carriedEmpty || isQuickMove || !hasSpace;
+            int slot1 = traits.getSelectedSlot(holder, player);
+            this.selectedSlot = hideEmptySlot && slot1 == 0
+                        ? 0
+                        : slot1 -1;
       }
+
+      public BundleTooltip(BundleLikeTraits traits, ArrayList<ItemStack> itemStacks, TraitTooltip<?> tooltip, boolean hasSpace, int selectedSlot) {
+            this.minecraft = Minecraft.getInstance();
+            this.holder = tooltip.holder();
+            this.itemstack = tooltip.itemStack();
+            this.title = tooltip.title();
+            this.traits = traits;
+
+            this.itemStacks = itemStacks;
+            this.size = itemStacks.size();
+
+            this.hasSpace = hasSpace;
+            int sudoSize = size + (hasSpace ? 1 : 0);
+
+            boolean forCol = false;
+            int columns = Math.min(sudoSize, 4);
+            int rows = 1;
+            for (int i = columns; i <= sudoSize; i++) {
+                  if (i > columns * rows) {
+                        if (forCol)
+                              columns++;
+                        else
+                              rows++;
+                        forCol = !forCol;
+                  }
+            }
+
+            this.columns = columns;
+            this.rows = rows;
+
+            this.selectedSlot = selectedSlot;
+      }
+
 
       @Override
       public int getHeight() {
@@ -89,21 +130,12 @@ public class BundleTooltip implements ClientTooltipComponent {
             int tooltipY = cursorY + rows * 2 - 2;
             int firstWidth = font.width(title);
             int tooltipWidth = Math.max(firstWidth, getWidth(font));
-            boolean carriedEmpty = renderHoveredItemTooltip(minecraft, gui, font, cursorX, tooltipY, tooltipWidth, stack);
+            renderHoveredItemTooltip(minecraft, gui, font, cursorX, tooltipY, tooltipWidth, itemstack);
 
             Iterator<ItemStack> stacks = itemStacks.iterator();
-            LocalPlayer player = minecraft.player;
 
             int topPos = cursorY + 7;
             int leftPos = cursorX + 9;
-
-            long window = Minecraft.getInstance().getWindow().getWindow();
-            boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
-            boolean hideEmptySlot = carriedEmpty || isQuickMove || !hasSpace;
-            int slot1 = traits.getSelectedSlot(player);
-            int selectedSlot = hideEmptySlot && slot1 == 0
-                        ? 0
-                        : slot1 -1;
 
             if (selectedSlot == -1) {
                   int fillX = leftPos - 9;

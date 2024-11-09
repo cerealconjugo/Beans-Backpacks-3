@@ -1,7 +1,9 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.access.BackData;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -42,11 +44,12 @@ public class PlayerMixin {
       private void getBackpackProjectile(ItemStack pShootable, CallbackInfoReturnable<ItemStack> cir, Predicate<ItemStack> predicate) {
             Player player = (Player) (Object) this;
             QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
-                  List<ItemStack> stacks = traits.stacks();
-                  if (stacks.isEmpty())
+                  ItemStack backpack = player.getItemBySlot(slot);
+                  List<ItemStack> stacks = backpack.get(ITraitData.ITEM_STACKS);
+                  if (stacks == null || stacks.isEmpty())
                         return false;
 
-                  int selectedSlot = traits.getSelectedSlotSafe(player);
+                  int selectedSlot = traits.getSelectedSlotSafe(PatchedComponentHolder.of(backpack), player);
                   ItemStack stack = stacks.get(selectedSlot);
                   if (predicate.test(stack)) {
                         cir.setReturnValue(stack);
