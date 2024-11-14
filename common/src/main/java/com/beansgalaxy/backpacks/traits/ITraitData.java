@@ -234,38 +234,6 @@ public abstract class ITraitData<T> {
             }
       }
 
-      static class Chest extends ITraitData<ItemContainerContents> {
-            private final PatchedComponentHolder holder;
-
-            public Chest(PatchedComponentHolder holder) {
-                  this.holder = holder;
-            }
-
-            @Override
-            public DataComponentType<ItemContainerContents> type() {
-                  return CHEST;
-            }
-
-            @Override
-            public PatchedComponentHolder holder() {
-                  return holder;
-            }
-
-            public ItemContainerContents get() {
-                  if (value == null) {
-                        markDirty();
-                        ItemContainerContents t = holder().get(type());
-                        value = Objects.requireNonNullElse(t, ItemContainerContents.EMPTY);
-                  }
-                  return value;
-            }
-
-            @Override
-            public boolean isEmpty(ItemContainerContents data) {
-                  return data.stream().allMatch(ItemStack::isEmpty);
-            }
-      }
-
       static class Amount extends ITraitData<Integer> {
             private final PatchedComponentHolder holder;
 

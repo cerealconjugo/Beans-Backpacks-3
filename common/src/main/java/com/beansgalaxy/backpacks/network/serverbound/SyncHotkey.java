@@ -11,18 +11,20 @@ import net.minecraft.world.entity.player.Player;
 public class SyncHotkey implements Packet2S {
       final boolean actionKey;
       final boolean menuKey;
+      final int tinySlot;
 
       public SyncHotkey(RegistryFriendlyByteBuf buf) {
-            this(buf.readBoolean(), buf.readBoolean());
+            this(buf.readBoolean(), buf.readBoolean(), buf.readInt());
       }
 
-      private SyncHotkey(boolean actionKey, boolean menuKey) {
+      private SyncHotkey(boolean actionKey, boolean menuKey, int tinySlot) {
             this.actionKey = actionKey;
             this.menuKey = menuKey;
+            this.tinySlot = tinySlot;
       }
 
-      public static void send(boolean actionKey, boolean menuKey) {
-            new SyncHotkey(actionKey, menuKey).send2S();
+      public static void send(boolean actionKey, boolean menuKey, int tinySlot) {
+            new SyncHotkey(actionKey, menuKey, tinySlot).send2S();
       }
 
       @Override
@@ -34,6 +36,7 @@ public class SyncHotkey implements Packet2S {
       public void encode(RegistryFriendlyByteBuf buf) {
             buf.writeBoolean(actionKey);
             buf.writeBoolean(menuKey);
+            buf.writeInt(tinySlot);
 
       }
 
@@ -42,6 +45,7 @@ public class SyncHotkey implements Packet2S {
             BackData backData = BackData.get(sender);
             backData.setActionKey(actionKey);
             backData.setMenuKey(menuKey);
+            backData.setTinySlot(tinySlot);
       }
 
       public static Type<SyncHotkey> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_hotkey_s"));

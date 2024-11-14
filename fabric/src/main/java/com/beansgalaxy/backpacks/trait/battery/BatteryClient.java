@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.trait.battery;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.BatteryTooltip;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.ChatFormatting;
@@ -23,21 +22,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BatteryClient implements IClientTraits {
+public class BatteryClient implements IClientTraits<BatteryTraits> {
       static final BatteryClient INSTANCE = new BatteryClient();
 
       @Override
-      public void isBarVisible(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
+      public void isBarVisible(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
             if (holder.has(ITraitData.SOLO_STACK) || holder.has(ITraitData.LONG))
                   cir.setReturnValue(true);
       }
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(BatteryTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             if (!trait.isEmpty(holder)) {
-                  BatteryTraits batteryTraits = (BatteryTraits) trait;
                   Long amount = holder.getOrDefault(ITraitData.LONG, 0L);
-                  MutableComponent energy = Component.literal(energyToReadable(amount) + "/" + energyToReadable(batteryTraits.size()) + " E");
+                  MutableComponent energy = Component.literal(energyToReadable(amount) + "/" + energyToReadable(trait.size()) + " E");
                   TraitTooltip<?> tooltip = new TraitTooltip<>(trait, itemStack, holder, energy);
                   gui.renderTooltip(Minecraft.getInstance().font, List.of(energy), Optional.of(tooltip), mouseX, mouseY);
                   ci.cancel();
@@ -79,7 +77,7 @@ public class BatteryClient implements IClientTraits {
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             Fraction fullness = trait.fullness(holder);
             if (fullness.equals(Fraction.ONE))
                   cir.setReturnValue(14);
@@ -92,33 +90,27 @@ public class BatteryClient implements IClientTraits {
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             if (!holder.has(ITraitData.SOLO_STACK))
                   cir.setReturnValue(Mth.color(0.4F, 0.4F, 1.0F));
             else
                   cir.setReturnValue(Mth.color(0.9F, 1F, 0.3F));
       }
 
-      @Override @Nullable
-      public <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
-            T traits = tooltip.traits();
-            if (traits instanceof BatteryTraits batteryTraits) {
-                  return new BatteryTooltip(tooltip);
-            }
-            return null;
+      @Override
+      public @Nullable ClientTooltipComponent getTooltipComponent(BatteryTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            return new BatteryTooltip(itemStack, holder, title);
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            BatteryTraits batteryTraits = (BatteryTraits) traits;
-            long size = batteryTraits.size();
+      public void appendEquipmentLines(BatteryTraits traits, Consumer<Component> pTooltipAdder) {
+            long size = traits.size();
             pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            BatteryTraits batteryTraits = (BatteryTraits) traits;
-            long size = batteryTraits.size();
+      public void appendTooltipLines(BatteryTraits traits, List<Component> lines) {
+            long size = traits.size();
             lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 }

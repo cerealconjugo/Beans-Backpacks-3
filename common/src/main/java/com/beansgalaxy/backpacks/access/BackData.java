@@ -19,4 +19,7 @@ public interface BackData {
 
       NonNullList<ItemStack> beans_Backpacks_3$getBody();
 
+      void setTinySlot(int tinySlot);
+
+      int getTinySlot();
 }

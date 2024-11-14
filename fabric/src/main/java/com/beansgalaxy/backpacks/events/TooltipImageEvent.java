@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 public class TooltipImageEvent implements TooltipComponentCallback {
       @Override @Nullable
       public ClientTooltipComponent getComponent(TooltipComponent data) {
-            if (data instanceof TraitTooltip<?> tooltip) {
+            if (data instanceof TraitTooltip<? extends GenericTraits> tooltip) {
                   GenericTraits traits = tooltip.traits();
-                  return traits.client().getTooltipComponent(tooltip);
+                  return traits.client().getTooltipComponent(tooltip.traits(), tooltip.itemStack(), tooltip.holder(), tooltip.title());
             }
             return null;
       }

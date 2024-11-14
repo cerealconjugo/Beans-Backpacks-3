@@ -48,8 +48,13 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public BucketClient client() {
             return BucketClient.INSTANCE;
+      }
+
+      @Override
+      public BucketEntity entity() {
+            return BucketEntity.INSTANCE;
       }
 
       @Override

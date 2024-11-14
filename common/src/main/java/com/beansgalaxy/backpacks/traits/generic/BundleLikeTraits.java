@@ -5,6 +5,7 @@ import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.network.serverbound.PickBlock;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -16,12 +17,14 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
@@ -44,6 +47,12 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
       }
 
       public static Optional<BundleLikeTraits> get(DataComponentHolder stack) {
+            for (TraitComponentKind<? extends BundleLikeTraits> type : Traits.BUNDLE_TRAITS) {
+                  BundleLikeTraits traits = stack.get(type);
+                  if (traits != null)
+                        return Optional.of(traits);
+            }
+
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
             if (referenceTrait != null && !referenceTrait.isEmpty())
                   return referenceTrait.getTrait().map(traits -> {
@@ -51,12 +60,6 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                               return storageTraits;
                         return null;
                   });
-
-            for (TraitComponentKind<? extends BundleLikeTraits> type : Traits.BUNDLE_TRAITS) {
-                  BundleLikeTraits traits = stack.get(type);
-                  if (traits != null)
-                        return Optional.of(traits);
-            }
 
             return Optional.empty();
       }
@@ -72,6 +75,10 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                   return Fraction.ZERO;
             }
 
+            return fullness(stacks);
+      }
+
+      public Fraction fullness(List<ItemStack> stacks) {
             return Traits.getWeight(stacks, size());
       }
 
@@ -506,5 +513,146 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
       @Override
       public int hashCode() {
             return Objects.hash(location(), sound(), size);
+      }
+
+      @Override
+      public void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
+            MutableBundleLike<?> mutable = newMutable(holder);
+            if (clickType.isHotbar()) {
+                  Inventory inventory = player.getInventory();
+                  ItemStack hotbarStack = inventory.items.get(clickType.hotbarSlot);
+                  ItemStack stack = mutable.removeItem(index);
+                  if (!hotbarStack.isEmpty()) {
+                        int add = mutable.toAdd(hotbarStack);
+                        if (add < hotbarStack.getCount()) {
+                              return;
+                        }
+
+                        mutable.addItem(hotbarStack, index, player);
+                  }
+
+                  inventory.items.set(clickType.hotbarSlot, stack);
+                  mutable.push();
+                  return;
+            }
+
+            if (clickType.isShift()) {
+                  Inventory inventory = player.getInventory();
+                  ItemStack stack = mutable.removeItem(index);
+                  for (int i = 0; i < 9; i++) {
+                        ItemStack hotbar = inventory.items.get(i);
+                        if (ItemStack.isSameItemSameComponents(stack, hotbar)) {
+                              int add = Math.min(hotbar.getMaxStackSize() - hotbar.getCount(), stack.getCount());
+                              hotbar.grow(add);
+                              stack.shrink(add);
+                        }
+
+                        if (stack.isEmpty()) {
+                              mutable.push();
+                              return;
+                        }
+                  }
+
+                  for (int i = 0; i < 9; i++) {
+                        ItemStack hotbar = inventory.items.get(i);
+                        if (hotbar.isEmpty()) {
+                              int add = Math.min(stack.getMaxStackSize(), stack.getCount());
+                              inventory.items.set(i, stack.copyWithCount(add));
+                              stack.shrink(add);
+                        }
+
+                        if (stack.isEmpty()) {
+                              mutable.push();
+                              return;
+                        }
+                  }
+                  return;
+            }
+
+            if (clickType.isAction()) {
+                  if (index == -1)
+                        return;
+
+                  List<ItemStack> stacks = mutable.stacks.get();
+                  if (index >= stacks.size())
+                        return;
+
+                  ItemStack stack = stacks.get(index);
+                  ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
+                        ItemStack backpack = player.getItemBySlot(slot);
+                        MutableItemStorage itemStorage = storageTraits.newMutable(PatchedComponentHolder.of(backpack));
+                        if (canItemFit(holder, stack)) {
+                              if (itemStorage.addItem(stack, player) != null) {
+                                    sound().atClient(player, ModSound.Type.INSERT);
+                                    mutable.push();
+                                    itemStorage.push();
+                              }
+                        }
+
+                        return stack.isEmpty();
+                  }));
+            }
+
+            List<ItemStack> stacks = mutable.getItemStacks();
+            ItemStack carried = carriedAccess.get();
+
+            if (index == -1) {
+                  if (clickType.isRight()) {
+                        if (mutable.addItem(carried.copyWithCount(1), player) != null) {
+                              carried.shrink(1);
+                              mutable.push();
+                        }
+                  } else if (mutable.addItem(carried, player) != null) {
+                              mutable.push();
+                  }
+                  return;
+            }
+
+            int size = stacks.size();
+            if (index >= size) {
+                  if (clickType.isRight()) {
+                        if (mutable.addItem(carried.copyWithCount(1), size, player) != null) {
+                              carried.shrink(1);
+                              mutable.push();
+                        }
+                  } else if (mutable.addItem(carried, size, player) != null) {
+                        mutable.push();
+                  }
+                  return;
+            }
+
+            ItemStack stack = stacks.get(index);
+            if (stack.isEmpty() && carried.isEmpty())
+                  return;
+
+            if (!stack.isEmpty() && !carried.isEmpty()) {
+                  if (ItemStack.isSameItemSameComponents(stack, carried)) {
+                        int toAdd = mutable.toAdd(carried);
+                        if (toAdd == 0)
+                              return;
+
+                        if (clickType.isRight()) {
+                              stack.grow(1);
+                              carried.shrink(1);
+                        } else {
+                              int add = Math.min(stack.getMaxStackSize() - stack.getCount(), toAdd);
+                              stack.grow(add);
+                              carried.shrink(add);
+                        }
+                  }
+                  else mutable.addItem(carried, index, player);
+            }
+            else if (clickType.isRight()) {
+                  int count = Mth.ceil((float) stack.getCount() / 2);
+                  ItemStack split = stack.split(count);
+                  carriedAccess.set(split);
+            }
+            else if (carried.isEmpty()) {
+                  ItemStack removed = mutable.removeItem(index);
+                  carriedAccess.set(removed);
+            } else
+                  mutable.addItem(carried, index + 1, player);
+
+            mutable.push();
       }
 }

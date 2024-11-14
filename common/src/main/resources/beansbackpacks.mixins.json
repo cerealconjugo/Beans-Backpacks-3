@@ -20,6 +20,7 @@
   "client": [
     "client.AbstractScreenMixin",
     "client.BlockStateModelMixin",
+    "client.GuiMixin",
     "client.KeyBindEntriesMixin",
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",

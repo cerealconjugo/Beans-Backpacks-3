@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.traits.lunch_box;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
@@ -34,8 +36,13 @@ public class LunchBoxTraits extends BundleLikeTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public LunchBoxClient client() {
             return LunchBoxClient.INSTANCE;
+      }
+
+      @Override
+      public LunchBoxEntity entity() {
+            return LunchBoxEntity.INSTANCE;
       }
 
       @Override
@@ -133,6 +140,11 @@ public class LunchBoxTraits extends BundleLikeTraits {
                         cir.setReturnValue(InteractionResultHolder.success(backpack));
                   }
             }
+      }
+
+      @Override
+      public void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
+            super.tinyMenuClick(holder, index, clickType, carriedAccess, player);
       }
 
       @Override

@@ -3,11 +3,13 @@ package com.beansgalaxy.backpacks.traits.experience;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -18,14 +20,15 @@ public class XpTooltip implements ClientTooltipComponent {
       private final int levels;
       private final float toNextLevel;
 
-      public XpTooltip(TraitTooltip<?> tooltip) {
-            int points = tooltip.getOrDefault(ITraitData.AMOUNT, 0);
+      public XpTooltip(XpTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            this.minecraft = Minecraft.getInstance();
+            int points = holder.getOrDefault(ITraitData.AMOUNT, 0);
             XpPackagable packagable = new XpPackagable(points);
 
             this.levels = packagable.experienceLevel;
             this.toNextLevel = packagable.experienceProgress;
-            this.backpack = tooltip.itemStack();
-            this.minecraft = Minecraft.getInstance();
+            this.backpack = itemStack;
+
       }
 
       @Override

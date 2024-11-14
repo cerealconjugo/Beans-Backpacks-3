@@ -2,10 +2,7 @@ package com.beansgalaxy.backpacks.trait.battery;
 
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.ITraitData;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -44,8 +41,13 @@ public class BatteryTraits extends GenericTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public BatteryClient client() {
             return BatteryClient.INSTANCE;
+      }
+
+      @Override
+      public BatteryEntity entity() {
+            return BatteryEntity.INSTANCE;
       }
 
       @Override

@@ -33,12 +33,15 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
             if (backpack instanceof EnderTraits)
                   return Optional.empty();
 
+            EquipableComponent equipable = backpack.get(Traits.EQUIPABLE);
+            if (equipable != null)
+                  return Optional.of(equipable);
+
             ReferenceTrait referenceTrait = backpack.get(Traits.REFERENCE);
             if (referenceTrait != null && !referenceTrait.isEmpty())
                   return referenceTrait.getEquipable();
 
-            EquipableComponent equipable = backpack.get(Traits.EQUIPABLE);
-            return Optional.ofNullable(equipable);
+            return Optional.empty();
       }
 
       public static Optional<EquipableComponent> get(ItemStack stack) {

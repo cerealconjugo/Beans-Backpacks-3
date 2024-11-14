@@ -36,17 +36,26 @@ public class ItemMixin {
       @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
       private void backpackUseOn(UseOnContext ctx, CallbackInfoReturnable<InteractionResult> cir) {
             ItemStack backpack = ctx.getItemInHand();
-            PlaceableComponent.get(backpack).ifPresentOrElse(placeable -> {
-                  Optional<GenericTraits> traits = Traits.get(backpack);
-                  BackpackEntity entity = BackpackEntity.create(ctx, backpack, placeable, traits);
+            Optional<GenericTraits> optionalTr = Traits.get(backpack);
+            ModSound modSound = ModSound.SOFT;
+            if (optionalTr.isPresent()) {
+                  GenericTraits traits = optionalTr.get();
+                  traits.useOn(ctx, backpack, cir);
+                  modSound = traits.sound();
+                  if (cir.isCancelled()) {
+                        return;
+                  }
+            }
+
+            Optional<PlaceableComponent> optionalPl = PlaceableComponent.get(backpack);
+            if (optionalPl.isPresent()) {
+                  PlaceableComponent placeable = optionalPl.get();
+                  BackpackEntity entity = BackpackEntity.create(ctx, backpack, placeable, optionalTr);
                   if (entity != null) {
-                        ModSound modSound = traits.map(GenericTraits::sound).orElse(ModSound.SOFT);
                         modSound.at(entity, ModSound.Type.PLACE);
                         cir.setReturnValue(InteractionResult.SUCCESS);
                   }
-            }, () -> Traits.runIfPresent(backpack, traits ->
-                        traits.useOn(ctx, backpack, cir))
-            );
+            }
       }
 
       @Inject(method = "use", at = @At("HEAD"), cancellable = true)

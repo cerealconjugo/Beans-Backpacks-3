@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.generic;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -49,7 +50,9 @@ public abstract class GenericTraits {
 
       public abstract String name();
 
-      public abstract IClientTraits client();
+      public abstract <T extends GenericTraits> IClientTraits<T> client();
+
+      public abstract <T extends GenericTraits> IEntityTraits<T> entity();
 
       abstract public <T extends GenericTraits> T toReference(ResourceLocation location);
 

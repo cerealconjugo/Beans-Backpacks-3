@@ -43,6 +43,9 @@ public abstract class MutableBundleLike<T extends BundleLikeTraits> implements M
 
       @Override
       public ItemStack removeItem(int slot) {
+            if (slot < 0)
+                  return ItemStack.EMPTY;
+
             ItemStack returned = ItemStack.EMPTY;
             List<ItemStack> stacks = getItemStacks();
             if (stacks.size() > slot) {
@@ -86,7 +89,7 @@ public abstract class MutableBundleLike<T extends BundleLikeTraits> implements M
             }
 
             if (!inserted.isEmpty()) {
-                  int selectedSlot = Math.min(getSelectedSlot(player), getItemStacks().size());
+                  int selectedSlot = Math.min(slot, getItemStacks().size());
                   ItemStack split = inserted.split(count);
                   getItemStacks().add(selectedSlot, split);
                   traits.getSlotSelection(holder).grow(selectedSlot);
@@ -133,5 +136,13 @@ public abstract class MutableBundleLike<T extends BundleLikeTraits> implements M
             }
 
             return Traits.getWeight(stacks, traits.size());
+      }
+
+      public int toAdd(ItemStack carried) {
+            if (!traits.canItemFit(holder, carried))
+                  return 0;
+
+            int spaceLeft = getMaxAmountToAdd(carried);
+            return Math.min(carried.getCount(), spaceLeft);
       }
 }

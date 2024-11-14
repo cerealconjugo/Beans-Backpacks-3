@@ -116,20 +116,15 @@ public interface Traits {
       }
 
       static Optional<GenericTraits> get(PatchedComponentHolder stack) {
-            ReferenceTrait reference = stack.get(REFERENCE);
-            if (reference != null && !reference.isEmpty())
-                  return reference.getTrait();
-
             for (TraitComponentKind<? extends GenericTraits> type : ALL_TRAITS) {
                   GenericTraits traits = stack.get(type);
                   if (traits != null)
                         return Optional.of(traits);
             }
 
-//            EnderTraits enderTraits = stack.get(ENDER);
-//            if (enderTraits != null) {
-//                  return enderTraits.getTrait();
-//            }
+            ReferenceTrait reference = stack.get(REFERENCE);
+            if (reference != null && !reference.isEmpty())
+                  return reference.getTrait();
 
             return Optional.empty();
       }

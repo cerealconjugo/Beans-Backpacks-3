@@ -33,12 +33,15 @@ public class PlaceableComponent {
       }
 
       public static Optional<PlaceableComponent> get(ItemStack stack) {
+            PlaceableComponent placeableComponent = stack.get(Traits.PLACEABLE);
+            if (placeableComponent != null)
+                  return Optional.of(placeableComponent);
+
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
             if (referenceTrait != null && !referenceTrait.isEmpty())
                   return referenceTrait.getPlaceable();
 
-            PlaceableComponent placeableComponent = stack.get(Traits.PLACEABLE);
-            return Optional.ofNullable(placeableComponent);
+            return Optional.empty();
       }
 
       public static final Codec<PlaceableComponent> CODEC = RecordCodecBuilder.create(in ->

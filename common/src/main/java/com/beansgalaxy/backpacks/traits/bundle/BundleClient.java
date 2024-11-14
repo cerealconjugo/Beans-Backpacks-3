@@ -32,23 +32,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BundleClient implements IClientTraits {
+public class BundleClient implements IClientTraits<BundleLikeTraits> {
       static final BundleClient INSTANCE = new BundleClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(BundleLikeTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             if (!trait.isEmpty(holder)) {
-                  BundleLikeTraits storageTraits = (BundleLikeTraits) trait;
                   Minecraft minecraft = Minecraft.getInstance();
 
                   LocalPlayer player = minecraft.player;
                   boolean carriedEmpty = player.containerMenu.getCarried().isEmpty();
                   boolean isQuickMove = BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344);
-                  boolean noSpace = storageTraits.fullness(holder).compareTo(Fraction.ONE) == 0;
+                  boolean noSpace = trait.fullness(holder).compareTo(Fraction.ONE) == 0;
                   boolean hideEmptySlot = carriedEmpty || isQuickMove || noSpace;
 
                   Component title;
-                  int selectedSlot = storageTraits.getSelectedSlot(holder, player);
+                  int selectedSlot = trait.getSelectedSlot(holder, player);
                   if (selectedSlot == 0 && !hideEmptySlot) {
                         title = Component.empty();
                   } else {
@@ -65,7 +64,7 @@ public class BundleClient implements IClientTraits {
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(BundleLikeTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             Fraction fullness = trait.fullness(holder);
             if (trait.isFull(holder))
                   cir.setReturnValue(14);
@@ -76,7 +75,7 @@ public class BundleClient implements IClientTraits {
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(BundleLikeTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             if (trait.isFull(holder))
                   cir.setReturnValue(Mth.color(0.9F, 0.2F, 0.3F));
             else
@@ -84,18 +83,13 @@ public class BundleClient implements IClientTraits {
       }
 
       @Override @Nullable
-      public <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
-            T traits = tooltip.traits();
-            if (traits instanceof BundleLikeTraits bundleLikeTraits) {
-                  ArrayList<ItemStack> stacks = new ArrayList<>(tooltip.holder().getOrDefault(ITraitData.ITEM_STACKS, List.of()));
-                  return new BundleTooltip(bundleLikeTraits, stacks, tooltip);
-            }
-            return null;
+      public ClientTooltipComponent getTooltipComponent(BundleLikeTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            ArrayList<ItemStack> stacks = new ArrayList<>(holder.getOrDefault(ITraitData.ITEM_STACKS, List.of()));
+            return new BundleTooltip(traits, itemStack, stacks, holder, title);
       }
 
       @Override
-      public boolean mouseScrolled(GenericTraits trait, Level level, Slot hoveredSlot, int containerId, int scrolled) {
-            BundleLikeTraits storageTraits = (BundleLikeTraits) trait;
+      public boolean mouseScrolled(BundleLikeTraits trait, Level level, Slot hoveredSlot, int containerId, int scrolled) {
             LocalPlayer player = Minecraft.getInstance().player;
 
             ItemStack backpack = hoveredSlot.getItem();
@@ -104,8 +98,8 @@ public class BundleClient implements IClientTraits {
                         ? PatchedComponentHolder.of(backpack)
                         : enderTraits;
 
-            int startSlot = storageTraits.getSelectedSlot(holder, player);
-            int i = storageTraits.getSlotSelection(holder).modSelectedSlot(player, slot -> {
+            int startSlot = trait.getSelectedSlot(holder, player);
+            int i = trait.getSlotSelection(holder).modSelectedSlot(player, slot -> {
                   boolean carriedEmpty = player.containerMenu.getCarried().isEmpty();
                   boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344);
                   boolean hideEmptySlot = carriedEmpty || isQuickMove || trait.isFull(holder);
@@ -129,16 +123,14 @@ public class BundleClient implements IClientTraits {
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            BundleLikeTraits bundleLikeTraits = (BundleLikeTraits) traits;
-            int size = bundleLikeTraits.size();
+      public void appendEquipmentLines(BundleLikeTraits traits, Consumer<Component> pTooltipAdder) {
+            int size = traits.size();
             pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            BundleLikeTraits bundleLikeTraits = (BundleLikeTraits) traits;
-            int size = bundleLikeTraits.size();
+      public void appendTooltipLines(BundleLikeTraits traits, List<Component> lines) {
+            int size = traits.size();
             lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 }

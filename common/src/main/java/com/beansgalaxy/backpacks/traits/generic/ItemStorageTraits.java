@@ -1,21 +1,27 @@
 package com.beansgalaxy.backpacks.traits.generic;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +41,12 @@ public abstract class ItemStorageTraits extends GenericTraits {
       }
 
       private static Optional<ItemStorageTraits> get(DataComponentHolder stack) {
+            for (TraitComponentKind<? extends ItemStorageTraits> type : Traits.STORAGE_TRAITS) {
+                  ItemStorageTraits traits = stack.get(type);
+                  if (traits != null)
+                        return Optional.of(traits);
+            }
+
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
             if (referenceTrait != null && !referenceTrait.isEmpty())
                   return referenceTrait.getTrait().map(traits -> {
@@ -42,22 +54,6 @@ public abstract class ItemStorageTraits extends GenericTraits {
                               return storageTraits;
                         return null;
                   });
-
-            for (TraitComponentKind<? extends ItemStorageTraits> type : Traits.STORAGE_TRAITS) {
-                  ItemStorageTraits traits = stack.get(type);
-                  if (traits != null)
-                        return Optional.of(traits);
-            }
-
-//            EnderTraits enderTraits = stack.get(Traits.ENDER);
-//            if (enderTraits != null) {
-//                  return enderTraits.getTrait().map(traits -> {
-//                        if (traits instanceof ItemStorageTraits storageTraits)
-//                              return storageTraits;
-//                        else
-//                              return null;
-//                  });
-//            }
 
             return Optional.empty();
       }
@@ -173,4 +169,72 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
       @Nullable
       public abstract ItemStack getFirst(PatchedComponentHolder backpack);
+
+      public void tinyHotbarClick(PatchedComponentHolder holder, int index, TinyClickType clickType, InventoryMenu menu, Player player) {
+            NonNullList<ItemStack> stacks = player.getInventory().items;
+            if (clickType.isAction()) {
+                  ItemStack stack = stacks.get(index);
+                  ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
+                        ItemStack backpack = player.getItemBySlot(slot);
+                        MutableItemStorage itemStorage = storageTraits.newMutable(PatchedComponentHolder.of(backpack));
+                        if (canItemFit(PatchedComponentHolder.of(backpack), stack)) {
+                              if (itemStorage.addItem(stack, player) != null) {
+                                    sound().atClient(player, ModSound.Type.INSERT);
+                                    itemStorage.push();
+                              }
+                        }
+
+                        return stack.isEmpty();
+                  }));
+            }
+
+            if (clickType.isShift()) {
+                  ItemStack hotbar = stacks.get(index);
+                  MutableItemStorage mutable = newMutable(holder);
+                  if (mutable.addItem(hotbar, player) != null) {
+                        mutable.push();
+                  }
+                  return;
+            }
+
+            ItemStack stack = stacks.get(index);
+            ItemStack carried = menu.getCarried();
+
+            if (stack.isEmpty() && carried.isEmpty())
+                  return;
+
+            if (!stack.isEmpty() && !carried.isEmpty()) {
+                  if (ItemStack.isSameItemSameComponents(stack, carried)) {
+                        int count = clickType.isRight()
+                                    ? 1
+                                    : carried.getCount();
+
+                        int toAdd = Math.min(stack.getMaxStackSize() - stack.getCount(), count);
+                        stack.grow(toAdd);
+                        carried.shrink(toAdd);
+                  }
+                  else {
+                        stacks.set(index, carried);
+                        menu.setCarried(stack);
+                  }
+            }
+            else if (clickType.isRight()) {
+                  if (stack.isEmpty()) {
+                        ItemStack copy = carried.copyWithCount(1);
+                        carried.shrink(1);
+                        stacks.set(index, copy);
+                  }
+                  else {
+                        int count = Mth.ceil((float) stack.getCount() / 2);
+                        ItemStack split = stack.split(count);
+                        menu.setCarried(split);
+                  }
+            }
+            else {
+                  stacks.set(index, carried);
+                  menu.setCarried(stack);
+            }
+      }
+
+      public abstract void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player);
 }

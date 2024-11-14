@@ -2,7 +2,7 @@ package com.beansgalaxy.backpacks.traits.bulk;
 
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
-import com.beansgalaxy.backpacks.util.TraitTooltip;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,11 +18,11 @@ public class BulkTooltip implements ClientTooltipComponent {
       private final Component title;
       private final ItemStack itemstack;
 
-      public BulkTooltip(TraitTooltip<?> tooltip) {
+      public BulkTooltip(BulkTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
             this.minecraft = Minecraft.getInstance();
-            this.title = tooltip.title();
-            this.itemstack = tooltip.itemStack();
-            BulkMutable.BulkStacks bulkStacks = tooltip.holder().get(ITraitData.BULK_STACKS);
+            this.title = title;
+            this.itemstack = itemStack;
+            BulkMutable.BulkStacks bulkStacks = holder.get(ITraitData.BULK_STACKS);
             if (bulkStacks == null || bulkStacks.isEmpty()) {
                   this.item = ItemStack.EMPTY;
                   this.amount = 0;
@@ -31,6 +31,7 @@ public class BulkTooltip implements ClientTooltipComponent {
                   this.item = bulkStacks.emptyStacks().getFirst().withItem(bulkStacks.itemHolder());
                   this.amount = bulkStacks.amount();
             }
+
       }
 
       @Override

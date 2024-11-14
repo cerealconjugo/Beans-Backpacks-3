@@ -8,45 +8,47 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public class NonTraitClient implements IClientTraits {
+public class NonTraitClient implements IClientTraits<NonTrait> {
       static final NonTraitClient INSTANCE = new NonTraitClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(NonTrait trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
 
       }
 
       @Override
-      public void isBarVisible(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
+      public void isBarVisible(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
 
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
 
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
 
       }
 
+
       @Override
-      public <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
+      public void appendEquipmentLines(NonTrait traits, Consumer<Component> pTooltipAdder) {
+      }
+
+      @Override
+      public @Nullable ClientTooltipComponent getTooltipComponent(NonTrait traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
             return null;
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-      }
-
-      @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
+      public void appendTooltipLines(NonTrait traits, List<Component> lines) {
       }
 }

@@ -1,0 +1,83 @@
+package com.beansgalaxy.backpacks.network.serverbound;
+
+import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.network.Network2S;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
+import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
+
+public class TinyMenuClick implements Packet2S {
+      private final int entityId;
+      private final int index;
+      private final TinyClickType clickType;
+
+      public TinyMenuClick(RegistryFriendlyByteBuf buf) {
+            this.entityId = buf.readInt();
+            this.index = buf.readInt();
+            this.clickType = buf.readEnum(TinyClickType.class);
+      }
+
+      public TinyMenuClick(int entityId, int index, TinyClickType clickType) {
+            this.entityId = entityId;
+            this.index = index;
+            this.clickType = clickType;
+      }
+
+      public static void send(BackpackEntity backpack, int index, TinyClickType clickType) {
+            new TinyMenuClick(backpack.getId(), index, clickType).send2S();
+      }
+
+      @Override
+      public Network2S getNetwork() {
+            return Network2S.TINY_MENU_2S;
+      }
+
+      @Override
+      public void encode(RegistryFriendlyByteBuf buf) {
+            buf.writeInt(entityId);
+            buf.writeInt(index);
+            buf.writeEnum(clickType);
+      }
+
+      @Override
+      public void handle(Player sender) {
+            Entity entity = sender.level().getEntity(entityId);
+            if (entity instanceof BackpackEntity backpack) {
+                  Optional<GenericTraits> optional = backpack.getTraits();
+                  if (optional.isPresent() && optional.get() instanceof ItemStorageTraits bundleLikeTraits) {
+                        InventoryMenu menu = sender.inventoryMenu;
+                        SlotAccess carriedAccess = new SlotAccess() {
+                              public ItemStack get() {
+                                    return menu.getCarried();
+                              }
+
+                              public boolean set(ItemStack p_150452_) {
+                                    menu.setCarried(p_150452_);
+                                    return true;
+                              }
+                        };
+
+                        bundleLikeTraits.tinyMenuClick(backpack, index, clickType, carriedAccess, sender);
+                  }
+            }
+      }
+
+      public static Type<TinyMenuClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_menu_click_s"));
+
+      @Override
+      public Type<? extends CustomPacketPayload> type() {
+            return ID;
+      }
+
+}

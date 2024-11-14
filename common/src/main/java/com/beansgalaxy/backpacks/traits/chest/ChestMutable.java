@@ -36,21 +36,26 @@ public class ChestMutable implements MutableItemStorage {
             if (!traits.canItemFit(holder, inserted) || inserted.isEmpty())
                   return null;
 
-            int i = 0;
-            boolean foundEmptySlot = false;
             NonNullList<ItemStack> items = getItemStacks();
+
+            int i = 0;
+            int emptySlot = -1;
             while (!inserted.isEmpty() && i < items.size()) {
                   ItemStack stack = items.get(i);
-                  if (!foundEmptySlot && stack.isEmpty()) {
-                        items.set(i, inserted);
-                        foundEmptySlot = true;
-                  }
-                  else if (ItemStack.isSameItemSameComponents(inserted, stack)) {
+                  if (emptySlot == -1 && stack.isEmpty())
+                        emptySlot = i;
+
+                  if (ItemStack.isSameItemSameComponents(inserted, stack)) {
                         int toAdd = Math.min(inserted.getCount(), stack.getMaxStackSize() - stack.getCount());
                         stack.grow(toAdd);
                         inserted.shrink(toAdd);
                   }
                   i++;
+            }
+
+            if (emptySlot != -1 && !inserted.isEmpty()) {
+                  items.set(emptySlot, inserted.copy());
+                  inserted.setCount(0);
             }
 
             return ItemStack.EMPTY;

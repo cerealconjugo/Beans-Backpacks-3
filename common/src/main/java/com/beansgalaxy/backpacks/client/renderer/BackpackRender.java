@@ -113,7 +113,7 @@ public interface BackpackRender {
             pose.mulPose(Axis.YP.rotationDegrees(180.0F));
             pose.translate(-8 / 16f, -12 / 16f, -8 / 16f - 0.001f);
 
-            VertexConsumer buffer = source.getBuffer(Sheets.cutoutBlockSheet());
+            VertexConsumer buffer = source.getBuffer(Sheets.translucentItemSheet());
             this.blockRenderer().getModelRenderer().renderModel(pose.last(), buffer, null, backpackModel, 1.0F, 1.0F, 1.0F, light, OverlayTexture.NO_OVERLAY);
             pose.popPose();
       }

@@ -3,21 +3,16 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.client.renderer.BackpackModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackRender;
 import com.beansgalaxy.backpacks.client.renderer.EntityRender;
-import com.beansgalaxy.backpacks.events.AppendLoadedModels;
-import com.beansgalaxy.backpacks.events.AppendModelLayers;
-import com.beansgalaxy.backpacks.events.NetworkPackages;
-import com.beansgalaxy.backpacks.events.TooltipImageEvent;
+import com.beansgalaxy.backpacks.events.*;
 import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.component.DataComponents;
@@ -55,7 +50,6 @@ public class FabricClient implements ClientModInitializer {
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
             EntityRendererRegistry.register(CommonClass.BACKPACK_ENTITY, EntityRender::new);
-            MenuScreens.register(FabricMain.BUNDLE_MENU, BundleScreen::new);
       }
 
       private static int componentTint(ItemStack itemStack, int rgbBase) {

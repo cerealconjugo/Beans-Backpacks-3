@@ -75,8 +75,13 @@ public class QuiverTraits extends BundleLikeTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public QuiverClient client() {
             return QuiverClient.INSTANCE;
+      }
+
+      @Override
+      public QuiverEntity entity() {
+            return QuiverEntity.INSTANCE;
       }
 
       @Override

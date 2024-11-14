@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BucketClient implements IClientTraits {
+public class BucketClient implements IClientTraits<BucketTraits> {
       static final BucketClient INSTANCE = new BucketClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(BucketTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             if (!trait.isEmpty(holder)) {
                   FluidStack fluidStack = holder.getOrDefault(NeoForgeMain.DATA_FLUID, FluidStack.EMPTY);
                   Component name = fluidStack.getHoverName();
@@ -40,7 +40,7 @@ public class BucketClient implements IClientTraits {
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(BucketTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             Fraction fullness = trait.fullness(holder);
             if (fullness.equals(Fraction.ONE))
                   cir.setReturnValue(14);
@@ -51,7 +51,7 @@ public class BucketClient implements IClientTraits {
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(BucketTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             if (trait.fullness(holder).equals(Fraction.ONE))
                   cir.setReturnValue(Mth.color(0.9F, 0.2F, 0.3F));
             else
@@ -59,34 +59,28 @@ public class BucketClient implements IClientTraits {
       }
 
       @Override
-      public <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
-            T traits = tooltip.traits();
-            if (traits instanceof BucketTraits trait) {
-                  FluidStack stack = tooltip.getOrDefault(NeoForgeMain.DATA_FLUID, FluidStack.EMPTY);
-                  IClientFluidTypeExtensions type = IClientFluidTypeExtensions.of(stack.getFluidType());
-                  int amount = stack.getAmount();
+      public ClientTooltipComponent getTooltipComponent(BucketTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            FluidStack stack = holder.getOrDefault(NeoForgeMain.DATA_FLUID, FluidStack.EMPTY);
+            IClientFluidTypeExtensions type = IClientFluidTypeExtensions.of(stack.getFluidType());
+            int amount = stack.getAmount();
 
-                  ResourceLocation texture = type.getStillTexture(stack);
-                  Tint tint = new Tint(type.getTintColor(stack));
-                  int buckets = amount / FluidType.BUCKET_VOLUME;
-                  int bottles = amount % FluidType.BUCKET_VOLUME / 250;
-                  int droplets = amount % FluidType.BUCKET_VOLUME % 250;
-                  return new BucketTooltip(tooltip.itemStack(), tooltip.title(), texture, tint, buckets, bottles, droplets);
-            }
-            return null;
+            ResourceLocation texture = type.getStillTexture(stack);
+            Tint tint = new Tint(type.getTintColor(stack));
+            int buckets = amount / FluidType.BUCKET_VOLUME;
+            int bottles = amount % FluidType.BUCKET_VOLUME / 250;
+            int droplets = amount % FluidType.BUCKET_VOLUME % 250;
+            return new BucketTooltip(itemStack, title, texture, tint, buckets, bottles, droplets);
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            BucketTraits bucketTraits = (BucketTraits) traits;
-            long size = bucketTraits.size();
+      public void appendEquipmentLines(BucketTraits traits, Consumer<Component> pTooltipAdder) {
+            long size = traits.size();
             pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            BucketTraits bucketTraits = (BucketTraits) traits;
-            long size = bucketTraits.size();
+      public void appendTooltipLines(BucketTraits traits, List<Component> lines) {
+            long size = traits.size();
             lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 }

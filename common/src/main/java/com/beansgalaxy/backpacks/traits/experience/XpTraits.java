@@ -36,8 +36,13 @@ public class XpTraits extends GenericTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public XpClient client() {
             return XpClient.INSTANCE;
+      }
+
+      @Override
+      public XpEntity entity() {
+            return XpEntity.INSTANCE;
       }
 
       @Override

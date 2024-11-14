@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -129,7 +130,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
 
                   pose.mulPose(Axis.YN.rotationDegrees(yaw));
                   VertexConsumer vertices = mbs.getBuffer(RenderType.lines());
-                  LevelRenderer.renderLineBox(pose, vertices, box, 0, 0, 0, 0.9f);
+                  LevelRenderer.renderLineBox(pose, vertices, box, 0, 0, 0, 0.5f);
                   pose.popPose();
             }
       }

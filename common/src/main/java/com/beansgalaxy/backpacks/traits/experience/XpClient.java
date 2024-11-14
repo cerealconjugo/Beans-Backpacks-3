@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class XpClient implements IClientTraits {
+public class XpClient implements IClientTraits<XpTraits> {
       static final XpClient INSTANCE = new XpClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(XpTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             if (!trait.isEmpty(holder)) {
                   TraitTooltip<?> tooltip = new TraitTooltip<>(trait, itemStack, holder, Component.empty());
                   gui.renderTooltip(Minecraft.getInstance().font, List.of(), Optional.of(tooltip), mouseX, mouseY);
@@ -31,40 +31,34 @@ public class XpClient implements IClientTraits {
       }
 
       @Override
-      public void isBarVisible(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
+      public void isBarVisible(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
 
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
 
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
 
       }
 
       @Override
-      public @Nullable <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
-            T traits = tooltip.traits();
-            if (traits instanceof XpTraits xpTraits) {
-                  return new XpTooltip(tooltip);
-            }
-            return null;
+      public @Nullable ClientTooltipComponent getTooltipComponent(XpTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            return new XpTooltip(traits, itemStack, holder, title);
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            XpTraits xpTraits = (XpTraits) traits;
-            int size = xpTraits.size();
+      public void appendEquipmentLines(XpTraits traits, Consumer<Component> pTooltipAdder) {
+            int size = traits.size();
             pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            XpTraits xpTraits = (XpTraits) traits;
-            int size = xpTraits.size();
+      public void appendTooltipLines(XpTraits traits, List<Component> lines) {
+            int size = traits.size();
             lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 }

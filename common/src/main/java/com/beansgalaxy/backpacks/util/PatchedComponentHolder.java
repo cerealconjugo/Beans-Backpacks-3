@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.util;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,10 @@ public interface PatchedComponentHolder {
       default <T> T getOrElse(DataComponentType<? extends T> type, Supplier<T> orElse) {
             T t = get(type);
             return t == null ? orElse.get() : t;
+      }
+
+      static PatchedComponentHolder of(Slot slot) {
+            return new SlotTraitHolder(slot);
       }
 
       static PatchedComponentHolder of(ItemStack stack) {
@@ -110,6 +115,29 @@ public interface PatchedComponentHolder {
                   return stack.get(type);
             }
 
+      }
+
+      class SlotTraitHolder implements PatchedComponentHolder {
+            private final Slot slot;
+
+            public SlotTraitHolder(Slot slot) {
+                  this.slot = slot;
+            }
+
+            @Override
+            public <T> @Nullable T remove(DataComponentType<? extends T> type) {
+                  return slot.getItem().remove(type);
+            }
+
+            @Override
+            public <T> void set(DataComponentType<? super T> type, T trait) {
+                  slot.getItem().set(type, trait);
+            }
+
+            @Override
+            public <T> @Nullable T get(DataComponentType<? extends T> type) {
+                  return slot.getItem().get(type);
+            }
       }
 
 }

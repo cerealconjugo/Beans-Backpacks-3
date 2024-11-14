@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.network.serverbound.BackpackUse;
 import com.beansgalaxy.backpacks.network.serverbound.BackpackUseOn;
 import com.beansgalaxy.backpacks.network.serverbound.SyncHotkey;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.chest.screen.MenuChestScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -47,17 +48,21 @@ public class KeyPress {
       public void tick(Minecraft minecraft, LocalPlayer player) {
             isPressed actionKey = KeyPress.isPressed(minecraft, KeyPress.getActionKeyBind());
             isPressed menusKey = KeyPress.isPressed(minecraft, KeyPress.getMenusKeyBind());
+            int tinyChestSlot = minecraft.screen instanceof MenuChestScreen screen ? screen.slotIndex() : -1;
+            boolean menuKeyPressed = tinyChestSlot == -1 && menusKey.pressed();
 
 //            if(actionKey.pressed() && minecraft.hitResult instanceof BlockHitResult hitResult && Constants.CLIENT_CONFIG.instant_place.get())
 //                  consumeActionUseOn(minecraft, hitResult);
 
             BackData backData = BackData.get(player);
-            if (actionKey.pressed() == backData.isActionKeyDown() && menusKey.pressed() == backData.isMenuKeyDown())
+
+            if (actionKey.pressed() == backData.isActionKeyDown() && menuKeyPressed == backData.isMenuKeyDown() && tinyChestSlot == backData.getTinySlot())
                   return;
 
             backData.setActionKey(actionKey.pressed());
-            backData.setMenuKey(menusKey.pressed());
-            SyncHotkey.send(actionKey.pressed(), menusKey.pressed());
+            backData.setMenuKey(menuKeyPressed);
+            backData.setTinySlot(tinyChestSlot);
+            SyncHotkey.send(actionKey.pressed(), menuKeyPressed, tinyChestSlot);
 
 //            boolean instantPlace = Constants.CLIENT_CONFIG.instant_place.get();
 //            if (actionKey.pressed() && (instantPlace || actionKey.onMouse()) && minecraft.screen == null) {

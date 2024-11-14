@@ -2,7 +2,9 @@ package com.beansgalaxy.backpacks.network.serverbound;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2S;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -18,29 +20,29 @@ public class TinyChestClick implements Packet2S {
       private final int containerId;
       private final int containerSlot;
       private final int index;
-      private final int button;
+      private final TinyClickType clickType;
 
       public TinyChestClick(RegistryFriendlyByteBuf buf) {
             this.containerId = buf.readInt();
             this.containerSlot = buf.readInt();
             this.index = buf.readInt();
-            this.button = buf.readInt();
+            clickType = buf.readEnum(TinyClickType.class);
       }
 
-      public TinyChestClick(int containerId, int containerSlot, int index, int button) {
+      public TinyChestClick(int containerId, int containerSlot, int index, TinyClickType clickType) {
             this.containerId = containerId;
             this.containerSlot = containerSlot;
             this.index = index;
-            this.button = button;
+            this.clickType = clickType;
       }
 
-      public static void send(int containerId, Slot slot, int index, int button) {
-            new TinyChestClick(containerId, slot.index, index, button).send2S();
+      public static void send(int containerId, Slot slot, int index, TinyClickType clickType) {
+            new TinyChestClick(containerId, slot.index, index, clickType).send2S();
       }
 
       @Override
       public Network2S getNetwork() {
-            return Network2S.TINY_CHEST_2S;
+            return Network2S.TINY_SUB_CHEST_2S;
       }
 
       @Override
@@ -48,7 +50,7 @@ public class TinyChestClick implements Packet2S {
             buf.writeInt(containerId);
             buf.writeInt(containerSlot);
             buf.writeInt(index);
-            buf.writeInt(button);
+            buf.writeEnum(clickType);
       }
 
       @Override
@@ -58,8 +60,7 @@ public class TinyChestClick implements Packet2S {
                   return;
 
             Slot slot = menu.getSlot(containerSlot);
-            ItemStack stack = slot.getItem();
-            Optional<ChestTraits> optional = ChestTraits.get(stack);
+            Optional<ChestTraits> optional = ChestTraits.get(PatchedComponentHolder.of(slot));
             if (optional.isEmpty()) {
                   return;
             }
@@ -77,10 +78,10 @@ public class TinyChestClick implements Packet2S {
                   }
             };
 
-            chestTraits.tinyMenuClick(slot, index, button, carriedAccess);
+            chestTraits.tinyMenuClick(slot.getItem(), index, clickType, carriedAccess, sender);
       }
 
-      public static Type<TinyChestClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_chest_click_s"));
+      public static Type<TinyChestClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_sub_chest_click_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

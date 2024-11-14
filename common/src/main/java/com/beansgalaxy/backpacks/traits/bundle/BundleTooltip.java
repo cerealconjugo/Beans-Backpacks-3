@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.traits.bundle;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,28 +30,25 @@ import java.util.Optional;
 
 public class BundleTooltip implements ClientTooltipComponent {
       private static final int SPACING = 17;
-      private final BundleLikeTraits traits;
-      private final ArrayList<ItemStack> itemStacks;
-      private final Minecraft minecraft;
+      protected final ArrayList<ItemStack> itemStacks;
+      protected final Minecraft minecraft;
       private final int size;
       private final boolean hasSpace;
       private final int columns;
       private final int rows;
-      private final PatchedComponentHolder holder;
       private final ItemStack itemstack;
       private final Component title;
-      private final int selectedSlot;
+      protected final int selectedSlot;
+      protected final boolean carriedEmpty;
 
-      public BundleTooltip(BundleLikeTraits traits, ArrayList<ItemStack> stacks, TraitTooltip<?> tooltip) {
-            this.traits = traits;
-            this.holder = tooltip.holder();
-            this.itemstack = tooltip.itemStack();
-            this.title = tooltip.title();
+      public BundleTooltip(BundleLikeTraits traits, ItemStack itemStack, ArrayList<ItemStack> stacks, PatchedComponentHolder holder, Component title) {
+            this.itemstack = itemStack;
+            this.title = title;
             this.itemStacks = stacks;
             this.minecraft = Minecraft.getInstance();
             this.size = itemStacks.size();
 
-            this.hasSpace = traits.fullness(tooltip.holder()).compareTo(Fraction.ONE) != 0;
+            this.hasSpace = traits.fullness(holder).compareTo(Fraction.ONE) != 0;
             int sudoSize = size + (hasSpace ? 1 : 0);
 
             boolean forCol = false;
@@ -71,47 +67,16 @@ public class BundleTooltip implements ClientTooltipComponent {
             this.columns = columns;
             this.rows = rows;
 
-            long window = Minecraft.getInstance().getWindow().getWindow();
             LocalPlayer player = minecraft.player;
+            long window = Minecraft.getInstance().getWindow().getWindow();
             boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
-            boolean carriedEmpty = minecraft.player.containerMenu.getCarried().isEmpty();
+            this.carriedEmpty = minecraft.player.containerMenu.getCarried().isEmpty();
             boolean hideEmptySlot = carriedEmpty || isQuickMove || !hasSpace;
             int slot1 = traits.getSelectedSlot(holder, player);
             this.selectedSlot = hideEmptySlot && slot1 == 0
                         ? 0
                         : slot1 -1;
-      }
 
-      public BundleTooltip(BundleLikeTraits traits, ArrayList<ItemStack> itemStacks, TraitTooltip<?> tooltip, boolean hasSpace, int selectedSlot) {
-            this.minecraft = Minecraft.getInstance();
-            this.holder = tooltip.holder();
-            this.itemstack = tooltip.itemStack();
-            this.title = tooltip.title();
-            this.traits = traits;
-
-            this.itemStacks = itemStacks;
-            this.size = itemStacks.size();
-
-            this.hasSpace = hasSpace;
-            int sudoSize = size + (hasSpace ? 1 : 0);
-
-            boolean forCol = false;
-            int columns = Math.min(sudoSize, 4);
-            int rows = 1;
-            for (int i = columns; i <= sudoSize; i++) {
-                  if (i > columns * rows) {
-                        if (forCol)
-                              columns++;
-                        else
-                              rows++;
-                        forCol = !forCol;
-                  }
-            }
-
-            this.columns = columns;
-            this.rows = rows;
-
-            this.selectedSlot = selectedSlot;
       }
 
 
@@ -150,22 +115,26 @@ public class BundleTooltip implements ClientTooltipComponent {
                   while (x < columns) {
                         int x1 = x * SPACING + leftPos;
                         int y1 = y * SPACING + topPos;
-                        if (stacks.hasNext()) {
-                              ItemStack stack = stacks.next();
-                              renderItem(minecraft, gui, stack, x1, y1, 300, false);
-                              renderItemDecorations(gui, font, stack, x1, y1, 300);
-                        }
-
-                        if (i == selectedSlot) {
-                              int fillX = x1 - 9;
-                              int fillY = y1 - 9;
-                              gui.fill(fillX + 1, fillY + 1, fillX + 17, fillY + 17, 500, 0x60FFFFFF);
-                        }
+                        drawSlot(font, gui, stacks, x1, y1, i);
                         i++;
                         x++;
                   }
                   x = 0;
                   y++;
+            }
+      }
+
+      protected void drawSlot(Font font, GuiGraphics gui, Iterator<ItemStack> stacks, int x, int y, int index) {
+            if (stacks.hasNext()) {
+                  ItemStack stack = stacks.next();
+                  renderItem(minecraft, gui, stack, x, y, 300, false);
+                  renderItemDecorations(gui, font, stack, x, y, 300);
+            }
+
+            if (index == selectedSlot) {
+                  int fillX = x - 9;
+                  int fillY = y - 9;
+                  gui.fill(fillX + 1, fillY + 1, fillX + 17, fillY + 17, 500, 0x60FFFFFF);
             }
       }
 

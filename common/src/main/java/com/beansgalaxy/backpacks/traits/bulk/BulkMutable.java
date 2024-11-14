@@ -178,7 +178,7 @@ public class BulkMutable implements MutableItemStorage {
             };
 
             public boolean isEmpty() {
-                  return emptyStacks().isEmpty() || BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR).is(itemHolder);
+                  return emptyStacks().isEmpty() || BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR).is(itemHolder) || emptyStacks.stream().allMatch(EmptyStack::isEmpty);
             }
 
             public int amount() {

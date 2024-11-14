@@ -37,9 +37,9 @@ public class BucketCodecs implements ITraitCodec<BucketTraits> {
 
             @Override
             public void encode(RegistryFriendlyByteBuf buf, BucketTraits trait) {
-                  buf.writeInt(trait.size());
-                  ModSound.STREAM_CODEC.encode(buf, trait.sound());
                   GenericTraits.encodeLocation(buf, trait);
+                  ModSound.STREAM_CODEC.encode(buf, trait.sound());
+                  buf.writeInt(trait.size());
             }
       };
 

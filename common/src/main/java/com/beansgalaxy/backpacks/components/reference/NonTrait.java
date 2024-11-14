@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.components.reference;
 
 import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, MutableTraits {
       public static final String NAME = "non";
       public static final NonTrait INSTANCE = new NonTrait();
+      private static final IEntityTraits<NonTrait> ENTITY = new IEntityTraits<>() {};
       public static final TraitComponentKind<NonTrait> KIND = new TraitComponentKind<>(-1, NAME, INSTANCE);
 
       private NonTrait() {
@@ -50,8 +52,13 @@ public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, Mu
       }
 
       @Override
-      public IClientTraits client() {
+      public NonTraitClient client() {
             return NonTraitClient.INSTANCE;
+      }
+
+      @Override
+      public IEntityTraits<NonTrait> entity() {
+            return ENTITY;
       }
 
       @Override

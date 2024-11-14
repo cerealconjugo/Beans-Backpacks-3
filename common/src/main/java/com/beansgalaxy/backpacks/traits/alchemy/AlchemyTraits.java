@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.alchemy;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
@@ -54,8 +55,13 @@ public class AlchemyTraits extends BundleLikeTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public AlchemyClient client() {
             return AlchemyClient.INSTANCE;
+      }
+
+      @Override
+      public AlchemyEntity entity() {
+            return AlchemyEntity.INSTANCE;
       }
 
       @Override

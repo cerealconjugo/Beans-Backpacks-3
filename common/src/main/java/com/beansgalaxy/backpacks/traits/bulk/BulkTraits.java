@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.traits.bulk;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.network.serverbound.PickBlock;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
@@ -43,8 +44,13 @@ public class BulkTraits extends ItemStorageTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public BulkClient client() {
             return BulkClient.INSTANCE;
+      }
+
+      @Override
+      public BulkEntity entity() {
+            return BulkEntity.INSTANCE;
       }
 
       @Override
@@ -401,6 +407,11 @@ public class BulkTraits extends ItemStorageTraits {
             BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
             Holder<Item> itemHolder = bulkStacks.itemHolder();
             return first.withCappedStackSize(itemHolder);
+      }
+
+      @Override
+      public void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
+
       }
 
       @Override

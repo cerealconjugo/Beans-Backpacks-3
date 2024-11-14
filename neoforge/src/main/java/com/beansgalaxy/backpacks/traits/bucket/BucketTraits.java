@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.NeoForgeMain;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -34,8 +35,13 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public BucketClient client() {
             return BucketClient.INSTANCE;
+      }
+
+      @Override
+      public BucketEntity entity() {
+            return BucketEntity.INSTANCE;
       }
 
       @Override

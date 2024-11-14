@@ -4,13 +4,10 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,6 +36,7 @@ public abstract class InventoryMixin implements BackData {
 
       @Unique private boolean beans_Backpacks_3$actionKeyIsDown = false;
       @Unique private boolean beans_Backpacks_3$menuKeyIsDown = false;
+      @Unique private int beans_Backpacks_3$tinySlot = -1;
 
       @Override
       public boolean isActionKeyDown() {
@@ -58,6 +56,16 @@ public abstract class InventoryMixin implements BackData {
       @Override
       public void setMenuKey(boolean menuKeyIsDown) {
             this.beans_Backpacks_3$menuKeyIsDown = menuKeyIsDown;
+      }
+
+      @Override
+      public int getTinySlot() {
+            return beans_Backpacks_3$tinySlot;
+      }
+
+      @Override
+      public void setTinySlot(int tinySlot) {
+            beans_Backpacks_3$tinySlot = tinySlot;
       }
 
       public NonNullList<ItemStack> beans_Backpacks_3$getBody() {

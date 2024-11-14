@@ -3,11 +3,15 @@ package com.beansgalaxy.backpacks.traits.bulk;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
@@ -22,11 +26,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BulkClient implements IClientTraits {
+public class BulkClient implements IClientTraits<BulkTraits> {
       static final BulkClient INSTANCE = new BulkClient();
 
       @Override
-      public void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
+      public void renderTooltip(BulkTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci) {
             BulkMutable.BulkStacks bulkStacks = holder.get(ITraitData.BULK_STACKS);
             if (bulkStacks != null) {
                   Minecraft minecraft = Minecraft.getInstance();
@@ -41,7 +45,7 @@ public class BulkClient implements IClientTraits {
       }
 
       @Override
-      public void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarWidth(BulkTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             Fraction fullness = trait.fullness(holder);
             if (trait.isFull(holder))
                   cir.setReturnValue(14);
@@ -52,7 +56,7 @@ public class BulkClient implements IClientTraits {
       }
 
       @Override
-      public void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public void getBarColor(BulkTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
             if (trait.isFull(holder))
                   cir.setReturnValue(Mth.color(0.9F, 0.2F, 0.3F));
             else
@@ -60,25 +64,42 @@ public class BulkClient implements IClientTraits {
       }
 
       @Override
-      public void appendTooltipLines(GenericTraits traits, List<Component> lines) {
-            BulkTraits bundleLikeTraits = (BulkTraits) traits;
-            int size = bundleLikeTraits.size();
+      public void appendTooltipLines(BulkTraits traits, List<Component> lines) {
+            int size = traits.size();
             lines.add(Component.translatable("traits.beansbackpacks.inventory." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder) {
-            BulkTraits bundleLikeTraits = (BulkTraits) traits;
-            int size = bundleLikeTraits.size();
+      public void appendEquipmentLines(BulkTraits traits, Consumer<Component> pTooltipAdder) {
+            int size = traits.size();
             pTooltipAdder.accept(Component.translatable("traits.beansbackpacks.equipment." + traits.name() + (size == 1 ? ".solo" : ".size"), size).withStyle(ChatFormatting.GOLD));
       }
 
       @Override
-      public @Nullable <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip) {
-            T traits = tooltip.traits();
-            if (traits instanceof BulkTraits bundleLikeTraits) {
-                  return new BulkTooltip(tooltip);
+      public @Nullable ClientTooltipComponent getTooltipComponent(BulkTraits traits, ItemStack itemStack, PatchedComponentHolder holder, Component title) {
+            return new BulkTooltip(traits, itemStack, holder, title);
+      }
+
+      @Override
+      public void renderEntityOverlay(Minecraft minecraft, BackpackEntity backpack, BulkTraits generic, GuiGraphics gui, DeltaTracker tick) {
+            BulkMutable.BulkStacks bulkStacks = backpack.get(ITraitData.BULK_STACKS);
+            if (bulkStacks == null) {
+                  return;
             }
-            return null;
+
+            BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
+            ItemStack item = first.withItem(bulkStacks.itemHolder());
+            int amount = bulkStacks.amount();
+
+            Window window = minecraft.getWindow();
+            int center = window.getGuiScaledWidth() / 2;
+            int y = window.getGuiScaledHeight() / 2;
+
+            Component name = Component.literal("x").append(String.valueOf(amount));
+            Font font = minecraft.font;
+            int x = center - font.width(name) / 2;
+            int hOffset = y / 10;
+            gui.drawString(font, name, x + 8, y + 4 + hOffset, 0xFFFFFFFF);
+            gui.renderItem(item, x - 9, y + hOffset);
       }
 }

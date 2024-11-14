@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.bundle;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
@@ -23,8 +24,13 @@ public class BundleTraits extends BundleLikeTraits {
       }
 
       @Override
-      public IClientTraits client() {
+      public BundleClient client() {
             return BundleClient.INSTANCE;
+      }
+
+      @Override
+      public BundleEntity entity() {
+            return BundleEntity.INSTANCE;
       }
 
       @Override
@@ -46,9 +52,9 @@ public class BundleTraits extends BundleLikeTraits {
       public String toString() {
             return "BundleTraits{" +
                         "size=" + size() +
-                        "sound=" + sound() +
+                        ", sound=" + sound() +
                         location().map(
-                                    location -> "location=" + location + '}')
+                                    location -> ", location=" + location + '}')
                                     .orElse("}");
       }
 

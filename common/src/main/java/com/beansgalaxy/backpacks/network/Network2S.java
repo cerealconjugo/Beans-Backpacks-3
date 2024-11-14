@@ -15,9 +15,10 @@ public enum Network2S {
       PLACE_BACKPACK_2S(BackpackUseOn.class, BackpackUseOn.ID, BackpackUseOn::encode, BackpackUseOn::new, BackpackUseOn::handle),
       USE_BACKPACK_2S(BackpackUse.class, BackpackUse.ID, BackpackUse::encode, BackpackUse::new, BackpackUse::handle),
       PICK_BLOCK_2S(PickBlock.class, PickBlock.ID, PickBlock::encode, PickBlock::new, PickBlock::handle),
-      TINY_CHEST_2S(TinyChestClick.class, TinyChestClick.ID, TinyChestClick::encode, TinyChestClick::new, TinyChestClick::handle),
-      SYNC_SELECTED_SLOT_2S(SyncSelectedSlot.class, SyncSelectedSlot.ID, SyncSelectedSlot::encode, SyncSelectedSlot::new, SyncSelectedSlot::handle),
-      ;
+      TINY_SUB_CHEST_2S(TinyChestClick.class, TinyChestClick.ID, TinyChestClick::encode, TinyChestClick::new, TinyChestClick::handle),
+      TINY_MENU_2S(TinyMenuClick.class, TinyMenuClick.ID, TinyMenuClick::encode, TinyMenuClick::new, TinyMenuClick::handle),
+      TINY_HOTBAR_2S(TinyHotbarClick.class, TinyHotbarClick.ID, TinyHotbarClick::encode, TinyHotbarClick::new, TinyHotbarClick::handle),
+      SYNC_SELECTED_SLOT_2S(SyncSelectedSlot.class, SyncSelectedSlot.ID, SyncSelectedSlot::encode, SyncSelectedSlot::new, SyncSelectedSlot::handle);
 
       public final DynamicLoaderPacket<? super RegistryFriendlyByteBuf, ?> packet;
       <T extends Packet2S> Network2S(Class<T> clazz, CustomPacketPayload.Type<T> id, BiConsumer<T, RegistryFriendlyByteBuf> encoder, Function<RegistryFriendlyByteBuf, T> decoder, BiConsumer<T, ServerPlayer> handle) {

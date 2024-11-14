@@ -11,11 +11,11 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -35,10 +36,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -54,6 +52,7 @@ import java.util.Optional;
 
 public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.ITEM_STACK);
+      public static final EntityDataAccessor<Direction> DIRECTION = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.DIRECTION);
       public static final EntityDataAccessor<PlaceableComponent> PLACEABLE = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
 
             @Override
@@ -67,13 +66,12 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             }
       });
 
-      private Direction direction = Direction.UP;
       public int wobble = 12;
       public int breakAmount = 0;
 
       public InteractionResult useTraitInteraction(Player player, InteractionHand hand) {
-            return tryTraits().map(mute ->
-                        mute.interact(BackpackEntity.this, player, hand)
+            return getTraits().map(traits ->
+                        traits.entity().interact(BackpackEntity.this, traits, player, hand)
             ).orElse(InteractionResult.PASS);
       }
 
@@ -82,7 +80,12 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             blocksBuilding = true;
       }
 
-      private Optional<MutableTraits> tryTraits() {
+      public Optional<GenericTraits> getTraits() {
+            ItemStack stack = entityData.get(ITEM_STACK);
+            return Traits.get(stack);
+      }
+
+      public Optional<MutableTraits> tryTraits() {
             ItemStack stack = entityData.get(ITEM_STACK);
             return Traits.get(stack).map(traits -> traits.newMutable(this));
       }
@@ -164,7 +167,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       @Override @NotNull
       protected AABB makeBoundingBox() {
-            return newBoundingBox(direction, position());
+            return newBoundingBox(getDirection(), position());
       }
 
       private static AABB newBoundingBox(Direction direction, Vec3 pos) {
@@ -207,12 +210,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       }
 
       public ItemStack toStack() {
-            ItemStack itemStack = entityData.get(ITEM_STACK);
-            tryTraits().ifPresent(mute -> {
-                  if (!NonTrait.is(mute))
-                        mute.push();
-            });
-            return itemStack;
+            return entityData.get(ITEM_STACK);
       }
 
       @Override
@@ -221,8 +219,8 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             updateGravity();
             wobble();
             this.move(MoverType.SELF, this.getDeltaMovement());
-            tryTraits().ifPresent(mute -> {
-                  mute.entityTick(this);
+            getTraits().ifPresent(traits -> {
+                  traits.entity().entityTick(this, traits);
             });
       }
 
@@ -288,15 +286,18 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             builder.define(ITEM_STACK, ModItems.IRON_BACKPACK.get().getDefaultInstance());
 //            builder.define(TRAIT, NonTrait.INSTANCE);
             builder.define(PLACEABLE, new PlaceableComponent());
+            builder.define(DIRECTION, Direction.UP);
       }
 
       @Override
       protected void readAdditionalSaveData(CompoundTag tag) {
-            ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.get("as_stack")).getOrThrow();
+            RegistryOps<Tag> serializationContext = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+            ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(serializationContext, tag.get("as_stack")).getOrThrow();
             entityData.set(ITEM_STACK, stack);
-//            Traits.runIfPresent(stack, traits ->
-//                  entityData.set(TRAIT, traits.mutable())
-//            );
+
+            Direction direction = Direction.CODEC.parse(serializationContext, tag.get("direction")).getOrThrow();
+            setDirection(direction);
+
             PlaceableComponent.get(stack).ifPresent(placeable ->
                   entityData.set(PLACEABLE, placeable)
             );
@@ -305,24 +306,32 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       @Override
       protected void addAdditionalSaveData(CompoundTag tag) {
             ItemStack stack = toStack();
-            tag.put("as_stack", ItemStack.OPTIONAL_CODEC.encodeStart(registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow());
+            RegistryOps<Tag> serializationContext = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+            tag.put("as_stack", ItemStack.OPTIONAL_CODEC.encodeStart(serializationContext, stack).getOrThrow());
+            Direction direction = getDirection();
+            tag.put("direction", Direction.CODEC.encodeStart(serializationContext, direction).getOrThrow());
       }
 
       @Override
       public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
-            return new ClientboundAddEntityPacket(this, entity, direction.get3DDataValue());
+            return new ClientboundAddEntityPacket(this, entity, getDirection().get3DDataValue());
       }
 
       @Override
       public void recreateFromPacket(ClientboundAddEntityPacket packet) {
             super.recreateFromPacket(packet);
-            setDirection(Direction.from3DDataValue(packet.getData()));
+            int data = packet.getData();
+            Direction direction = Direction.from3DDataValue(data);
+            setDirection(direction);
       }
 
       protected void setDirection(Direction direction) {
             if (direction != null) {
-                  this.direction = direction;
-                  if (direction.getAxis().isHorizontal()) {
+                  if (direction == Direction.DOWN)
+                        direction = Direction.UP;
+
+                  entityData.set(DIRECTION, direction);
+                  if (direction != Direction.UP) {
                         this.setNoGravity(true);
                         this.setYRot((float) direction.get2DDataValue() * 90);
                   }
@@ -334,7 +343,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       @Override
       public Direction getDirection() {
-            return direction;
+            return entityData.get(DIRECTION);
       }
 
       @Override
@@ -388,24 +397,16 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             if ((damageSource.is(DamageTypes.IN_FIRE) || damageSource.is(DamageTypes.LAVA))) {
                   if (fireImmune())
                         return false;
-                  damage(1, true);
+
+                  wobble(5);
+                  breakAmount += 1;
+                  if (breakAmount >= BACKPACK_HEALTH)
+                        breakAndDropContents();
+
                   if ((breakAmount + 10) % 11 == 0)
                         playSound(SoundEvents.GENERIC_BURN, 0.8f, 1f);
+
                   return true;
-            }
-            if (damageSource.is(DamageTypes.ON_FIRE))
-                  return false;
-            if (damageSource.is(DamageTypes.CACTUS)) {
-                  breakAndDropContents();
-                  return true;
-            }
-            if (damageSource.is(DamageTypes.EXPLOSION) || damageSource.is(DamageTypes.PLAYER_EXPLOSION)) {
-                  height += Math.sqrt(amount) / 20;
-                  return hop(height);
-            }
-            if (damageSource.is(DamageTypes.ARROW) || damageSource.is(DamageTypes.THROWN) || damageSource.is(DamageTypes.TRIDENT) || damageSource.is(DamageTypes.MOB_PROJECTILE)) {
-                  hop(height);
-                  return false;
             }
             if (damageSource.is(DamageTypes.PLAYER_ATTACK) && damageSource.getDirectEntity() instanceof Player player) {
                   if (player.isCreative()) {
@@ -414,62 +415,74 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                         this.markHurt();
                   }
                   else {
-                        float damage = 10; // !player.getUUID().equals(getPlacedBy()) && isLocked()) ? 3 : 10;
-                        return damage((int) (damage), false);
+                        if (breakAmount + 10 >= BACKPACK_HEALTH)
+                              breakAndDropContents();
+                        else {
+                              boolean silent = this.isSilent();
+                              getTraits().ifPresentOrElse(traits -> {
+                                    traits.entity().onDamage(this, traits, silent);
+                              }, () -> {
+                                    wobble(10);
+                                    breakAmount += 10;
+                                    hop(0.1);
+                                    if (!silent) {
+                                          float pitch = random.nextFloat() * 0.3f;
+                                          ModSound.SOFT.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
+                                    }
+                              });
+                        }
+                        return true;
                   }
+            }
+
+            if (damageSource.is(DamageTypes.ON_FIRE))
+                  return false;
+            if (damageSource.is(DamageTypes.CACTUS)) {
+                  breakAndDropContents();
+                  return true;
+            }
+            if (damageSource.is(DamageTypes.EXPLOSION) || damageSource.is(DamageTypes.PLAYER_EXPLOSION)) {
+                  height += Math.sqrt(amount) / 20;
+                  hop(height);
+                  return true;
+            }
+            if (damageSource.is(DamageTypes.ARROW) || damageSource.is(DamageTypes.THROWN) || damageSource.is(DamageTypes.TRIDENT) || damageSource.is(DamageTypes.MOB_PROJECTILE)) {
+                  hop(height);
+                  return false;
             }
 
             hop(height);
             return true;
       }
 
-      public boolean hop(double height) {
-            if (this.isNoGravity())
-                  this.setNoGravity(false);
-            else {
-                  this.setDeltaMovement(this.getDeltaMovement().add(0.0D, height, 0.0D));
-            }
-//            if (level().isClientSide())
-//                  getViewable().headPitch += 0.1f;
-            return true;
+      public static final int BACKPACK_HEALTH = 24;
+      public void wobble(int amount) {
+            wobble = Math.min(wobble + amount, BACKPACK_HEALTH);
       }
 
-      private boolean damage(int damage, boolean silent) {
-            int health = 24;
-            wobble = Math.min(wobble + 10, health);
-
-            breakAmount += damage;
-            if (breakAmount >= health)
-                  breakAndDropContents();
-            else {
-                  tryTraits().ifPresent(mute ->
-                              mute.onDamage(this, damage, silent)
-                  );
-                  if (!silent) {
-                        float pitch = random.nextFloat() * 0.3f;
-                        ModSound modSound = tryTraits().map(MutableTraits::sound).orElse(ModSound.SOFT);
-                        modSound.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
-                  }
-                  return hop(0.1);
-            }
-            return true;
+      public void hop(double height) {
+            if (this.isNoGravity())
+                  this.setNoGravity(false);
+            else
+                  this.setDeltaMovement(this.getDeltaMovement().add(0.0D, height, 0.0D));
       }
 
       protected void breakAndDropContents() {
             boolean dropItems = level().getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
-            ModSound modSound = tryTraits().map(mute -> {
-                  if (dropItems)
-                        mute.onBreak(this);
-
-                  return mute.sound();
+            ModSound modSound = getTraits().map(traits -> {
+                  traits.entity().onBreak(this, traits, dropItems);
+                  return traits.sound();
             }).orElse(ModSound.SOFT);
-            modSound.at(this, ModSound.Type.BREAK);
+
+            if (!this.isSilent())
+                  modSound.at(this, ModSound.Type.BREAK);
 
             ItemStack backpack = toStack();
             if (!this.isRemoved() && !this.level().isClientSide()) {
                   this.kill();
                   this.markHurt();
-                  if (dropItems) this.spawnAtLocation(backpack);
+                  if (dropItems)
+                        this.spawnAtLocation(backpack);
             }
       }
 
@@ -477,22 +490,51 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public InteractionResult interact(Player player, InteractionHand hand) {
             BackData backData = BackData.get(player);
             if (backData.isActionKeyDown()) {
-                  NonNullList<ItemStack> backSlot = backData.beans_Backpacks_3$getBody();
-                  if (backSlot.getFirst().isEmpty()) {
-                        tryTraits().ifPresent(mute ->
-                                    mute.onPickup(this, player)
-                        );
+                  Optional<EquipableComponent> optional = EquipableComponent.get(this);
+                  if (optional.isEmpty()) {
+                        ItemStack handStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
+                        getTraits().ifPresent(traits ->
+                                    traits.entity().onPickup(this, traits, player));
 
-                        backSlot.set(0, toStack());
+                        ItemStack stack = toStack();
+                        if (!handStack.isEmpty())
+                              player.getInventory().add(-1, stack);
+                        else
+                              player.setItemSlot(EquipmentSlot.MAINHAND, stack);
+
                         if (!this.isRemoved() && !this.level().isClientSide()) {
                               this.kill();
                               this.markHurt();
                         }
 
-                        ModSound modSound = tryTraits().map(MutableTraits::sound).orElse(ModSound.SOFT);
+                        ModSound modSound = getTraits().map(GenericTraits::sound).orElse(ModSound.SOFT);
                         modSound.at(player, ModSound.Type.EQUIP);
                         return InteractionResult.SUCCESS;
                   }
+
+                  EquipableComponent equipable = optional.get();
+                  EquipmentSlot[] values = EquipmentSlot.values();
+                  for (int i = values.length - 1; i > 0; i--) {
+                        EquipmentSlot slot = values[i];
+                        if (equipable.slots().test(slot)) {
+                              ItemStack stack = player.getItemBySlot(slot);
+                              if (stack.isEmpty()) {
+                                    getTraits().ifPresent(traits ->
+                                                traits.entity().onPickup(this, traits, player));
+
+                                    player.setItemSlot(slot, toStack());
+                                    if (!this.isRemoved() && !this.level().isClientSide()) {
+                                          this.kill();
+                                          this.markHurt();
+                                    }
+
+                                    ModSound modSound = getTraits().map(GenericTraits::sound).orElse(ModSound.SOFT);
+                                    modSound.at(player, ModSound.Type.EQUIP);
+                                    return InteractionResult.SUCCESS;
+                              }
+                        }
+                  }
+
                   return InteractionResult.FAIL;
             }
             return useTraitInteraction(player, hand);
@@ -517,5 +559,4 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public <T> T get(DataComponentType<? extends T> type) {
             return entityData.get(ITEM_STACK).get(type);
       }
-
 }

@@ -1,13 +1,14 @@
 package com.beansgalaxy.backpacks.traits;
 
+import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -18,37 +19,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface IClientTraits {
+public interface IClientTraits<T extends GenericTraits> {
 
-      void renderTooltip(GenericTraits trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci);
+      void renderTooltip(T trait, ItemStack itemStack, PatchedComponentHolder holder, GuiGraphics gui, int mouseX, int mouseY, CallbackInfo ci);
 
-      default void isBarVisible(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
+      default void isBarVisible(T trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
             if (!trait.isEmpty(holder))
                   cir.setReturnValue(true);
       }
 
-      void getBarWidth(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
+      void getBarWidth(T trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
 
-      void getBarColor(GenericTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
+      void getBarColor(T trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir);
 
-      void appendTooltipLines(GenericTraits traits, List<Component> lines);
+      void appendTooltipLines(T traits, List<Component> lines);
 
-      void appendEquipmentLines(GenericTraits traits, Consumer<Component> pTooltipAdder);
+      void appendEquipmentLines(T traits, Consumer<Component> pTooltipAdder);
 
-      default void appendAdvancedLines(GenericTraits traits, List<Component> list) {
+      default void appendAdvancedLines(T traits, List<Component> list) {
             traits.location().ifPresent(location -> {
                   list.add(Component.translatable("tooltip.beansbackpacks.advanced.reference", location).withStyle(ChatFormatting.DARK_GRAY).withStyle(ChatFormatting.ITALIC));
             });
       }
 
-      default MutableComponent getTooltipTitle(GenericTraits traits) {
-            return Component.translatable("traits.beansbackpacks." + traits.name());
+      @Nullable
+      ClientTooltipComponent getTooltipComponent(T traits, ItemStack itemStack, PatchedComponentHolder holder, Component title);
+
+      default boolean mouseScrolled(T traits, Level level, Slot hoveredSlot, int containerId, int scrolled) {
+            return false;
       }
 
-      @Nullable
-      <T extends GenericTraits> ClientTooltipComponent getTooltipComponent(TraitTooltip<T> tooltip);
+      default void renderEntityOverlay(Minecraft minecraft, BackpackEntity backpack, T trait, GuiGraphics gui, DeltaTracker tick) {
 
-      default boolean mouseScrolled(GenericTraits traits, Level level, Slot hoveredSlot, int containerId, int scrolled) {
-            return false;
       }
 }
