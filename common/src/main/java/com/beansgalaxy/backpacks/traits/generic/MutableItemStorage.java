@@ -11,6 +11,4 @@ public interface MutableItemStorage extends MutableTraits {
 
       ItemStack addItem(ItemStack inserted, Player player);
 
-      boolean isEmpty();
-
 }

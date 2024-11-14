@@ -96,21 +96,9 @@ public class LunchBoxTraits extends BundleLikeTraits {
             });
       }
 
-      public static void firstIsPresent(ItemStack lunchBox, Consumer<ItemStack> ifPresent) {
-            ifPresent(lunchBox, traits -> {
-                  List<ItemStack> stacks = lunchBox.get(ITraitData.ITEM_STACKS);
-                  if (stacks == null || stacks.isEmpty())
-                        return;
-
-                  int selectedSlotSafe = 0; //TODO FIND A NEW WAY TO COLLECT THE SELECTED SLOT
-                  ifPresent.accept(stacks.get(selectedSlotSafe));
-
-            });
-      }
-
       public void finishUsingItem(ItemStack backpack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
             PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
-            LunchBoxMutable mutable = newMutable(holder);
+            LunchBoxMutable mutable = mutable(holder);
             int selectedSlot = entity instanceof Player player
                         ? getSelectedSlotSafe(holder, player)
                         : 0;
@@ -153,7 +141,7 @@ public class LunchBoxTraits extends BundleLikeTraits {
       }
 
       @Override
-      public LunchBoxMutable newMutable(PatchedComponentHolder holder) {
+      public LunchBoxMutable mutable(PatchedComponentHolder holder) {
             return new LunchBoxMutable(this, holder);
       }
 

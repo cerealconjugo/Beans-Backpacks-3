@@ -74,7 +74,7 @@ public class BatteryTraits extends GenericTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            BatteryMutable mutable = newMutable(backpack);
+            BatteryMutable mutable = mutable(backpack);
             if (mutable.item.get().isEmpty() && other.isEmpty()) {
                   return;
             }
@@ -97,7 +97,7 @@ public class BatteryTraits extends GenericTraits {
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
             if (ClickAction.SECONDARY.equals(click) && EquipableComponent.get(backpack).isEmpty()) {
-                  BatteryMutable mutable = newMutable(backpack);
+                  BatteryMutable mutable = mutable(backpack);
                   ItemStack itemStack = mutable.insert(other, player);
                   slot.set(itemStack);
                   mutable.push(cir);
@@ -114,7 +114,7 @@ public class BatteryTraits extends GenericTraits {
             EnergyStorage to = EnergyStorage.ITEM.find(stack, context);
             if (to == null) return;
 
-            BatteryMutable mutable = newMutable(backpack);
+            BatteryMutable mutable = mutable(backpack);
             SimpleEnergyStorage storage = mutable.getStorage();
             try(Transaction transaction = Transaction.openOuter()) {
                   EnergyStorageUtil.move(storage, to, speed(), transaction);
@@ -123,7 +123,7 @@ public class BatteryTraits extends GenericTraits {
       }
 
       @Override
-      public BatteryMutable newMutable(PatchedComponentHolder holder) {
+      public BatteryMutable mutable(PatchedComponentHolder holder) {
             return new BatteryMutable(this, holder);
       }
 

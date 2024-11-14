@@ -165,7 +165,18 @@ public class ChestTraits extends ItemStorageTraits {
       }
 
       @Override
-      public ChestMutable newMutable(PatchedComponentHolder holder) {
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            Fraction fullness = fullness(holder);
+            if (fullness.compareTo(Fraction.ZERO) == 0)
+                  return 0;
+
+            Fraction maximum = Fraction.getFraction(Math.min(size(), 15), 1);
+            Fraction fraction = fullness.multiplyBy(maximum);
+            return fraction.intValue();
+      }
+
+      @Override
+      public ChestMutable mutable(PatchedComponentHolder holder) {
             return new ChestMutable(this, holder);
       }
 
@@ -173,7 +184,7 @@ public class ChestTraits extends ItemStorageTraits {
       public void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci) {
             if (selectedEquipment == null) {
                   PatchedComponentHolder holder = PatchedComponentHolder.of(slot.getItem());
-                  ChestMutable mutable = newMutable(holder);
+                  ChestMutable mutable = mutable(holder);
                   if (mutable.isEmpty()) {
                         ci.cancel();
                         return;
@@ -228,7 +239,7 @@ public class ChestTraits extends ItemStorageTraits {
             } else {
                   ItemStack backpack = player.getItemBySlot(selectedEquipment);
                   PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
-                  ChestMutable mutable = newMutable(holder);
+                  ChestMutable mutable = mutable(holder);
                   if (mutable.isFull())
                         return;
 
@@ -284,7 +295,7 @@ public class ChestTraits extends ItemStorageTraits {
             if (isEmpty(backpack))
                   return;
 
-            ChestMutable mutable = newMutable(backpack);
+            ChestMutable mutable = mutable(backpack);
 
             ItemStack removed;
             if (menuKeyDown)
@@ -323,7 +334,7 @@ public class ChestTraits extends ItemStorageTraits {
                         return true;
                   }
 
-                  ChestMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  ChestMutable mutable = mutable(PatchedComponentHolder.of(backpack));
                   Iterator<ItemStack> iterator = mutable.getItemStacks().iterator();
                   while (iterator.hasNext() && !stack.isEmpty()) {
                         ItemStack itemStack = iterator.next();
@@ -415,7 +426,7 @@ public class ChestTraits extends ItemStorageTraits {
             }
 
             PatchedComponentHolder holder = PatchedComponentHolder.of(itemStack);
-            ChestMutable mutable = newMutable(holder);
+            ChestMutable mutable = mutable(holder);
             if (clickType.isShift()) {
                   ItemStack stack = mutable.removeItem(index);
                   if (player.addItem(stack)) {
@@ -433,7 +444,7 @@ public class ChestTraits extends ItemStorageTraits {
                   return;
             }
 
-            ChestMutable mutable = newMutable(holder);
+            ChestMutable mutable = mutable(holder);
             if (clickType.isShift()) {
                   Inventory inventory = player.getInventory();
                   ItemStack stack = mutable.removeItem(index);
@@ -474,10 +485,13 @@ public class ChestTraits extends ItemStorageTraits {
             if (clickType.isHotbar()) {
                   Inventory inventory = player.getInventory();
                   ItemStack hotbarStack = inventory.items.get(clickType.hotbarSlot);
-                  ItemStack stack = mutable.getItem(index);
-                  mutable.setItem(index, hotbarStack);
-                  inventory.items.set(clickType.hotbarSlot, stack);
-                  mutable.push();
+                  if (hotbarStack.isEmpty() || canItemFit(holder, hotbarStack)) {
+                        ItemStack stack = mutable.getItem(index);
+                        mutable.setItem(index, hotbarStack);
+                        inventory.items.set(clickType.hotbarSlot, stack);
+                        mutable.push();
+
+                  }
                   return;
             }
 
@@ -485,7 +499,7 @@ public class ChestTraits extends ItemStorageTraits {
                   ItemStack stack = mutable.getItem(index);
                   ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
                         ItemStack backpack = player.getItemBySlot(slot);
-                        MutableItemStorage itemStorage = storageTraits.newMutable(PatchedComponentHolder.of(backpack));
+                        MutableItemStorage itemStorage = storageTraits.mutable(PatchedComponentHolder.of(backpack));
                         if (canItemFit(holder, stack)) {
                               if (itemStorage.addItem(stack, player) != null) {
                                     sound().atClient(player, ModSound.Type.INSERT);

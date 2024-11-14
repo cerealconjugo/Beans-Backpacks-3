@@ -210,10 +210,10 @@ public abstract class ITraitData<T> {
                         return;
 
                   if (stacks.isEmpty()) {
-                        holder().remove(type());
+                        holder.remove(type());
                   }
                   else if (isDirty) {
-                        holder().set(type(), stacks);
+                        holder.set(type(), stacks);
                   }
             }
 

@@ -1,9 +1,9 @@
 package com.beansgalaxy.backpacks.components.reference;
 
-import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -14,6 +14,7 @@ import com.mojang.serialization.DynamicOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -22,10 +23,9 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, MutableTraits {
+public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, MutableTraits, IEntityTraits<NonTrait> {
       public static final String NAME = "non";
       public static final NonTrait INSTANCE = new NonTrait();
-      private static final IEntityTraits<NonTrait> ENTITY = new IEntityTraits<>() {};
       public static final TraitComponentKind<NonTrait> KIND = new TraitComponentKind<>(-1, NAME, INSTANCE);
 
       private NonTrait() {
@@ -58,7 +58,7 @@ public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, Mu
 
       @Override
       public IEntityTraits<NonTrait> entity() {
-            return ENTITY;
+            return this;
       }
 
       @Override
@@ -82,7 +82,7 @@ public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, Mu
       }
 
       @Override
-      public MutableTraits newMutable(PatchedComponentHolder holder) {
+      public MutableTraits mutable(PatchedComponentHolder holder) {
             return this;
       }
 

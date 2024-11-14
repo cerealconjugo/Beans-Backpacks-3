@@ -3,10 +3,12 @@ package com.beansgalaxy.backpacks.traits;
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public interface IEntityTraits<T extends GenericTraits> {
 
@@ -40,4 +42,8 @@ public interface IEntityTraits<T extends GenericTraits> {
 
       }
 
+      @Nullable
+      default Container createHopperContainer(BackpackEntity backpack, T traits) {
+            return null;
+      }
 }

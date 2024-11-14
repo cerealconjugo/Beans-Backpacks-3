@@ -78,7 +78,7 @@ public class BulkTraits extends ItemStorageTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            BulkMutable mutable = newMutable(backpack);
+            BulkMutable mutable = mutable(backpack);
             if (!EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable())) {
                   if (ClickAction.SECONDARY.equals(click)) {
                         if (other.isEmpty()) {
@@ -133,7 +133,7 @@ public class BulkTraits extends ItemStorageTraits {
             );
 
             if (empty && ClickAction.SECONDARY.equals(click)) {
-                  BulkMutable mutable = newMutable(backpack);
+                  BulkMutable mutable = mutable(backpack);
                   ModSound sound = sound();
                   if (other.isEmpty()) {
                         ItemStack stack = mutable.removeItem(0);
@@ -179,7 +179,7 @@ public class BulkTraits extends ItemStorageTraits {
       public void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci) {
             if (selectedEquipment == null) {
                   PatchedComponentHolder holder = PatchedComponentHolder.of(slot.getItem());
-                  BulkMutable mutable = newMutable(holder);
+                  BulkMutable mutable = mutable(holder);
                   if (mutable.isEmpty()) {
                         ci.cancel();
                         return;
@@ -248,7 +248,7 @@ public class BulkTraits extends ItemStorageTraits {
                         return;
 
                   PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
-                  BulkMutable mutable = newMutable(holder);
+                  BulkMutable mutable = mutable(holder);
                   if (ClickType.PICKUP_ALL.equals(actionType)) {
                         ItemStack carried = player.containerMenu.getCarried();
                         if (mutable.isEmpty() || !carried.is(mutable.bulkList.get().itemHolder())) {
@@ -295,7 +295,7 @@ public class BulkTraits extends ItemStorageTraits {
             if (isEmpty(backpack))
                   return;
 
-            BulkMutable mutable = newMutable(backpack);
+            BulkMutable mutable = mutable(backpack);
 
             ItemStack removed;
             if (menuKeyDown)
@@ -342,7 +342,7 @@ public class BulkTraits extends ItemStorageTraits {
                         return true;
                   }
 
-                  BulkMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  BulkMutable mutable = mutable(PatchedComponentHolder.of(backpack));
                   BulkMutable.BulkStacks bulkStacks = mutable.bulkList.get();
                   Holder<Item> itemHolder = bulkStacks.itemHolder();
                   if (stack.is(itemHolder)) {
@@ -420,6 +420,16 @@ public class BulkTraits extends ItemStorageTraits {
       }
 
       @Override
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            Fraction fullness = fullness(holder);
+            if (fullness.compareTo(Fraction.ZERO) == 0)
+                  return 0;
+
+            Fraction fraction = fullness.multiplyBy(Fraction.getFraction(15, 1));
+            return fraction.intValue();
+      }
+
+      @Override
       public boolean canItemFit(PatchedComponentHolder holder, ItemStack inserted) {
             if (!super.canItemFit(holder, inserted))
                   return false;
@@ -432,7 +442,7 @@ public class BulkTraits extends ItemStorageTraits {
       }
 
       @Override
-      public BulkMutable newMutable(PatchedComponentHolder holder) {
+      public BulkMutable mutable(PatchedComponentHolder holder) {
             return new BulkMutable(this, holder);
       }
 

@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.bucket;
 
 import com.beansgalaxy.backpacks.NeoForgeMain;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.entity.player.Player;
@@ -73,9 +74,13 @@ public class BucketMutable extends FluidTank implements MutableTraits {
       }
 
 
-      @Override
       public void push() {
-
+            if (isEmpty()) {
+                  holder.remove(NeoForgeMain.DATA_FLUID);
+            } else {
+                  holder.set(NeoForgeMain.DATA_FLUID, fluid);
+            }
+            holder.setChanged();
       }
 
       @Override

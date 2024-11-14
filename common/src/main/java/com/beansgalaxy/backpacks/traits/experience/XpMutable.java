@@ -10,15 +10,17 @@ import org.apache.commons.lang3.math.Fraction;
 public class XpMutable implements MutableTraits {
       private final XpTraits traits;
       private final ITraitData<Integer> amount;
+      private final PatchedComponentHolder holder;
 
       public XpMutable(XpTraits traits, PatchedComponentHolder holder) {
             this.traits = traits;
             amount = ITraitData.AMOUNT.get(holder);
+            this.holder = holder;
       }
 
-      @Override
       public void push() {
             amount.push();
+            holder.setChanged();
       }
 
       @Override

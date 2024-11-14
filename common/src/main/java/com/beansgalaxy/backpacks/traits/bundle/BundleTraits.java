@@ -7,6 +7,7 @@ import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.MutableBundleLike;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +45,8 @@ public class BundleTraits extends BundleLikeTraits {
       }
 
       @Override
-      public BundleMutable newMutable(PatchedComponentHolder holder) {
-            return new BundleMutable(this, holder);
+      public MutableBundleLike<BundleTraits> mutable(PatchedComponentHolder holder) {
+            return new MutableBundleLike<>(this, holder);
       }
 
       @Override

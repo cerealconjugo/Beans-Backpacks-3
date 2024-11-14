@@ -5,6 +5,7 @@ import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -21,7 +22,7 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
 
       @Override
       public InteractionResult interact(BackpackEntity backpack, BulkTraits traits, Player player, InteractionHand hand) {
-            BulkMutable bulkMutable = traits.newMutable(backpack);
+            BulkMutable bulkMutable = traits.mutable(backpack);
             ItemStack itemInHand = player.getItemInHand(hand);
             if (itemInHand.isEmpty()) {
                   if (!bulkMutable.isEmpty() && findAndInsertFromInventory(player, bulkMutable)) {
@@ -67,7 +68,7 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
 
       @Override
       public void onDamage(BackpackEntity backpack, BulkTraits traits, boolean silent) {
-            BulkMutable mutable = traits.newMutable(backpack);
+            BulkMutable mutable = traits.mutable(backpack);
             ItemStack stack = mutable.removeItem(0);
             if (!stack.isEmpty()) {
                   backpack.wobble(10);
@@ -100,5 +101,10 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
             }
 
             IEntityTraits.super.onDamage(backpack, traits, silent);
+      }
+
+      @Override
+      public Container createHopperContainer(BackpackEntity backpack, BulkTraits traits) {
+            return new BulkHopper(backpack, traits);
       }
 }

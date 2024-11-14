@@ -31,6 +31,10 @@ public class ChestMutable implements MutableItemStorage {
             return stacks;
       }
 
+      public boolean canItemFit(ItemStack stack) {
+            return traits.canItemFit(holder, stack);
+      }
+
       @Override
       public ItemStack addItem(ItemStack inserted, Player player) {
             if (!traits.canItemFit(holder, inserted) || inserted.isEmpty())
@@ -73,13 +77,14 @@ public class ChestMutable implements MutableItemStorage {
             }
       }
 
-      @Override
       public void push() {
             boolean isEmpty = stacks.stream().allMatch(ItemStack::isEmpty);
             if (isEmpty)
                   holder.remove(ITraitData.CHEST);
             else
                   holder.set(ITraitData.CHEST, ItemContainerContents.fromItems(stacks));
+
+            holder.setChanged();
       }
 
       @Override
@@ -122,5 +127,9 @@ public class ChestMutable implements MutableItemStorage {
       @Override
       public InteractionResult interact(BackpackEntity backpack, Player player, InteractionHand hand) {
             return MutableItemStorage.super.interact(backpack, player, hand);
+      }
+
+      public int size() {
+            return traits.size();
       }
 }

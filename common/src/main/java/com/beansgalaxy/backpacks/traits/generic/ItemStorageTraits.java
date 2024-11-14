@@ -7,7 +7,6 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -97,7 +96,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
             return !stack.isEmpty() && get(stack).map(predicate::test).orElse(false);
       }
 
-      public abstract MutableItemStorage newMutable(PatchedComponentHolder holder);
+      public abstract MutableItemStorage mutable(PatchedComponentHolder holder);
 
       public abstract void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci);
 
@@ -120,7 +119,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
             ItemStack selectedStack = inventory.getItem(inventory.selected);
 
-            MutableItemStorage mutable = newMutable(PatchedComponentHolder.of(backpack));
+            MutableItemStorage mutable = mutable(PatchedComponentHolder.of(backpack));
             ItemStack take = mutable.removeItem(index);
             inventory.setItem(inventory.selected, take);
             mutable.push();
@@ -144,7 +143,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
       public boolean overflowFromInventory(EquipmentSlot equipmentSlot, Player player, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
             ItemStack backpack = player.getItemBySlot(equipmentSlot);
-            MutableItemStorage mutable = newMutable(PatchedComponentHolder.of(backpack));
+            MutableItemStorage mutable = mutable(PatchedComponentHolder.of(backpack));
             ItemStack itemStack = mutable.addItem(stack, player);
             if (itemStack != null) {
                   mutable.push();
@@ -176,7 +175,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
                   ItemStack stack = stacks.get(index);
                   ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
                         ItemStack backpack = player.getItemBySlot(slot);
-                        MutableItemStorage itemStorage = storageTraits.newMutable(PatchedComponentHolder.of(backpack));
+                        MutableItemStorage itemStorage = storageTraits.mutable(PatchedComponentHolder.of(backpack));
                         if (canItemFit(PatchedComponentHolder.of(backpack), stack)) {
                               if (itemStorage.addItem(stack, player) != null) {
                                     sound().atClient(player, ModSound.Type.INSERT);
@@ -190,7 +189,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
             if (clickType.isShift()) {
                   ItemStack hotbar = stacks.get(index);
-                  MutableItemStorage mutable = newMutable(holder);
+                  MutableItemStorage mutable = mutable(holder);
                   if (mutable.addItem(hotbar, player) != null) {
                         mutable.push();
                   }

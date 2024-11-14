@@ -24,6 +24,10 @@ public interface PatchedComponentHolder {
             return get(type) != null;
       }
 
+      default void setChanged() {
+
+      }
+
       @NotNull
       default <T> T getOrElse(DataComponentType<? extends T> type, Supplier<T> orElse) {
             T t = get(type);

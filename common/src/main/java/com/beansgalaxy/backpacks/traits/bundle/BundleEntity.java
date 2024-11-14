@@ -4,7 +4,9 @@ import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.traits.generic.MutableBundleLike;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -50,5 +52,10 @@ public class BundleEntity implements IEntityTraits<BundleLikeTraits> {
             }
 
             backpack.remove(ITraitData.ITEM_STACKS);
+      }
+
+      @Override
+      public Container createHopperContainer(BackpackEntity backpack, BundleLikeTraits traits) {
+            return new BundleHopper(backpack, traits);
       }
 }

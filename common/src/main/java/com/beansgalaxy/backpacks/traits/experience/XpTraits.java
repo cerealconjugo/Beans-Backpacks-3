@@ -75,7 +75,7 @@ public class XpTraits extends GenericTraits {
 
       @Override
       public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            XpMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+            XpMutable mutable = mutable(PatchedComponentHolder.of(backpack));
 
             if (isEmpty(backpack)) {
                   int totalExperience = player.totalExperience;
@@ -113,13 +113,25 @@ public class XpTraits extends GenericTraits {
       public boolean isEmpty(PatchedComponentHolder holder) {
             return !holder.has(ITraitData.AMOUNT);
       }
+
+      @Override
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            Fraction fullness = fullness(holder);
+            if (fullness.compareTo(Fraction.ZERO) == 0)
+                  return 0;
+
+            Fraction maximum = Fraction.getFraction(Math.min(size(), 15), 1);
+            Fraction fraction = fullness.multiplyBy(maximum);
+            return fraction.intValue();
+      }
+
       @Override
       public boolean isStackable(PatchedComponentHolder holder) {
             return isEmpty(holder);
       }
 
       @Override
-      public XpMutable newMutable(PatchedComponentHolder holder) {
+      public XpMutable mutable(PatchedComponentHolder holder) {
             return new XpMutable(this, holder);
       }
 

@@ -81,6 +81,22 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            if (size() > 15) {
+                  Fraction fullness = fullness(holder);
+                  Fraction fraction = fullness.multiplyBy(Fraction.getFraction(15, 1));
+                  return fraction.intValue();
+            }
+
+            Long amount = holder.get(ITraitData.LONG);
+            if (amount == null)
+                  return 0;
+
+            long buckets = amount / FluidConstants.BUCKET;
+            return (int) buckets;
+      }
+
+      @Override
       public void useOn(UseOnContext ctx, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
             Level level = ctx.getLevel();
             Player player = ctx.getPlayer();
@@ -93,7 +109,7 @@ public class BucketTraits extends GenericTraits {
                   return;
 
             PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
-            BucketMutable mutable = newMutable(holder);
+            BucketMutable mutable = mutable(holder);
             boolean success = !isEmpty(holder) && mutable.transferTo(storage, resource -> {
                   SoundEvent sound = FluidVariantAttributes.getEmptySound(resource);
                   player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
@@ -117,7 +133,7 @@ public class BucketTraits extends GenericTraits {
 
       @Override
       public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            BucketMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+            BucketMutable mutable = mutable(PatchedComponentHolder.of(backpack));
 
             if (player.isDiscrete()
                         ? mutable.tryPlace(level, player, backpack) || mutable.tryPickup(level, player, backpack)
@@ -135,7 +151,7 @@ public class BucketTraits extends GenericTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            BucketMutable mutable = newMutable(backpack);
+            BucketMutable mutable = mutable(backpack);
             if (EquipableComponent.canEquip(backpack, slot)) {
                   ItemStack itemStack = mutable.addItem(other, player);
 
@@ -159,7 +175,7 @@ public class BucketTraits extends GenericTraits {
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
             if (ClickAction.SECONDARY.equals(click) && EquipableComponent.get(backpack).isEmpty()) {
-                  BucketMutable mutable = newMutable(backpack);
+                  BucketMutable mutable = mutable(backpack);
                   ItemStack itemStack = null;
                   if (slot.mayPickup(player))
                         itemStack = mutable.addItem(other, player);
@@ -176,7 +192,7 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
-      public BucketMutable newMutable(PatchedComponentHolder holder) {
+      public BucketMutable mutable(PatchedComponentHolder holder) {
             return new BucketMutable(this, holder);
       }
 

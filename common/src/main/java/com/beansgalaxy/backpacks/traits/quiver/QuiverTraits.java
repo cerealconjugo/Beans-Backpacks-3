@@ -22,7 +22,6 @@ import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -113,7 +112,7 @@ public class QuiverTraits extends BundleLikeTraits {
 
             int i = Fraction.getFraction(size(), 1).compareTo(fraction);
             if (i > 0) {
-                  QuiverMutable mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  QuiverMutable mutable = this.mutable(PatchedComponentHolder.of(backpack));
                   if (mutable.addItem(stack, player) != null) {
                         cir.setReturnValue(true);
                         sound().toClient(player, ModSound.Type.INSERT, 1, 1);
@@ -150,7 +149,7 @@ public class QuiverTraits extends BundleLikeTraits {
       }
 
       @Override
-      public QuiverMutable newMutable(PatchedComponentHolder holder) {
+      public QuiverMutable mutable(PatchedComponentHolder holder) {
             return new QuiverMutable(this, holder);
       }
 

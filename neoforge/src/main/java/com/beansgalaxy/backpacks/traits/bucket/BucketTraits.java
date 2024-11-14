@@ -3,8 +3,7 @@ package com.beansgalaxy.backpacks.traits.bucket;
 import com.beansgalaxy.backpacks.NeoForgeMain;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.IEntityTraits;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -16,6 +15,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -68,8 +68,23 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            if (size() > 15) {
+                  Fraction fullness = fullness(holder);
+                  Fraction fraction = fullness.multiplyBy(Fraction.getFraction(15, 1));
+                  return fraction.intValue();
+            }
+
+            FluidStack fluid = holder.get(NeoForgeMain.DATA_FLUID);
+            if (fluid == null)
+                  return 0;
+
+            return fluid.getAmount() / FluidType.BUCKET_VOLUME;
+      }
+
+      @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            BucketMutable mutable = newMutable(backpack);
+            BucketMutable mutable = mutable(backpack);
             if (EquipableComponent.canEquip(backpack, slot)) {
                   ItemStack itemStack = mutable.addItem(other, player);
 
@@ -97,7 +112,7 @@ public class BucketTraits extends GenericTraits {
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
             if (ClickAction.SECONDARY.equals(click) && EquipableComponent.get(backpack).isEmpty()) {
-                  BucketMutable mutable = newMutable(backpack);
+                  BucketMutable mutable = mutable(backpack);
                   ItemStack itemStack = null;
                   if (slot.mayPickup(player))
                         itemStack = mutable.addItem(other, player);
@@ -116,7 +131,7 @@ public class BucketTraits extends GenericTraits {
             }
       }
 
-      public BucketMutable newMutable(PatchedComponentHolder holder) {
+      public BucketMutable mutable(PatchedComponentHolder holder) {
             return new BucketMutable(this, holder);
       }
 

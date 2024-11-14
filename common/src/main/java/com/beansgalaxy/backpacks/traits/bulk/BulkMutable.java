@@ -32,10 +32,12 @@ import java.util.stream.Stream;
 public class BulkMutable implements MutableItemStorage {
       private final BulkTraits traits;
       public final ITraitData<BulkStacks> bulkList;
+      private final PatchedComponentHolder holder;
 
       public BulkMutable(BulkTraits traits, PatchedComponentHolder holder) {
             this.traits = traits;
             this.bulkList = ITraitData.BULK_STACKS.get(holder);
+            this.holder = holder;
       }
 
       @Override
@@ -57,6 +59,11 @@ public class BulkMutable implements MutableItemStorage {
 
       @Override @Nullable
       public ItemStack addItem(ItemStack inserted, Player player) {
+            return addItem(inserted);
+      }
+
+      @Nullable
+      public ItemStack addItem(ItemStack inserted) {
             BulkStacks bulkList = this.bulkList.get();
             if (bulkList.isEmpty()) {
                   int toAdd = Math.min(inserted.getCount(), getMaxAmountToAdd(inserted));
@@ -135,9 +142,9 @@ public class BulkMutable implements MutableItemStorage {
             return bulkList.isEmpty();
       }
 
-      @Override
       public void push() {
             bulkList.push();
+            holder.setChanged();
       }
 
       @Override

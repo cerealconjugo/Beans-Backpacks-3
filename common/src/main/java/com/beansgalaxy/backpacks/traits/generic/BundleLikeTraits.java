@@ -24,7 +24,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
@@ -88,6 +87,17 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             return stacks == null || stacks.isEmpty();
       }
 
+      @Override
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            Fraction fullness = fullness(holder);
+            if (fullness.compareTo(Fraction.ZERO) == 0)
+                  return 0;
+
+            Fraction maximum = Fraction.getFraction(Math.min(size(), 15), 1);
+            Fraction fraction = fullness.multiplyBy(maximum);
+            return fraction.intValue();
+      }
+
       @Override @Nullable
       public ItemStack getFirst(PatchedComponentHolder holder) {
             List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
@@ -123,7 +133,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
-            MutableBundleLike<?> mutable = newMutable(backpack);
+            MutableBundleLike<?> mutable = mutable(backpack);
             boolean empty = !EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable());
             if (empty) {
                   if (ClickAction.SECONDARY.equals(click)) {
@@ -241,7 +251,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
             boolean equals = ClickAction.SECONDARY.equals(click);
             if (equals && empty) {
-                  MutableBundleLike<?> mutable = newMutable(backpack);
+                  MutableBundleLike<?> mutable = mutable(backpack);
                   ModSound sound = sound();
                   if (other.isEmpty()) {
                         ItemStack stack = mutable.removeItem(other, player);
@@ -268,13 +278,13 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             return !inserted.isEmpty() && super.canItemFit(holder, inserted);
       }
 
-      public abstract MutableBundleLike<?> newMutable(PatchedComponentHolder holder);
+      public abstract MutableBundleLike<?> mutable(PatchedComponentHolder holder);
 
       @Override
       public void hotkeyUse(Slot slot, EquipmentSlot selectedEquipment, int button, ClickType actionType, Player player, CallbackInfo ci) {
             if (selectedEquipment == null) {
                   PatchedComponentHolder holder = PatchedComponentHolder.of(slot.getItem());
-                  MutableBundleLike<?> mutable = newMutable(holder);
+                  MutableBundleLike<?> mutable = mutable(holder);
                   if (mutable.isEmpty()) {
                         ci.cancel();
                         return;
@@ -333,7 +343,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             } else {
                   ItemStack backpack = player.getItemBySlot(selectedEquipment);
                   PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
-                  MutableBundleLike<?> mutable = newMutable(holder);
+                  MutableBundleLike<?> mutable = mutable(holder);
                   if (mutable.isFull())
                         return;
 
@@ -389,7 +399,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             if (isEmpty(backpack))
                   return;
 
-            MutableBundleLike<?> mutable = newMutable(backpack);
+            MutableBundleLike<?> mutable = mutable(backpack);
             int selectedSlot = getSelectedSlotSafe(backpack, player);
 
             ItemStack removed;
@@ -431,7 +441,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         return true;
                   }
 
-                  MutableBundleLike<?> mutable = newMutable(PatchedComponentHolder.of(backpack));
+                  MutableBundleLike<?> mutable = mutable(PatchedComponentHolder.of(backpack));
                   Iterator<ItemStack> iterator = mutable.getItemStacks().iterator();
                   while (iterator.hasNext() && !stack.isEmpty()) {
                         ItemStack itemStack = iterator.next();
@@ -517,7 +527,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
       @Override
       public void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
-            MutableBundleLike<?> mutable = newMutable(holder);
+            MutableBundleLike<?> mutable = mutable(holder);
             if (clickType.isHotbar()) {
                   Inventory inventory = player.getInventory();
                   ItemStack hotbarStack = inventory.items.get(clickType.hotbarSlot);
@@ -580,7 +590,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                   ItemStack stack = stacks.get(index);
                   ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
                         ItemStack backpack = player.getItemBySlot(slot);
-                        MutableItemStorage itemStorage = storageTraits.newMutable(PatchedComponentHolder.of(backpack));
+                        MutableItemStorage itemStorage = storageTraits.mutable(PatchedComponentHolder.of(backpack));
                         if (canItemFit(holder, stack)) {
                               if (itemStorage.addItem(stack, player) != null) {
                                     sound().atClient(player, ModSound.Type.INSERT);

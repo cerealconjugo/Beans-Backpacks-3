@@ -21,9 +21,9 @@ public class BatteryMutable implements MutableTraits {
             this.holder = holder;
       }
 
-      @Override
       public void push() {
             item.push();
+            holder.setChanged();
       }
 
       @Override

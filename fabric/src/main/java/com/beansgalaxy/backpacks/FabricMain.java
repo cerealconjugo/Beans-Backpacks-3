@@ -38,20 +38,20 @@ public class FabricMain implements ModInitializer {
         EnergyStorage.ITEM.registerFallback((stack, ctx) -> {
             BatteryTraits batteryTraits = (BatteryTraits) stack.get(Traits.BATTERY);
             if (batteryTraits != null)
-                return batteryTraits.newMutable(PatchedComponentHolder.of(stack)).getStorage();
+                return batteryTraits.mutable(PatchedComponentHolder.of(stack)).getStorage();
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
             if (reference != null && !reference.isEmpty()) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
-                    return battery.newMutable(PatchedComponentHolder.of(stack)).getStorage();
+                    return battery.mutable(PatchedComponentHolder.of(stack)).getStorage();
             }
 
             EnderTraits enderTraits = stack.get(Traits.ENDER);
             if (enderTraits != null) {
                 Optional<GenericTraits> trait = enderTraits.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
-                    return battery.newMutable(PatchedComponentHolder.of(stack)).getStorage();
+                    return battery.mutable(PatchedComponentHolder.of(stack)).getStorage();
             }
             return null;
         });
@@ -59,20 +59,20 @@ public class FabricMain implements ModInitializer {
         FluidStorage.ITEM.registerFallback((stack, ctx) -> {
             BucketTraits bucketTraits = (BucketTraits) stack.get(Traits.BUCKET);
             if (bucketTraits != null)
-                return bucketTraits.newMutable(PatchedComponentHolder.of(stack));
+                return bucketTraits.mutable(PatchedComponentHolder.of(stack));
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
             if (reference != null && !reference.isEmpty()) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
-                    return bucket.newMutable(PatchedComponentHolder.of(stack));
+                    return bucket.mutable(PatchedComponentHolder.of(stack));
             }
 
             EnderTraits enderTraits = stack.get(Traits.ENDER);
             if (enderTraits != null) {
                 Optional<GenericTraits> trait = enderTraits.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
-                    return bucket.newMutable(PatchedComponentHolder.of(stack));
+                    return bucket.mutable(PatchedComponentHolder.of(stack));
             }
 
             return null;

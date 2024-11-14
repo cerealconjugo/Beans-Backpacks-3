@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
@@ -142,7 +143,7 @@ public class ItemMixin {
 
       @Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
       private void lunchBoxUseAnimation(ItemStack backpack, CallbackInfoReturnable<UseAnim> cir) {
-            LunchBoxTraits.firstIsPresent(backpack, food -> {
+            CommonAtClient.LunchBoxTraitsFirstIsPresent(backpack, food -> {
                   cir.setReturnValue(food.getUseAnimation());
             });
       }

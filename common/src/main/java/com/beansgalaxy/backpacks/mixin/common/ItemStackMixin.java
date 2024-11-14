@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
@@ -48,14 +49,14 @@ public abstract class ItemStackMixin {
 
       @Inject(method = "getDrinkingSound", at = @At("HEAD"), cancellable = true)
       private void lunchBoxDrinkingSound(CallbackInfoReturnable<SoundEvent> cir) {
-            LunchBoxTraits.firstIsPresent(instance, food -> {
+            CommonAtClient.LunchBoxTraitsFirstIsPresent(instance, food -> {
                   cir.setReturnValue(food.getDrinkingSound());
             });
       }
 
       @Inject(method = "getEatingSound", at = @At("HEAD"), cancellable = true)
       private void lunchBoxEatingSound(CallbackInfoReturnable<SoundEvent> cir) {
-            LunchBoxTraits.firstIsPresent(instance, food -> {
+            CommonAtClient.LunchBoxTraitsFirstIsPresent(instance, food -> {
                   cir.setReturnValue(food.getEatingSound());
             });
       }

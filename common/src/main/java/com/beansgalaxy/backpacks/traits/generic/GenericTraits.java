@@ -54,7 +54,17 @@ public abstract class GenericTraits {
 
       public abstract <T extends GenericTraits> IEntityTraits<T> entity();
 
+      abstract public TraitComponentKind<? extends GenericTraits> kind();
+
       abstract public <T extends GenericTraits> T toReference(ResourceLocation location);
+
+      public Optional<ResourceLocation> location() {
+            return Optional.ofNullable(location);
+      }
+
+      public ModSound sound() {
+            return sound;
+      }
 
       public abstract Fraction fullness(PatchedComponentHolder holder);
 
@@ -94,19 +104,13 @@ public abstract class GenericTraits {
 
       }
 
-      public abstract MutableTraits newMutable(PatchedComponentHolder holder);
+      public abstract MutableTraits mutable(PatchedComponentHolder holder);
 
       public boolean isStackable(PatchedComponentHolder holder) {
             return false;
       }
 
-      public ModSound sound() {
-            return sound;
-      }
-
-      abstract public TraitComponentKind<? extends GenericTraits> kind();
-
-      public Optional<ResourceLocation> location() {
-            return Optional.ofNullable(location);
+      public int getAnalogOutput(PatchedComponentHolder holder) {
+            return 0;
       }
 }

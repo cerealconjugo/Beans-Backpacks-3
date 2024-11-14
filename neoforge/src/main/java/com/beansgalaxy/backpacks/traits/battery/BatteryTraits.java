@@ -106,7 +106,7 @@ public class BatteryTraits extends GenericTraits {
       }
 
       @Override
-      public MutableTraits newMutable(PatchedComponentHolder holder) {
+      public MutableTraits mutable(PatchedComponentHolder holder) {
             return null;
       }
 

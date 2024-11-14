@@ -1,8 +1,6 @@
 package com.beansgalaxy.backpacks.traits.alchemy;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
@@ -77,7 +75,7 @@ public class AlchemyTraits extends BundleLikeTraits {
       }
 
       @Override
-      public AlchemyMutable newMutable(PatchedComponentHolder holder) {
+      public AlchemyMutable mutable(PatchedComponentHolder holder) {
             return new AlchemyMutable(this, holder);
       }
 
@@ -87,7 +85,7 @@ public class AlchemyTraits extends BundleLikeTraits {
             if (isEmpty(holder))
                   return;
 
-            AlchemyMutable mutable = newMutable(holder);
+            AlchemyMutable mutable = mutable(holder);
             int selectedSlot = getSelectedSlotSafe(holder, player);
             ItemStack selected = mutable.getItemStacks().get(selectedSlot);
             Item item = selected.getItem();

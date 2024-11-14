@@ -57,7 +57,7 @@ public class BucketMutable extends SingleFluidStorage implements MutableTraits {
             amount = holder.getOrElse(ITraitData.LONG, () -> 0L);
             variant = holder.getOrElse(FabricMain.DATA_FLUID, FluidVariant::blank);
       }
-      @Override
+
       public void push() {
             if (isEmpty()) {
                   holder.remove(ITraitData.LONG);
@@ -66,6 +66,7 @@ public class BucketMutable extends SingleFluidStorage implements MutableTraits {
                   holder.set(ITraitData.LONG, amount);
                   holder.set(FabricMain.DATA_FLUID, variant);
             }
+            holder.setChanged();
       }
 
       @Override

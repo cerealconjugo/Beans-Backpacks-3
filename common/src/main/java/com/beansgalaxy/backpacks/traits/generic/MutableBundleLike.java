@@ -11,7 +11,7 @@ import org.apache.commons.lang3.math.Fraction;
 
 import java.util.List;
 
-public abstract class MutableBundleLike<T extends BundleLikeTraits> implements MutableItemStorage {
+public class MutableBundleLike<T extends BundleLikeTraits> implements MutableItemStorage {
       public final ITraitData<List<ItemStack>> stacks;
       private final PatchedComponentHolder holder;
       protected final T traits;
@@ -31,9 +31,9 @@ public abstract class MutableBundleLike<T extends BundleLikeTraits> implements M
             return traits.sound();
       }
 
-      @Override
       public void push() {
             stacks.push();
+            holder.setChanged();
       }
 
       @Override
@@ -65,6 +65,10 @@ public abstract class MutableBundleLike<T extends BundleLikeTraits> implements M
       }
 
       public ItemStack addItem(ItemStack inserted, int slot, Player player) {
+            return addItem(inserted, slot);
+      }
+
+      public ItemStack addItem(ItemStack inserted, int slot) {
             if (!traits.canItemFit(holder, inserted))
                   return null;
 

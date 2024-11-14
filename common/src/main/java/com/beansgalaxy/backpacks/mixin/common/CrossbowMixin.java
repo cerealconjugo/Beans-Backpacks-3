@@ -40,7 +40,7 @@ public abstract class CrossbowMixin extends ProjectileWeaponItem {
                   QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
                         ItemStack quiver = player.getItemBySlot(slot);
                         PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
-                        QuiverMutable mutable = traits.newMutable(holder);
+                        QuiverMutable mutable = traits.mutable(holder);
                         List<ItemStack> stacks = mutable.getItemStacks();
                         if (stacks.isEmpty())
                               return false;
