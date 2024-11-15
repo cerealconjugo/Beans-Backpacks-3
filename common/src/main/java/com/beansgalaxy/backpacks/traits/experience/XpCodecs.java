@@ -2,8 +2,10 @@ package com.beansgalaxy.backpacks.traits.experience;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
+import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,7 +16,11 @@ public class XpCodecs implements ITraitCodec<XpTraits> {
 
       public static final Codec<XpTraits> CODEC = RecordCodecBuilder.create(in ->
                   in.group(
-                              PrimitiveCodec.INT.fieldOf("size").forGetter(XpTraits::size),
+                              PrimitiveCodec.INT.fieldOf("size").validate(size ->
+                                    size < 238609312 ? size > 0 ? DataResult.success(size)
+                                    : DataResult.error(() -> "The provided field \"size\" must be greater than 0; Provided=" + size, 1)
+                                    : DataResult.error(() -> "The provided field \"size\" must be smaller than 238,609,312; Provided=" + size, 238609311)
+                              ).forGetter(XpTraits::size),
                               ModSound.MAP_CODEC.forGetter(XpTraits::sound)
                   ).apply(in, (size, sound) -> new XpTraits(null, sound, size))
       );

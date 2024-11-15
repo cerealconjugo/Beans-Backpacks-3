@@ -431,6 +431,7 @@ public class ChestTraits extends ItemStorageTraits {
                   ItemStack stack = mutable.removeItem(index);
                   if (player.addItem(stack)) {
                         mutable.push();
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
                   return;
             }
@@ -458,6 +459,7 @@ public class ChestTraits extends ItemStorageTraits {
 
                         if (stack.isEmpty()) {
                               mutable.push();
+                              sound().atClient(player, ModSound.Type.REMOVE);
                               return;
                         }
                   }
@@ -472,6 +474,7 @@ public class ChestTraits extends ItemStorageTraits {
 
                         if (stack.isEmpty()) {
                               mutable.push();
+                              sound().atClient(player, ModSound.Type.REMOVE);
                               return;
                         }
                   }
@@ -490,26 +493,31 @@ public class ChestTraits extends ItemStorageTraits {
                         mutable.setItem(index, hotbarStack);
                         inventory.items.set(clickType.hotbarSlot, stack);
                         mutable.push();
-
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
                   return;
             }
 
             if (clickType.isAction()) {
                   ItemStack stack = mutable.getItem(index);
+                  CallbackInfo ci = new CallbackInfo("chest_tiny_menu", true);
                   ItemStorageTraits.runIfEquipped(player, ((storageTraits, slot) -> {
                         ItemStack backpack = player.getItemBySlot(slot);
                         MutableItemStorage itemStorage = storageTraits.mutable(PatchedComponentHolder.of(backpack));
                         if (canItemFit(holder, stack)) {
                               if (itemStorage.addItem(stack, player) != null) {
-                                    sound().atClient(player, ModSound.Type.INSERT);
-                                    mutable.push();
                                     itemStorage.push();
+                                    ci.cancel();
                               }
                         }
 
                         return stack.isEmpty();
                   }));
+
+                  if (ci.isCancelled()) {
+                        mutable.push();
+                        sound().atClient(player, ModSound.Type.REMOVE);
+                  }
             }
 
             List<ItemStack> stacks = mutable.getItemStacks();
@@ -540,6 +548,8 @@ public class ChestTraits extends ItemStorageTraits {
                         carriedAccess.set(stack);
                         stacks.set(index, carried);
                   }
+
+                  sound().atClient(player, ModSound.Type.INSERT);
             }
             else if (carried.isEmpty()) {
                   if (clickType.isRight()) {
@@ -550,6 +560,8 @@ public class ChestTraits extends ItemStorageTraits {
                         ItemStack removed = mutable.removeItem(index);
                         carriedAccess.set(removed);
                   }
+
+                  sound().atClient(player, ModSound.Type.REMOVE);
             }
             else {
                   if (!canItemFit(holder, carried))
@@ -562,6 +574,8 @@ public class ChestTraits extends ItemStorageTraits {
                         carriedAccess.set(stack);
                         stacks.set(index, carried);
                   }
+
+                  sound().atClient(player, ModSound.Type.INSERT);
             }
 
             mutable.push();

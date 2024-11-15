@@ -2,9 +2,11 @@ package com.beansgalaxy.backpacks.traits.alchemy;
 
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
+import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -15,7 +17,11 @@ public class AlchemyCodecs implements ITraitCodec<AlchemyTraits> {
 
       public static final Codec<AlchemyTraits> CODEC = RecordCodecBuilder.create(in ->
             in.group(
-                        PrimitiveCodec.INT.fieldOf("size").forGetter(AlchemyTraits::size),
+                        PrimitiveCodec.INT.fieldOf("size").validate(size ->
+                              size < 256 ? size > 0 ? DataResult.success(size)
+                              : DataResult.error(() -> "The provided field \"size\" must be greater than 0; Provided=" + size, 1)
+                              : DataResult.error(() -> "The provided field \"size\" must be smaller than 256; Provided=" + size, 255)
+                        ).forGetter(BundleLikeTraits::size),
                         ModSound.MAP_CODEC.forGetter(AlchemyTraits::sound)
             ).apply(in, (size, sound) -> new AlchemyTraits(null, sound, size))
       );

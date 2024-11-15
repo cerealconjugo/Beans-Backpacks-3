@@ -393,7 +393,6 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       @Override
       public boolean hurt(DamageSource damageSource, float amount) {
             double height = 0.1D;
-
             if ((damageSource.is(DamageTypes.IN_FIRE) || damageSource.is(DamageTypes.LAVA))) {
                   if (fireImmune())
                         return false;

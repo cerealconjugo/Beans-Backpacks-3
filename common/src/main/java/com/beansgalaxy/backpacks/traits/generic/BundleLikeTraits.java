@@ -541,6 +541,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         mutable.addItem(hotbarStack, index, player);
                   }
 
+                  sound().at(player, ModSound.Type.REMOVE);
                   inventory.items.set(clickType.hotbarSlot, stack);
                   mutable.push();
                   return;
@@ -559,6 +560,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
                         if (stack.isEmpty()) {
                               mutable.push();
+                              sound().at(player, ModSound.Type.INSERT);
                               return;
                         }
                   }
@@ -573,6 +575,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
                         if (stack.isEmpty()) {
                               mutable.push();
+                              sound().at(player, ModSound.Type.INSERT);
                               return;
                         }
                   }
@@ -593,8 +596,8 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         MutableItemStorage itemStorage = storageTraits.mutable(PatchedComponentHolder.of(backpack));
                         if (canItemFit(holder, stack)) {
                               if (itemStorage.addItem(stack, player) != null) {
-                                    sound().atClient(player, ModSound.Type.INSERT);
                                     mutable.push();
+                                    sound().atClient(player, ModSound.Type.INSERT);
                                     itemStorage.push();
                               }
                         }
@@ -611,9 +614,11 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         if (mutable.addItem(carried.copyWithCount(1), player) != null) {
                               carried.shrink(1);
                               mutable.push();
+                              sound().at(player, ModSound.Type.INSERT);
                         }
                   } else if (mutable.addItem(carried, player) != null) {
-                              mutable.push();
+                        mutable.push();
+                        sound().at(player, ModSound.Type.INSERT);
                   }
                   return;
             }
@@ -624,9 +629,11 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         if (mutable.addItem(carried.copyWithCount(1), size, player) != null) {
                               carried.shrink(1);
                               mutable.push();
+                              sound().atClient(player, ModSound.Type.INSERT);
                         }
                   } else if (mutable.addItem(carried, size, player) != null) {
                         mutable.push();
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
                   return;
             }
@@ -649,19 +656,25 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                               stack.grow(add);
                               carried.shrink(add);
                         }
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
-                  else mutable.addItem(carried, index, player);
+                  else if (mutable.addItem(carried, index, player) != null) {
+                        sound().atClient(player, ModSound.Type.INSERT);
+                  }
             }
             else if (clickType.isRight()) {
                   int count = Mth.ceil((float) stack.getCount() / 2);
                   ItemStack split = stack.split(count);
                   carriedAccess.set(split);
+                  sound().atClient(player, ModSound.Type.REMOVE);
             }
             else if (carried.isEmpty()) {
                   ItemStack removed = mutable.removeItem(index);
                   carriedAccess.set(removed);
-            } else
-                  mutable.addItem(carried, index + 1, player);
+                  sound().atClient(player, ModSound.Type.REMOVE);
+            } else if (mutable.addItem(carried, index + 1, player) != null) {
+                  sound().atClient(player, ModSound.Type.INSERT);
+            }
 
             mutable.push();
       }

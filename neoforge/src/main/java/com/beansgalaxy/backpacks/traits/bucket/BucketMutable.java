@@ -73,7 +73,6 @@ public class BucketMutable extends FluidTank implements MutableTraits {
             return stack;
       }
 
-
       public void push() {
             if (isEmpty()) {
                   holder.remove(NeoForgeMain.DATA_FLUID);

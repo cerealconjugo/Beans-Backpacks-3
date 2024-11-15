@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,7 +15,11 @@ public class BulkCodecs implements ITraitCodec<BulkTraits> {
 
       public static final Codec<BulkTraits> CODEC = RecordCodecBuilder.create(in ->
             in.group(
-                        PrimitiveCodec.INT.fieldOf("size").forGetter(BulkTraits::size),
+                        PrimitiveCodec.INT.fieldOf("size").validate(size ->
+                              size < 1024 ? size > 0 ? DataResult.success(size)
+                              : DataResult.error(() -> "The provided field \"size\" must be greater than 0; Provided=" + size, 1)
+                              : DataResult.error(() -> "The provided field \"size\" must be smaller than 1024; Provided=" + size, 1023)
+                        ).forGetter(BulkTraits::size),
                         ModSound.MAP_CODEC.forGetter(BulkTraits::sound)
             ).apply(in, (size, sound) -> new BulkTraits(null, sound, size))
       );

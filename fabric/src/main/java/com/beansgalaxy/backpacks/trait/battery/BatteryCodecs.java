@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,8 +15,14 @@ public class BatteryCodecs implements ITraitCodec<BatteryTraits> {
 
       public static final Codec<BatteryTraits> CODEC = RecordCodecBuilder.create(in ->
                   in.group(
-                              PrimitiveCodec.LONG.fieldOf("size").forGetter(BatteryTraits::size),
-                              PrimitiveCodec.LONG.fieldOf("speed").forGetter(BatteryTraits::speed),
+                              PrimitiveCodec.LONG.fieldOf("size").validate(size ->
+                                    size > 0 ? DataResult.success(size)
+                                    : DataResult.error(() -> "The provided field \"size\" must be greater than 0; Provided=" + size + 'L', 1L)
+                              ).forGetter(BatteryTraits::size),
+                              PrimitiveCodec.LONG.fieldOf("speed").validate(size ->
+                                    size > 0 ? DataResult.success(size)
+                                    : DataResult.error(() -> "The provided field \"speed\" must be greater than 0; Provided=" + size + 'L', 1L)
+                              ).forGetter(BatteryTraits::speed),
                               ModSound.MAP_CODEC.forGetter(BatteryTraits::sound)
                   ).apply(in, (size, speed, sound) -> new BatteryTraits(null, sound, size, speed))
       );
