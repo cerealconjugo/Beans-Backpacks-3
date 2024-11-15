@@ -89,7 +89,7 @@ public interface BackpackRender {
             pose.pushPose();
             pose.mulPose(Axis.YN.rotationDegrees(yaw + 180));
 
-            ResourceLocation location = backpack.getPlaceable().modelLocation;
+            ResourceLocation location = backpack.getPlaceable().modelLocation();
             if (location == null) {
                   pose.translate(0, 1/4f, 0);
                   pose.scale(0.5f, 0.5f, 0.5f);

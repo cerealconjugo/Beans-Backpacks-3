@@ -61,8 +61,7 @@ public class BackpackUseOn implements Packet2S {
                   if (entity == null)
                         return false;
 
-                  ModSound modSound = traits.map(GenericTraits::sound).orElse(ModSound.SOFT);
-                  modSound.at(entity, ModSound.Type.PLACE);
+                  entity.getPlaceable().sound().at(entity, ModSound.Type.PLACE);
                   return true;
             }).orElse(false);
       }

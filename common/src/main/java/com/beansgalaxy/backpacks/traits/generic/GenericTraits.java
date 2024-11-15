@@ -48,14 +48,6 @@ public abstract class GenericTraits {
             return null;
       }
 
-      public abstract String name();
-
-      public abstract <T extends GenericTraits> IClientTraits<T> client();
-
-      public abstract <T extends GenericTraits> IEntityTraits<T> entity();
-
-      abstract public TraitComponentKind<? extends GenericTraits> kind();
-
       abstract public <T extends GenericTraits> T toReference(ResourceLocation location);
 
       public Optional<ResourceLocation> location() {
@@ -65,6 +57,14 @@ public abstract class GenericTraits {
       public ModSound sound() {
             return sound;
       }
+
+      public abstract String name();
+
+      public abstract <T extends GenericTraits> IClientTraits<T> client();
+
+      public abstract <T extends GenericTraits> IEntityTraits<T> entity();
+
+      abstract public TraitComponentKind<? extends GenericTraits> kind();
 
       public abstract Fraction fullness(PatchedComponentHolder holder);
 

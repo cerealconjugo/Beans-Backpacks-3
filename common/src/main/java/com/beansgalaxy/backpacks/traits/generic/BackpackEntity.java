@@ -64,7 +64,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
             @Override
             public PlaceableComponent copy(PlaceableComponent placeableComponent) {
-                  return new PlaceableComponent(placeableComponent.modelLocation);
+                  return new PlaceableComponent(placeableComponent.modelLocation(), placeableComponent.sound());
             }
       });
 
@@ -152,7 +152,6 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             mute.onPlace(backpackEntity, ctx.getPlayer(), backpackStack);
 
             backpackEntity.entityData.set(ITEM_STACK, backpackStack.copyWithCount(1));
-            backpackStack.shrink(1);
 
             if (level instanceof ServerLevel) {
                   level.addFreshEntity(backpackEntity);
@@ -162,6 +161,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                   level.updateNeighbourForOutputSignal(backpackEntity.blockPosition(), Blocks.AIR);
             }
 
+            backpackStack.shrink(1);
             return backpackEntity;
       }
 
@@ -285,7 +285,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       protected void defineSynchedData(SynchedEntityData.Builder builder) {
             builder.define(ITEM_STACK, ModItems.IRON_BACKPACK.get().getDefaultInstance());
 //            builder.define(TRAIT, NonTrait.INSTANCE);
-            builder.define(PLACEABLE, new PlaceableComponent());
+            builder.define(PLACEABLE, new PlaceableComponent(ModSound.HARD));
             builder.define(DIRECTION, Direction.UP);
       }
 
@@ -422,14 +422,15 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                         else {
                               boolean silent = this.isSilent();
                               getTraits().ifPresentOrElse(traits -> {
-                                    traits.entity().onDamage(this, traits, silent);
+                                    traits.entity().onDamage(this, traits, silent, getPlaceable().sound());
                               }, () -> {
                                     wobble(10);
                                     breakAmount += 10;
                                     hop(0.1);
                                     if (!silent) {
                                           float pitch = random.nextFloat() * 0.3f;
-                                          ModSound.SOFT.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
+                                          ModSound sound = getPlaceable().sound();
+                                          sound.at(this, ModSound.Type.HIT, 1f, pitch + 0.9f);
                                     }
                               });
                         }
@@ -472,11 +473,11 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       protected void breakAndDropContents() {
             boolean dropItems = level().getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
-            ModSound modSound = getTraits().map(traits -> {
+            getTraits().ifPresent(traits -> {
                   traits.entity().onBreak(this, traits, dropItems);
-                  return traits.sound();
-            }).orElse(ModSound.SOFT);
+            });
 
+            ModSound modSound = getPlaceable().sound();
             if (!this.isSilent())
                   modSound.at(this, ModSound.Type.BREAK);
 
@@ -514,7 +515,8 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
                         killAndUpdate(false);
 
-                        ModSound modSound = getTraits().map(GenericTraits::sound).orElse(ModSound.SOFT);
+
+                        ModSound modSound = getPlaceable().sound();
                         modSound.at(player, ModSound.Type.EQUIP);
                         return InteractionResult.SUCCESS;
                   }
@@ -532,7 +534,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                                     player.setItemSlot(slot, toStack());
                                     killAndUpdate(false);
 
-                                    ModSound modSound = getTraits().map(GenericTraits::sound).orElse(ModSound.SOFT);
+                                    ModSound modSound = getPlaceable().sound();
                                     modSound.at(player, ModSound.Type.EQUIP);
                                     return InteractionResult.SUCCESS;
                               }

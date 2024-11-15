@@ -67,7 +67,7 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
       }
 
       @Override
-      public void onDamage(BackpackEntity backpack, BulkTraits traits, boolean silent) {
+      public void onDamage(BackpackEntity backpack, BulkTraits traits, boolean silent, ModSound sound) {
             BulkMutable mutable = traits.mutable(backpack);
             ItemStack stack = mutable.removeItem(0);
             if (!stack.isEmpty()) {
@@ -95,12 +95,12 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
                   backpack.wobble(10);
                   if (!silent) {
                         float pitch = backpack.getRandom().nextFloat() * 0.3f;
-                        traits.sound().at(backpack, ModSound.Type.HIT, 1f, pitch + 0.9f);
+                        sound.at(backpack, ModSound.Type.HIT, 1f, pitch + 0.9f);
                   }
                   return;
             }
 
-            IEntityTraits.super.onDamage(backpack, traits, silent);
+            IEntityTraits.super.onDamage(backpack, traits, silent, sound);
       }
 
       @Override

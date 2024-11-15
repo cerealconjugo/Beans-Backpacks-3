@@ -38,11 +38,9 @@ public class ItemMixin {
       private void backpackUseOn(UseOnContext ctx, CallbackInfoReturnable<InteractionResult> cir) {
             ItemStack backpack = ctx.getItemInHand();
             Optional<GenericTraits> optionalTr = Traits.get(backpack);
-            ModSound modSound = ModSound.SOFT;
             if (optionalTr.isPresent()) {
                   GenericTraits traits = optionalTr.get();
                   traits.useOn(ctx, backpack, cir);
-                  modSound = traits.sound();
                   if (cir.isCancelled()) {
                         return;
                   }
@@ -53,7 +51,8 @@ public class ItemMixin {
                   PlaceableComponent placeable = optionalPl.get();
                   BackpackEntity entity = BackpackEntity.create(ctx, backpack, placeable, optionalTr);
                   if (entity != null) {
-                        modSound.at(entity, ModSound.Type.PLACE);
+                        ModSound sound = entity.getPlaceable().sound();
+                        sound.at(entity, ModSound.Type.PLACE);
                         cir.setReturnValue(InteractionResult.SUCCESS);
                   }
             }

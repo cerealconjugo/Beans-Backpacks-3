@@ -1,35 +1,27 @@
 package com.beansgalaxy.backpacks.components;
 
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
+import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class PlaceableComponent {
+public record PlaceableComponent(@Nullable ResourceLocation modelLocation, ModSound sound) {
       public static final String NAME = "placeable";
-      public final ResourceLocation modelLocation;
 
-      public PlaceableComponent() {
-            modelLocation = null;
-      }
-
-      public PlaceableComponent(ResourceLocation modelLocation) {
-            this.modelLocation = modelLocation;
+      public PlaceableComponent(ModSound sound) {
+            this(null, ModSound.HARD);
       }
 
       public Optional<ResourceLocation> getModelLocation() {
-            return Optional.ofNullable(modelLocation);
+            return Optional.ofNullable(modelLocation());
       }
 
       public static Optional<PlaceableComponent> get(ItemStack stack) {
@@ -46,14 +38,17 @@ public class PlaceableComponent {
 
       public static final Codec<PlaceableComponent> CODEC = RecordCodecBuilder.create(in ->
                   in.group(
-                              ResourceLocation.CODEC.optionalFieldOf("model").forGetter(PlaceableComponent::getModelLocation)
-                  ).apply(in, model -> new PlaceableComponent(model.orElse(null)))
+                              ResourceLocation.CODEC.optionalFieldOf("model").forGetter(PlaceableComponent::getModelLocation),
+                              ModSound.MAP_CODEC.forGetter(PlaceableComponent::sound)
+                  ).apply(in, (model, sound) -> new PlaceableComponent(model.orElse(null), sound))
       );
 
       public static final StreamCodec<RegistryFriendlyByteBuf, PlaceableComponent> STREAM_CODEC = new StreamCodec<>() {
 
             @Override
             public void encode(RegistryFriendlyByteBuf buf, PlaceableComponent placeable) {
+                  ModSound.STREAM_CODEC.encode(buf, placeable.sound);
+
                   boolean modelNotEmpty = placeable.modelLocation != null;
                   buf.writeBoolean(modelNotEmpty);
                   if (modelNotEmpty)
@@ -62,13 +57,15 @@ public class PlaceableComponent {
 
             @Override
             public PlaceableComponent decode(RegistryFriendlyByteBuf buf) {
+                  ModSound sound = ModSound.STREAM_CODEC.decode(buf);
+
                   boolean modelNotEmpty = buf.readBoolean();
                   if (modelNotEmpty) {
                         ResourceLocation modelResourceLocation = buf.readResourceLocation();
-                        return new PlaceableComponent(modelResourceLocation);
+                        return new PlaceableComponent(modelResourceLocation, sound);
                   }
 
-                  return new PlaceableComponent();
+                  return new PlaceableComponent(sound);
             }
       };
 }
