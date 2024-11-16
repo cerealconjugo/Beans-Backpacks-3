@@ -66,17 +66,6 @@ public class ChestTraits extends ItemStorageTraits {
                   }
             }
 
-            EnderTraits enderTraits = backpack.get(Traits.ENDER);
-            if (enderTraits == null)
-                  return Optional.empty();
-
-            Optional<GenericTraits> optional = enderTraits.getTrait();
-            if (optional.isEmpty())
-                  return Optional.empty();
-
-            if (optional.get() instanceof ChestTraits trait)
-                  return Optional.of(trait);
-
             return Optional.empty();
       }
 
@@ -126,12 +115,12 @@ public class ChestTraits extends ItemStorageTraits {
       }
 
       @Override
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
             if (player.level().isClientSide)
                   client().openTinyMenu(this, hand, player);
 
+            ItemStack backpack = player.getItemInHand(hand);
             cir.setReturnValue(InteractionResultHolder.success(backpack));
-            super.use(level, player, hand, backpack, cir);
       }
 
       @Override
@@ -420,12 +409,11 @@ public class ChestTraits extends ItemStorageTraits {
             return contents.copyOne();
       }
 
-      public void tinyMenuClick(ItemStack itemStack, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
+      public void tinySubMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player) {
             if (index < 0 || index >= size()) {
                   return;
             }
 
-            PatchedComponentHolder holder = PatchedComponentHolder.of(itemStack);
             ChestMutable mutable = mutable(holder);
             if (clickType.isShift()) {
                   ItemStack stack = mutable.removeItem(index);

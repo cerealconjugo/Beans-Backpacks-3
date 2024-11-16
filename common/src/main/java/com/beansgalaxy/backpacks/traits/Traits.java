@@ -29,7 +29,6 @@ import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.serialization.*;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;

@@ -8,10 +8,7 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.*;
 
 import java.util.function.UnaryOperator;
 
@@ -74,5 +71,9 @@ public enum ModItems {
 
       public Item get() {
             return item;
+      }
+
+      public boolean is(ItemStack stack) {
+            return stack.is(item);
       }
 }

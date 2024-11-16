@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.client.CommonAtClient;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
@@ -29,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(Item.class)
@@ -37,10 +39,11 @@ public class ItemMixin {
       @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
       private void backpackUseOn(UseOnContext ctx, CallbackInfoReturnable<InteractionResult> cir) {
             ItemStack backpack = ctx.getItemInHand();
-            Optional<GenericTraits> optionalTr = Traits.get(backpack);
+            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+            Optional<GenericTraits> optionalTr = Traits.get(holder);
             if (optionalTr.isPresent()) {
                   GenericTraits traits = optionalTr.get();
-                  traits.useOn(ctx, backpack, cir);
+                  traits.useOn(ctx, holder, cir);
                   if (cir.isCancelled()) {
                         return;
                   }
@@ -62,7 +65,7 @@ public class ItemMixin {
       private void backpackUseOn(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
             ItemStack backpack = player.getItemInHand(hand);
             Traits.runIfPresent(backpack, traits -> {
-                  traits.use(level, player, hand, backpack, cir);
+                  traits.use(level, player, hand, PatchedComponentHolder.of(backpack), cir);
             });
             if (!cir.isCancelled())
                   EquipableComponent.use(player, hand, backpack, cir);
@@ -87,11 +90,6 @@ public class ItemMixin {
             Traits.runIfPresent(stack, traits -> {
                   traits.inventoryTick(PatchedComponentHolder.of(stack), level, entity, slot, selected);
             });
-      }
-
-      @Inject(method = "canFitInsideContainerItems", at = @At("HEAD"), cancellable = true)
-      private void backpackFitInsideContainer(CallbackInfoReturnable<Boolean> cir) {
-
       }
 
 // ===================================================================================================================== CLIENT METHODS
@@ -128,8 +126,9 @@ public class ItemMixin {
 
       @Inject(method = "finishUsingItem", at = @At("HEAD"), cancellable = true)
       private void finishUsingLunchBox(ItemStack backpack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
+            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
             LunchBoxTraits.ifPresent(backpack, traits -> {
-                  traits.finishUsingItem(backpack, level, entity, cir);
+                  traits.finishUsingItem(holder, backpack, level, entity, cir);
             });
       }
 
@@ -142,8 +141,12 @@ public class ItemMixin {
 
       @Inject(method = "getUseAnimation", at = @At("HEAD"), cancellable = true)
       private void lunchBoxUseAnimation(ItemStack backpack, CallbackInfoReturnable<UseAnim> cir) {
-            CommonAtClient.LunchBoxTraitsFirstIsPresent(backpack, food -> {
-                  cir.setReturnValue(food.getUseAnimation());
+            LunchBoxTraits.ifPresent(backpack, traits -> {
+                  List<ItemStack> stacks = backpack.get(ITraitData.ITEM_STACKS);
+                  if (stacks == null || stacks.isEmpty())
+                        return;
+
+                  cir.setReturnValue(UseAnim.EAT);
             });
       }
 

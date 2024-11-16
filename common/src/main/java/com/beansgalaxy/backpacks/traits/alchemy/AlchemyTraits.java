@@ -80,8 +80,7 @@ public class AlchemyTraits extends BundleLikeTraits {
       }
 
       @Override
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
             if (isEmpty(holder))
                   return;
 
@@ -98,6 +97,7 @@ public class AlchemyTraits extends BundleLikeTraits {
                   if (foodproperties == null) {
                         player.drop(selected, true);
                         mutable.push();
+                        ItemStack backpack = player.getItemInHand(hand);
                         cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide));
                         return;
                   }
@@ -137,6 +137,7 @@ public class AlchemyTraits extends BundleLikeTraits {
             int size = mutable.getItemStacks().size();
             limitSelectedSlot(holder, selectedSlot, size);
             mutable.push();
+            ItemStack backpack = player.getItemInHand(hand);
             cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide));
       }
 

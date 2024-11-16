@@ -43,8 +43,8 @@ public class PlayerMixin {
                   target = "Lnet/minecraft/world/item/ProjectileWeaponItem;getHeldProjectile(Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Predicate;)Lnet/minecraft/world/item/ItemStack;"))
       private void getBackpackProjectile(ItemStack pShootable, CallbackInfoReturnable<ItemStack> cir, Predicate<ItemStack> predicate) {
             Player player = (Player) (Object) this;
-            QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver) -> {
-                  List<ItemStack> stacks = quiver.get(ITraitData.ITEM_STACKS);
+            QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver, holder) -> {
+                  List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
                   if (stacks == null || stacks.isEmpty())
                         return false;
 

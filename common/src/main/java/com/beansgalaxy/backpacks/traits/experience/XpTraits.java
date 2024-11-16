@@ -74,10 +74,10 @@ public class XpTraits extends GenericTraits {
       }
 
       @Override
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            XpMutable mutable = mutable(PatchedComponentHolder.of(backpack));
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+            XpMutable mutable = mutable(holder);
 
-            if (isEmpty(backpack)) {
+            if (isEmpty(holder)) {
                   int totalExperience = player.totalExperience;
                   if (totalExperience == 0)
                         return;
@@ -88,6 +88,8 @@ public class XpTraits extends GenericTraits {
             }
 
             mutable.push();
+            ItemStack backpack = player.getItemInHand(hand);
+            cir.setReturnValue(InteractionResultHolder.success(backpack));
       }
 
       static int pointsFromLevels(int level) {

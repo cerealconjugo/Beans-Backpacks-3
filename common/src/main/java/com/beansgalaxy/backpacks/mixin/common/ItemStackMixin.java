@@ -1,10 +1,12 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.client.CommonAtClient;
+import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -38,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -46,20 +49,6 @@ public abstract class ItemStackMixin {
       @Shadow public abstract Item getItem();
 
       @Unique public final ItemStack instance = (ItemStack) (Object) this;
-
-      @Inject(method = "getDrinkingSound", at = @At("HEAD"), cancellable = true)
-      private void lunchBoxDrinkingSound(CallbackInfoReturnable<SoundEvent> cir) {
-            CommonAtClient.LunchBoxTraitsFirstIsPresent(instance, food -> {
-                  cir.setReturnValue(food.getDrinkingSound());
-            });
-      }
-
-      @Inject(method = "getEatingSound", at = @At("HEAD"), cancellable = true)
-      private void lunchBoxEatingSound(CallbackInfoReturnable<SoundEvent> cir) {
-            CommonAtClient.LunchBoxTraitsFirstIsPresent(instance, food -> {
-                  cir.setReturnValue(food.getEatingSound());
-            });
-      }
 
       @Inject(method = "isStackable", at = @At("HEAD"), cancellable = true)
       private void backpackIsStackable(CallbackInfoReturnable<Boolean> cir) {

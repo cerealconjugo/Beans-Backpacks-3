@@ -92,12 +92,10 @@ public class LunchBoxTraits extends BundleLikeTraits {
                               : 0;
 
                   ifPresent.accept(stacks.get(selectedSlotSafe));
-
             });
       }
 
-      public void finishUsingItem(ItemStack backpack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
-            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
+      public void finishUsingItem(PatchedComponentHolder holder, ItemStack backpack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
             LunchBoxMutable mutable = mutable(holder);
             int selectedSlot = entity instanceof Player player
                         ? getSelectedSlotSafe(holder, player)
@@ -114,17 +112,18 @@ public class LunchBoxTraits extends BundleLikeTraits {
       }
 
       @Override
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            List<ItemStack> stacks = backpack.get(ITraitData.ITEM_STACKS);
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+            List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
             if (stacks == null || stacks.isEmpty())
                   return;
 
-            int selectedSlotSafe = getSelectedSlotSafe(PatchedComponentHolder.of(backpack), player);
+            int selectedSlotSafe = getSelectedSlotSafe(holder, player);
             ItemStack first = stacks.get(selectedSlotSafe);
             FoodProperties $$4 = first.get(DataComponents.FOOD);
             if ($$4 != null) {
                   if (player.canEat($$4.canAlwaysEat())) {
                         player.startUsingItem(hand);
+                        ItemStack backpack = player.getItemInHand(hand);
                         cir.setReturnValue(InteractionResultHolder.success(backpack));
                   }
             }

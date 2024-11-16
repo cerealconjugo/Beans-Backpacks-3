@@ -1,9 +1,11 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -60,12 +62,26 @@ public class TinyChestClick implements Packet2S {
                   return;
 
             Slot slot = menu.getSlot(containerSlot);
-            Optional<ChestTraits> optional = ChestTraits.get(PatchedComponentHolder.of(slot));
+            PatchedComponentHolder holder = PatchedComponentHolder.of(slot);
+            Optional<ChestTraits> optional = ChestTraits.get(holder);
+            ChestTraits chestTraits;
             if (optional.isEmpty()) {
-                  return;
+                  Optional<EnderTraits> optionalEnder = EnderTraits.get(slot.getItem());
+                  if (optionalEnder.isEmpty())
+                        return;
+
+                  EnderTraits enderTraits = optionalEnder.get();
+                  GenericTraits trait = enderTraits.getTrait(sender.level());
+                  if (trait instanceof ChestTraits chest) {
+                        holder = enderTraits;
+                        chestTraits = chest;
+                  } else
+                        return;
+            }
+            else {
+                  chestTraits = optional.get();
             }
 
-            ChestTraits chestTraits = optional.get();
 
             SlotAccess carriedAccess = new SlotAccess() {
                   public ItemStack get() {
@@ -78,7 +94,7 @@ public class TinyChestClick implements Packet2S {
                   }
             };
 
-            chestTraits.tinyMenuClick(slot.getItem(), index, clickType, carriedAccess, sender);
+            chestTraits.tinySubMenuClick(holder, index, clickType, carriedAccess, sender);
       }
 
       public static Type<TinyChestClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_sub_chest_click_s"));

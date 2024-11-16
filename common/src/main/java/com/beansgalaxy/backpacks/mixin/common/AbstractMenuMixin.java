@@ -33,15 +33,11 @@ public abstract class AbstractMenuMixin {
             if (ClickType.THROW.equals(actionType)) {
                   ItemStorageTraits.runIfPresent(stack, trait -> {
                         trait.hotkeyThrow(slot, PatchedComponentHolder.of(stack), button, player, menuKeyDown, ci);
-                  }, () -> {
-                        EnderTraits enderTraits = stack.get(Traits.ENDER);
-                        if (enderTraits != null)
-                              enderTraits.getTrait().ifPresent(traits -> {
-                                    if (traits instanceof ItemStorageTraits storageTraits) {
-                                          storageTraits.hotkeyThrow(slot, enderTraits, button, player, menuKeyDown, ci);
-                                    }
-                              });
-                  });
+                  }, () -> EnderTraits.get(stack).ifPresent(enderTraits -> enderTraits.getTrait().ifPresent(traits -> {
+                        if (traits instanceof ItemStorageTraits storageTraits) {
+                              storageTraits.hotkeyThrow(slot, enderTraits, button, player, menuKeyDown, ci);
+                        }
+                  })));
                   return;
             }
 

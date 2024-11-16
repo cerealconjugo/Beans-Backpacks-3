@@ -47,12 +47,15 @@ public class FabricMain implements ModInitializer {
                     return battery.mutable(PatchedComponentHolder.of(stack)).getStorage();
             }
 
-            EnderTraits enderTraits = stack.get(Traits.ENDER);
-            if (enderTraits != null) {
-                Optional<GenericTraits> trait = enderTraits.getTrait();
-                if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
-                    return battery.mutable(PatchedComponentHolder.of(stack)).getStorage();
-            }
+            Optional<EnderTraits> optional = EnderTraits.get(stack);
+            if (optional.isEmpty())
+                return null;
+
+            EnderTraits enderTraits = optional.get();
+            Optional<GenericTraits> optionalTrait = enderTraits.getTrait();
+            if (optionalTrait.isPresent() && optionalTrait.get() instanceof BatteryTraits battery)
+                return battery.mutable(enderTraits).getStorage();
+
             return null;
         });
 
@@ -68,12 +71,14 @@ public class FabricMain implements ModInitializer {
                     return bucket.mutable(PatchedComponentHolder.of(stack));
             }
 
-            EnderTraits enderTraits = stack.get(Traits.ENDER);
-            if (enderTraits != null) {
-                Optional<GenericTraits> trait = enderTraits.getTrait();
-                if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
-                    return bucket.mutable(PatchedComponentHolder.of(stack));
-            }
+            Optional<EnderTraits> optional = EnderTraits.get(stack);
+            if (optional.isEmpty())
+                return null;
+
+            EnderTraits enderTraits = optional.get();
+            Optional<GenericTraits> optionalTrait = enderTraits.getTrait();
+            if (optionalTrait.isPresent() && optionalTrait.get() instanceof BucketTraits bucket)
+                return bucket.mutable(enderTraits);
 
             return null;
         });

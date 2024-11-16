@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.network.serverbound;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -41,9 +42,9 @@ public class BackpackUse implements Packet2S {
             ItemStack backStack = sender.getItemBySlot(EquipmentSlot.BODY);
 
             Traits.runIfPresent(backStack, traits -> {
-                  CallbackInfoReturnable<InteractionResultHolder<ItemStack>> holder =
+                  CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir =
                               new CallbackInfoReturnable<>("backpack_action_use", true, InteractionResultHolder.pass(backStack));
-                  traits.use(sender.level(), sender, InteractionHand.MAIN_HAND, backStack, holder);
+                  traits.use(sender.level(), sender, InteractionHand.MAIN_HAND, PatchedComponentHolder.of(backStack), cir);
             });
       }
 

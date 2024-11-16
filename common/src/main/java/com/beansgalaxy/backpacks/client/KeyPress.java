@@ -7,6 +7,7 @@ import com.beansgalaxy.backpacks.network.serverbound.BackpackUseOn;
 import com.beansgalaxy.backpacks.network.serverbound.SyncHotkey;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.chest.screen.MenuChestScreen;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -75,14 +76,14 @@ public class KeyPress {
 
       public boolean consumeActionUse(Level level, Player player) {
             ItemStack backStack = player.getItemBySlot(EquipmentSlot.BODY);
-            CallbackInfoReturnable<InteractionResultHolder<ItemStack>> holder =
+            CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir =
                         new CallbackInfoReturnable<>("backpack_action_use", true, InteractionResultHolder.pass(backStack));
 
             Traits.runIfPresent(backStack, traits -> {
-                  traits.use(level, player, InteractionHand.MAIN_HAND, backStack, holder);
+                  traits.use(level, player, InteractionHand.MAIN_HAND, PatchedComponentHolder.of(backStack), cir);
             });
 
-            if (holder.getReturnValue().getResult().consumesAction()) {
+            if (cir.getReturnValue().getResult().consumesAction()) {
                   BackpackUse.send();
                   return true;
             }

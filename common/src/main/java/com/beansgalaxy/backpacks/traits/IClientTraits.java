@@ -45,7 +45,7 @@ public interface IClientTraits<T extends GenericTraits> {
       @Nullable
       ClientTooltipComponent getTooltipComponent(T traits, ItemStack itemStack, PatchedComponentHolder holder, Component title);
 
-      default boolean mouseScrolled(T traits, Level level, Slot hoveredSlot, int containerId, int scrolled) {
+      default boolean mouseScrolled(T traits, PatchedComponentHolder holder, Level level, Slot hoveredSlot, int containerId, int scrolled) {
             return false;
       }
 

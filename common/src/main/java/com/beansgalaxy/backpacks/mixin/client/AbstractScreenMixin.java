@@ -57,14 +57,9 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
                   ItemStack itemstack = this.hoveredSlot.getItem();
                   Traits.get(itemstack).ifPresentOrElse(trait -> {
                         trait.client().renderTooltip(trait, itemstack, PatchedComponentHolder.of(itemstack), gui, mouseX, mouseY, ci);
-                  }, () -> {
-                        EnderTraits enderTraits = itemstack.get(Traits.ENDER);
-                        if (enderTraits != null) {
-                              enderTraits.getTrait().ifPresent(trait -> {
-                                    trait.client().renderTooltip(trait, itemstack, enderTraits, gui, mouseX, mouseY, ci);
-                              });
-                        }
-                  });
+                  }, () -> EnderTraits.get(itemstack).ifPresent(enderTraits -> enderTraits.getTrait().ifPresent(trait ->
+                        trait.client().renderTooltip(trait, itemstack, enderTraits, gui, mouseX, mouseY, ci)
+                  )));
             }
       }
 
@@ -75,16 +70,13 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
                   int containerId = menu.containerId;
                   ClientLevel level = minecraft.level;
                   if (ItemStorageTraits.testIfPresent(stack, traits ->
-                              traits.client().mouseScrolled(traits, level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5))))
+                              traits.client().mouseScrolled(traits, PatchedComponentHolder.of(stack), level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5))))
                         return true;
                   else {
-                        EnderTraits enderTraits = stack.get(Traits.ENDER);
-                        if (enderTraits != null)
-                              enderTraits.getTrait().ifPresent(traits -> {
-                                    if (traits instanceof ItemStorageTraits storageTraits) {
-                                          traits.client().mouseScrolled(storageTraits, level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5));
-                                    }
-                              });
+                        EnderTraits.get(stack).ifPresent(enderTraits -> enderTraits.getTrait().ifPresent(traits -> {
+                              if (traits instanceof ItemStorageTraits storageTraits)
+                                    traits.client().mouseScrolled(storageTraits, enderTraits, level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5));
+                        }));
                   }
             }
             return super.mouseScrolled(pMouseX, pMouseY, pScrollX, pScrollY);
@@ -102,15 +94,13 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
                   return;
 
             if (slot != lastClickSlot && slot != backpackDraggedSlot) {
-                  EnderTraits enderTraits = backpack.get(Traits.ENDER);
-                  if (enderTraits != null) {
+                  EnderTraits.get(backpack).ifPresentOrElse(enderTraits -> {
                         GenericTraits trait = enderTraits.getTrait(minecraft.level);
                         if (trait instanceof ItemStorageTraits storageTraits)
                               beans_Backpacks_3$dragTrait(pButton, storageTraits, slot, cir, enderTraits);
-                  }
-                  else ItemStorageTraits.runIfPresent(backpack, traits -> {
-                        beans_Backpacks_3$dragTrait(pButton, traits, slot, cir, PatchedComponentHolder.of(backpack));
-                  });
+                  }, () -> ItemStorageTraits.runIfPresent(backpack, traits ->
+                        beans_Backpacks_3$dragTrait(pButton, traits, slot, cir, PatchedComponentHolder.of(backpack))
+                  ));
             }
       }
 
@@ -140,14 +130,15 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
             if (!backpackDraggedSlots.isEmpty()) {
                   if (backpackDraggedSlot != null) {
                         ItemStack backpack = menu.getCarried();
-                        EnderTraits enderTraits = backpack.get(Traits.ENDER);
-                        if (enderTraits != null) {
+
+                        EnderTraits.get(backpack).ifPresentOrElse(enderTraits -> {
                               GenericTraits trait = enderTraits.getTrait(minecraft.level);
                               if (trait instanceof ItemStorageTraits storageTraits)
                                     clickSlot(storageTraits, backpackDraggedSlot, enderTraits);
-                        }
-                        else ItemStorageTraits.runIfPresent(backpack, traits ->
-                                    clickSlot(traits, backpackDraggedSlot, PatchedComponentHolder.of(backpack)));
+                        }, () -> ItemStorageTraits.runIfPresent(backpack, traits ->
+                                    clickSlot(traits, backpackDraggedSlot, PatchedComponentHolder.of(backpack)))
+                        );
+
                         backpackDraggedSlot = null;
                   }
                   backpackDraggedSlots.clear();

@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.components.reference;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.*;
@@ -17,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class ReferenceTrait {
       private final ResourceLocation location;
@@ -88,25 +86,19 @@ public class ReferenceTrait {
       public Optional<GenericTraits> getTrait() {
             return NonTrait.is(trait) ? Optional.empty()
                         : Optional.ofNullable(trait).or(() -> {
-                              ReferenceFields reference = ReferenceTraitRegistry.get(location);
+                              ReferenceRegistry reference = ReferenceRegistry.getNullable(location);
                               if (reference == null)
                                     return Optional.empty();
 
-                              GenericTraits traits = reference.traits();
-                              if (traits == null) {
-                                    return Optional.empty();
-                              }
-
-                              this.trait = traits;
                               loadFromReferenceFields(reference);
-                              return Optional.of(traits);
+                              return Optional.of(trait);
                         });
       }
 
       @NotNull
       public Optional<PlaceableComponent> getPlaceable() {
             return Optional.ofNullable(placeable).or(() -> {
-                  ReferenceFields reference = ReferenceTraitRegistry.get(location);
+                  ReferenceRegistry reference = ReferenceRegistry.getNullable(location);
                   if (reference == null)
                         return Optional.empty();
 
@@ -118,7 +110,7 @@ public class ReferenceTrait {
       @NotNull
       public Optional<EquipableComponent> getEquipable() {
             return Optional.ofNullable(equipable).or(() -> {
-                  ReferenceFields reference = ReferenceTraitRegistry.get(location);
+                  ReferenceRegistry reference = ReferenceRegistry.getNullable(location);
                   if (reference == null)
                         return Optional.empty();
 
@@ -130,7 +122,7 @@ public class ReferenceTrait {
       @NotNull
       public Optional<ItemAttributeModifiers> getAttributes() {
             return Optional.ofNullable(modifiers).or(() -> {
-                  ReferenceFields reference = ReferenceTraitRegistry.get(location);
+                  ReferenceRegistry reference = ReferenceRegistry.getNullable(location);
                   if (reference == null)
                         return Optional.empty();
 
@@ -139,50 +131,22 @@ public class ReferenceTrait {
             });
       }
 
-      private void loadFromReferenceFields(ReferenceFields fields) {
+      private void loadFromReferenceFields(ReferenceRegistry fields) {
+            this.trait = fields.traits();
             this.placeable = fields.placeable();
             this.equipable = fields.equipable();
             this.modifiers = fields.modifiers();
       }
 
-      public static final Codec<ReferenceTrait> CODEC = new MapCodec<ReferenceTrait>() {
-            private static final MapCodec<ResourceLocation> LOCATION_CODEC = ResourceLocation.CODEC.fieldOf("location");
+      public static final Codec<ReferenceTrait> CODEC = ResourceLocation.CODEC.flatXmap(location -> {
+            ReferenceRegistry referenceRegistry = ReferenceRegistry.getNullable(location);
+            if (referenceRegistry == null)
+                  return DataResult.error(() -> "No trait is registered using the given location; " + location, new ReferenceTrait(location));
 
-            @Override
-            public <T> Stream<T> keys(DynamicOps<T> ops) {
-                  return LOCATION_CODEC.keys(ops);
-            }
-
-            @Override
-            public <T> RecordBuilder<T> encode(ReferenceTrait input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-                  RecordBuilder<T> suffix = input.getTrait().map(traits ->
-                                    TraitComponentKind.encode(traits, ops, prefix)
-                  ).orElse(prefix);
-
-                  return LOCATION_CODEC.encode(input.location, ops, suffix);
-            }
-
-            @Override
-            public <T> DataResult<ReferenceTrait> decode(DynamicOps<T> ops, MapLike<T> input) {
-                  return LOCATION_CODEC.decode(ops, input).flatMap(location -> {
-                        ReferenceFields referenceFields = ReferenceTraitRegistry.get(location);
-                        if (referenceFields == null)
-                              return DataResult.error(() -> "No trait is registered using the given location: " + location);
-
-                        GenericTraits reference = referenceFields.traits();
-                        if (!NonTrait.is(reference))
-                              return reference.kind().codec().fieldOf("trait").decode(ops, input).map(
-                                          trait -> {
-                                                GenericTraits traitReference = trait.toReference(location);
-                                                return new ReferenceTrait(location, traitReference, referenceFields.placeable(), referenceFields.equipable());
-                                          }
-                              );
-
-
-                        return DataResult.success(new ReferenceTrait(location, NonTrait.INSTANCE, referenceFields.placeable(), referenceFields.equipable()));
-                  });
-            }
-      }.codec();
+            return DataResult.success(new ReferenceTrait(location, referenceRegistry.traits().toReference(location), referenceRegistry.placeable(), referenceRegistry.equipable()));
+      }, reference ->
+            DataResult.success(reference.location)
+      );
 
       public static final StreamCodec<? super RegistryFriendlyByteBuf, ReferenceTrait> STREAM_CODEC = new StreamCodec<>() {
 
@@ -198,7 +162,7 @@ public class ReferenceTrait {
             public ReferenceTrait decode(RegistryFriendlyByteBuf buf) {
                   ResourceLocation location = ResourceLocation.STREAM_CODEC.decode(buf);
                   if (buf.readBoolean()) {
-                        ReferenceFields reference = ReferenceTraitRegistry.get(location);
+                        ReferenceRegistry reference = ReferenceRegistry.get(location);
                         GenericTraits fields = reference.traits();
                         return new ReferenceTrait(location, fields.toReference(location), reference.placeable(), reference.equipable());
                   }

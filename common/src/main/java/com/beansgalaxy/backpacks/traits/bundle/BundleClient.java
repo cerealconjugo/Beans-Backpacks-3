@@ -8,7 +8,6 @@ import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -89,14 +88,8 @@ public class BundleClient implements IClientTraits<BundleLikeTraits> {
       }
 
       @Override
-      public boolean mouseScrolled(BundleLikeTraits trait, Level level, Slot hoveredSlot, int containerId, int scrolled) {
+      public boolean mouseScrolled(BundleLikeTraits trait, PatchedComponentHolder holder, Level level, Slot hoveredSlot, int containerId, int scrolled) {
             LocalPlayer player = Minecraft.getInstance().player;
-
-            ItemStack backpack = hoveredSlot.getItem();
-            EnderTraits enderTraits = backpack.get(Traits.ENDER);
-            PatchedComponentHolder holder = enderTraits == null
-                        ? PatchedComponentHolder.of(backpack)
-                        : enderTraits;
 
             int startSlot = trait.getSelectedSlot(holder, player);
             int i = trait.getSlotSelection(holder).modSelectedSlot(player, slot -> {

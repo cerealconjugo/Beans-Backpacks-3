@@ -3,8 +3,7 @@ package com.beansgalaxy.backpacks.network.clientbound;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.components.reference.ReferenceFields;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
+import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -19,15 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigureReferences implements Packet2C {
-      final Map<ResourceLocation, ReferenceFields> references;
+      final Map<ResourceLocation, ReferenceRegistry> references;
 
-      private ConfigureReferences(Map<ResourceLocation, ReferenceFields> references) {
+      private ConfigureReferences(Map<ResourceLocation, ReferenceRegistry> references) {
             this.references = references;
       }
 
       public ConfigureReferences(RegistryFriendlyByteBuf buf) {
             int size = buf.readInt();
-            HashMap<ResourceLocation, ReferenceFields> map = new HashMap<>();
+            HashMap<ResourceLocation, ReferenceRegistry> map = new HashMap<>();
             for (int i = 0; i < size; i++) {
                   ResourceLocation location = ResourceLocation.STREAM_CODEC.decode(buf);
 
@@ -42,15 +41,15 @@ public class ConfigureReferences implements Packet2C {
                   boolean isEquipable = buf.readBoolean();
                   EquipableComponent equipableComponent = isEquipable ? EquipableComponent.STREAM_CODEC.decode(buf) : null;
 
-                  ReferenceFields referenceFields = new ReferenceFields(fields, modifiers, placeableComponent, equipableComponent);
-                  map.put(location, referenceFields);
+                  ReferenceRegistry referenceRegistry = new ReferenceRegistry(fields, modifiers, placeableComponent, equipableComponent);
+                  map.put(location, referenceRegistry);
             }
 
             this.references = map;
       }
 
       public static void send(ServerPlayer player) {
-            new ConfigureReferences(ReferenceTraitRegistry.REFERENCES).send2C(player);
+            new ConfigureReferences(ReferenceRegistry.REFERENCES).send2C(player);
       }
 
       @Override
@@ -88,8 +87,8 @@ public class ConfigureReferences implements Packet2C {
 
       @Override
       public void handle() {
-            ReferenceTraitRegistry.REFERENCES.clear();
-            references.forEach(ReferenceTraitRegistry::put);
+            ReferenceRegistry.REFERENCES.clear();
+            references.forEach(ReferenceRegistry::put);
       }
 
       public static Type<ConfigureReferences> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":config_references_c"));

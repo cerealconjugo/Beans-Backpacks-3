@@ -16,6 +16,7 @@
     "common.InventoryMixin",
     "common.ItemMixin",
     "common.ItemStackMixin",
+    "common.LivingEntityMixin",
     "common.PlayerMixin",
     "common.ServerPlayMixin"
   ],

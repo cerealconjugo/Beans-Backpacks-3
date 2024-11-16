@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.traits.quiver;
 
+import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipmentGroups;
 import com.beansgalaxy.backpacks.registry.ModSound;
@@ -10,6 +11,7 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import com.mojang.datafixers.util.Function3;
+import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -56,17 +58,35 @@ public class QuiverTraits extends BundleLikeTraits {
             });
       }
 
-      public static void runIfQuiverEquipped(Player player, Function3<QuiverTraits, @Nullable EquipmentSlot, ItemStack, Boolean> runnable) {
+      public static void runIfQuiverEquipped(Player player, Function4<QuiverTraits, @Nullable EquipmentSlot, ItemStack, PatchedComponentHolder, Boolean> runnable) {
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                   ItemStack stack = player.getItemBySlot(slot);
                   if (stack.isEmpty())
                         continue;
 
                   Optional<QuiverTraits> traits = getQuiver(stack);
-                  if (traits.isEmpty())
-                        continue;
+                  QuiverTraits trait;
+                  PatchedComponentHolder holder;
+                  if (traits.isEmpty()) {
+                        Optional<EnderTraits> optionalEnder = EnderTraits.get(stack);
+                        if (optionalEnder.isEmpty()) {
+                              continue;
+                        }
 
-                  if (runnable.apply(traits.get(), slot, stack))
+                        EnderTraits ender = optionalEnder.get();
+                        GenericTraits generic = ender.getTrait(player.level());
+                        if (generic instanceof QuiverTraits quiverTraits) {
+                              trait = quiverTraits;
+                              holder = ender;
+                        }
+                        else continue;
+                  }
+                  else {
+                        trait = traits.get();
+                        holder = PatchedComponentHolder.of(stack);
+                  }
+
+                  if (runnable.apply(trait, slot, stack, holder))
                         return;
             }
 
@@ -74,15 +94,33 @@ public class QuiverTraits extends BundleLikeTraits {
                   if (stack.isEmpty())
                         continue;
 
+                  Optional<EquipableComponent> equipableComponent = EquipableComponent.get(stack);
+                  if (equipableComponent.isPresent())
+                        continue;
+
                   Optional<QuiverTraits> traits = getQuiver(stack);
-                  if (traits.isEmpty())
-                        continue;
+                  QuiverTraits trait;
+                  PatchedComponentHolder holder;
+                  if (traits.isEmpty()) {
+                        Optional<EnderTraits> optionalEnder = EnderTraits.get(stack);
+                        if (optionalEnder.isEmpty()) {
+                              continue;
+                        }
 
-                  Optional<EquipableComponent> optional = EquipableComponent.get(stack);
-                  if (optional.isPresent())
-                        continue;
+                        EnderTraits ender = optionalEnder.get();
+                        GenericTraits generic = ender.getTrait(player.level());
+                        if (generic instanceof QuiverTraits quiverTraits) {
+                              trait = quiverTraits;
+                              holder = ender;
+                        }
+                        else continue;
+                  }
+                  else {
+                        trait = traits.get();
+                        holder = PatchedComponentHolder.of(stack);
+                  }
 
-                  if (runnable.apply(traits.get(), null, stack))
+                  if (runnable.apply(trait, null, stack, holder))
                         return;
             }
       }

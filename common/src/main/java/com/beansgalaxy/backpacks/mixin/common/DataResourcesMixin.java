@@ -3,8 +3,7 @@ package com.beansgalaxy.backpacks.mixin.common;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
-import com.beansgalaxy.backpacks.components.reference.ReferenceFields;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
+import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
@@ -44,7 +43,7 @@ public class DataResourcesMixin {
                                          int $$4, Executor $$5, Executor $$6,
                                          CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir)
       {
-            ReferenceTraitRegistry.REFERENCES.clear();
+            ReferenceRegistry.REFERENCES.clear();
             manager.listResources("trait_ids", in -> in.getPath().endsWith(".json"))
                         .forEach(((resourceLocation, resource) -> {
                   try {
@@ -132,7 +131,7 @@ public class DataResourcesMixin {
                         if (NonTrait.is(fields) && placeable == null && equipable == null)
                               return;
 
-                        ReferenceTraitRegistry.put(location, new ReferenceFields(fields, attributes, placeable, equipable));
+                        ReferenceRegistry.put(location, new ReferenceRegistry(fields, attributes, placeable, equipable));
 
                   } catch (IOException e) {
                         throw new RuntimeException("error while parsing trait_ids", e);

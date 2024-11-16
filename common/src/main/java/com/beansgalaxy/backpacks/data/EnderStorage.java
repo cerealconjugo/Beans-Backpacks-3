@@ -1,8 +1,7 @@
 package com.beansgalaxy.backpacks.data;
 
 import com.beansgalaxy.backpacks.client.CommonAtClient;
-import com.beansgalaxy.backpacks.components.reference.ReferenceFields;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
+import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.network.clientbound.SendEnderEntry;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -138,7 +137,7 @@ public class EnderStorage {
             }
 
             private static @Nullable TraitEntry newMapFromLocation(ResourceLocation key) {
-                  ReferenceFields reference = ReferenceTraitRegistry.get(key);
+                  ReferenceRegistry reference = ReferenceRegistry.get(key);
                   if (reference == null)
                         return null;
 

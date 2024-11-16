@@ -30,6 +30,14 @@ public final class EnderTraits implements PatchedComponentHolder {
       private final ResourceLocation location;
       private @Nullable Level level = null;
 
+      public static Optional<EnderTraits> get(ItemStack stack) {
+            if (!ModItems.ENDER_POUCH.is(stack))
+                  return Optional.empty();
+
+            EnderTraits enderTraits = stack.get(Traits.ENDER);
+            return Optional.ofNullable(enderTraits);
+      }
+
       public EnderTraits(UUID uuid, ResourceLocation location) {
             this.uuid = uuid;
             this.location = location;
@@ -165,6 +173,28 @@ public final class EnderTraits implements PatchedComponentHolder {
                   EnderStorage enderStorage = EnderStorage.get(level);
                   return (T) enderStorage.get(uuid, location).get(type);
             }).orElse(null);
+      }
+
+      @Override
+      public void setChanged() {
+            if (!isLoaded() || level.isClientSide)
+                  return;
+
+            Predicate<ItemStack> matchTraits = stack -> this.equals(stack.get(Traits.ENDER));
+            HashSet<ServerPlayer> listeners = getListeners(level);
+            Iterator<ServerPlayer> iterator = listeners.iterator();
+
+            while (iterator.hasNext()) {
+                  ServerPlayer listener = iterator.next();
+                  if (listener.getInventory().contains(matchTraits) || matchTraits.test(listener.inventoryMenu.getCarried())) {
+                        SendEnderTraits.send(listener, uuid, location);
+                  }
+                  else iterator.remove();
+            }
+      }
+
+      public void broadcastChanges() {
+
       }
 
       public void broadcastChanges(ServerPlayer player) {

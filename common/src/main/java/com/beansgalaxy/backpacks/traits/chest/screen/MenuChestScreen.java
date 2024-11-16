@@ -1,9 +1,12 @@
 package com.beansgalaxy.backpacks.traits.chest.screen;
 
 import com.beansgalaxy.backpacks.client.KeyPress;
+import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.network.serverbound.TinyChestClick;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
+import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -17,6 +20,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 public class MenuChestScreen extends TinyChestScreen {
       private final AbstractContainerScreen<?> previousScreen;
@@ -66,13 +71,18 @@ public class MenuChestScreen extends TinyChestScreen {
 
       @Override
       protected void tinyMenuClick(int index, TinyClickType clickType, SlotAccess carriedAccess, LocalPlayer player) {
-            traits.tinyMenuClick(getStack(), index, clickType, carriedAccess, player);
+            traits.tinySubMenuClick(getHolder(), index, clickType, carriedAccess, player);
             TinyChestClick.send(previousScreen.getMenu().containerId, slot, index, clickType);
       }
 
       @Override
       public PatchedComponentHolder getHolder() {
-            return PatchedComponentHolder.of(getStack());
+            ItemStack stack = getStack();
+            Optional<EnderTraits> optional = EnderTraits.get(stack);
+            if (optional.isPresent())
+                  return optional.get();
+
+            return PatchedComponentHolder.of(stack);
       }
 
       @Override
@@ -83,7 +93,14 @@ public class MenuChestScreen extends TinyChestScreen {
       @Override
       public void render(GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
             ItemStack stack = getStack();
-            if (stack.isEmpty() || ChestTraits.get(getHolder()).isEmpty()) {
+            if (stack.isEmpty() || ChestTraits.get(getHolder()).or(() ->
+                        EnderTraits.get(stack).flatMap(enderTraits -> {
+                              GenericTraits trait = enderTraits.getTrait(minecraft.level);
+                              if (trait instanceof ChestTraits chestTraits)
+                                    return Optional.of(chestTraits);
+                              return Optional.empty();
+                        })).isEmpty())
+            {
                   previousScreen.render(gui, pMouseX, pMouseY, pPartialTick);
                   onClose();
                   return;

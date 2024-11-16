@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverMutable;
@@ -45,9 +46,7 @@ public abstract class BowMixin extends ProjectileWeaponItem {
       private void useBackpackQuiverArrow(ItemStack bowStack, Level level, LivingEntity pEntityLiving, int pTimeLeft, CallbackInfo ci) {
             Player player = (Player) pEntityLiving;
             Predicate<ItemStack> predicate = getAllSupportedProjectiles();
-            QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver) -> {
-
-                  PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
+            QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver, holder) -> {
                   QuiverMutable mutable = traits.mutable(holder);
                   List<ItemStack> stacks = mutable.getItemStacks();
                   if (stacks.isEmpty())
@@ -76,7 +75,9 @@ public abstract class BowMixin extends ProjectileWeaponItem {
                               traits.limitSelectedSlot(holder, selectedSlotSafe, size);
                               ci.cancel();
 
-                              if (player instanceof ServerPlayer serverPlayer) {
+                              if (holder instanceof EnderTraits enderTraits)
+                                    enderTraits.broadcastChanges();
+                              else if (player instanceof ServerPlayer serverPlayer) {
                                     List<Pair<EquipmentSlot, ItemStack>> pSlots = List.of(Pair.of(slot, quiver));
                                     ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(serverPlayer.getId(), pSlots);
                                     serverPlayer.serverLevel().getChunkSource().broadcastAndSend(serverPlayer, packet);

@@ -97,7 +97,7 @@ public class BucketTraits extends GenericTraits {
       }
 
       @Override
-      public void useOn(UseOnContext ctx, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      public void useOn(UseOnContext ctx, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResult> cir) {
             Level level = ctx.getLevel();
             Player player = ctx.getPlayer();
             BlockPos pos = ctx.getClickedPos();
@@ -108,7 +108,6 @@ public class BucketTraits extends GenericTraits {
             if (storage == null)
                   return;
 
-            PatchedComponentHolder holder = PatchedComponentHolder.of(backpack);
             BucketMutable mutable = mutable(holder);
             boolean success = !isEmpty(holder) && mutable.transferTo(storage, resource -> {
                   SoundEvent sound = FluidVariantAttributes.getEmptySound(resource);
@@ -127,13 +126,14 @@ public class BucketTraits extends GenericTraits {
             }
 
             if (!success) {
-                  super.useOn(ctx, backpack, cir);
+                  super.useOn(ctx, holder, cir);
             }
       }
 
       @Override
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-            BucketMutable mutable = mutable(PatchedComponentHolder.of(backpack));
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+            ItemStack backpack = player.getItemInHand(hand);
+            BucketMutable mutable = mutable(holder);
 
             if (player.isDiscrete()
                         ? mutable.tryPlace(level, player, backpack) || mutable.tryPickup(level, player, backpack)

@@ -92,11 +92,11 @@ public abstract class GenericTraits {
 
       public abstract void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir);
 
-      public void useOn(UseOnContext ctx, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      public void useOn(UseOnContext ctx, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResult> cir) {
 
       }
 
-      public void use(Level level, Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+      public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
 
       }
 

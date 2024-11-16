@@ -8,6 +8,7 @@ import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
 import net.fabricmc.api.ClientModInitializer;
@@ -42,13 +43,8 @@ public class FabricClient implements ClientModInitializer {
             ColorProviderRegistry.ITEM.register(((itemStack, layer) -> layer != 1 ? componentTint(itemStack, 0xFFcd7b46) : 0xFFFFFFFF), ModItems.BUNDLE.get());
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("no_gui"), Constants.NO_GUI_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("fullness"), FULLNESS_ITEM_PREDICATE);
+            ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("eating"), EATING_TRAIT_ITEM_PREDICATE);
             ItemProperties.register(ModItems.ENDER_POUCH.item, ResourceLocation.withDefaultNamespace("searching"), ENDER_SEARCHING_PREDICATE);
-            ItemProperties.register(ModItems.LUNCH_BOX.item, ResourceLocation.withDefaultNamespace("eating"), (itemStack, clientLevel, livingEntity, i) ->
-                        livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
-            );
-            ItemProperties.register(ModItems.NETHERITE_LUNCH_BOX.item, ResourceLocation.withDefaultNamespace("eating"), (itemStack, clientLevel, livingEntity, i) ->
-                        livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
-            );
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
             EntityRendererRegistry.register(CommonClass.BACKPACK_ENTITY, EntityRender::new);
@@ -88,6 +84,10 @@ public class FabricClient implements ClientModInitializer {
             tintHsl.modLum(l -> (Math.sqrt(l) + l + l) / 3);
             return tintHsl;
       }
+
+      ClampedItemPropertyFunction EATING_TRAIT_ITEM_PREDICATE = (itemStack, clientLevel, livingEntity, i) ->
+                  livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack && LunchBoxTraits.get(itemStack).isPresent()
+                              ? 1.0F : 0.0F;
 
       ClampedItemPropertyFunction FULLNESS_ITEM_PREDICATE = (itemStack, clientLevel, livingEntity, i) -> {
             Optional<GenericTraits> optional = Traits.get(itemStack);

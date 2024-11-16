@@ -1,7 +1,7 @@
 package com.beansgalaxy.backpacks.items;
 
 import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTraitRegistry;
+import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.components.EnderTraits;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.mojang.serialization.Codec;
@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -73,7 +72,7 @@ public class EmptyEnderItem extends Item {
       }
 
       public static final Codec<UnboundEnderTraits> CODEC = Codec.of(ResourceLocation.CODEC.comap(UnboundEnderTraits::location),
-                  ResourceLocation.CODEC.flatMap(location -> ReferenceTraitRegistry.get(location) == null
+                  ResourceLocation.CODEC.flatMap(location -> ReferenceRegistry.get(location) == null
                               ? DataResult.error(() -> "No trait is registered using the given location: " + location)
                               : DataResult.success(new UnboundEnderTraits(location))
                   )
