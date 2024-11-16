@@ -72,7 +72,7 @@ public interface BackpackRender {
                   if (equipable.model() == null)
                         return false;
 
-                  return equipable.model().useBuiltInLeatherModel;
+                  return equipable.model().isBuiltInLeatherModel();
             }).orElse(false);
 
             if (useLeatherModel) {

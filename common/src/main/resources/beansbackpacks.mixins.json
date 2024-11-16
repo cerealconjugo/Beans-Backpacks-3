@@ -23,6 +23,7 @@
     "client.AbstractScreenMixin",
     "client.BlockStateModelMixin",
     "client.GuiMixin",
+    "client.ItemRendererMixin",
     "client.KeyBindEntriesMixin",
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",

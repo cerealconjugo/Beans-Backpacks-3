@@ -195,8 +195,8 @@ public enum ModSound implements StringRepresentable {
       }
 
       public enum Type {
-            PLACE(SoundEvents.ITEM_FRAME_PLACE),
             EQUIP(SoundEvents.ARMOR_EQUIP_ELYTRA.value()),
+            PLACE(SoundEvents.ITEM_FRAME_PLACE),
             HIT(SoundEvents.PLAYER_ATTACK_WEAK),
             BREAK(SoundEvents.PLAYER_ATTACK_CRIT),
             INSERT(SoundEvents.BUNDLE_INSERT),

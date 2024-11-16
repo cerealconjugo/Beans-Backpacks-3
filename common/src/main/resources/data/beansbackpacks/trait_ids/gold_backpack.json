@@ -5,9 +5,7 @@
   "equipable": {
     "slots": "body",
     "model": {
-      "body": {
-        "body": "beansbackpacks:backpack/gold"
-      }
+      "back": "beansbackpacks:backpack/gold"
     }
   },
   "placeable": {

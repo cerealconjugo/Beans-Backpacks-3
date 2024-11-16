@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -39,6 +40,7 @@ public class FabricClient implements ClientModInitializer {
             }), ModItems.LEATHER_BACKPACK.get());
 
             ColorProviderRegistry.ITEM.register(((itemStack, layer) -> layer != 1 ? componentTint(itemStack, 0xFFcd7b46) : 0xFFFFFFFF), ModItems.BUNDLE.get());
+            ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("no_gui"), Constants.NO_GUI_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("fullness"), FULLNESS_ITEM_PREDICATE);
             ItemProperties.register(ModItems.ENDER_POUCH.item, ResourceLocation.withDefaultNamespace("searching"), ENDER_SEARCHING_PREDICATE);
             ItemProperties.register(ModItems.LUNCH_BOX.item, ResourceLocation.withDefaultNamespace("eating"), (itemStack, clientLevel, livingEntity, i) ->

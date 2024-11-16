@@ -77,12 +77,12 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
 
       public static void use(Player player, InteractionHand hand, ItemStack backpack, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
             get(backpack).ifPresent(equipable -> {
-                  if (InteractionHand.OFF_HAND.equals(hand) && equipable.slots.test(EquipmentSlot.OFFHAND))
+                  if (equipable.traitRemovable)
                         return;
 
                   EquipmentSlot slot = null;
                   for (EquipmentSlot value : EquipmentSlot.values()) {
-                        if (!equipable.slots().test(value) || EquipmentSlot.OFFHAND.equals(value))
+                        if (EquipmentSlot.Type.HAND.equals(value.getType()) || !equipable.slots().test(value))
                               continue;
 
                         if (slot == null)

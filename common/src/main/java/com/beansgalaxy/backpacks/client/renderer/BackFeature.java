@@ -52,22 +52,28 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
       @Override
       public void render(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, float limbAngle, float limbDistance, float delta, float animationProgress, float playerHeadYaw, float playerHeadPitch) {
             EquipableComponent.runIfPresent(player, (equipable, slot) -> {
+                  if (!equipable.slots().test(slot))
+                        return;
 
                   ItemStack itemStack = player.getItemBySlot(slot);
                   EquipmentModel model = equipable.model();
                   if (model == null)
                         return;
 
-                  if (model.useBuiltInLeatherModel) {
+                  if (model.isBuiltInLeatherModel()) {
                         pose.pushPose();
                         this.getParentModel().body.translateAndRotate(pose);
-                        pose.translate(0.0F, (player.isCrouching() ? 1 / 16f : 0), 0);
+
+                        pose.translate(0.0F, (player.isCrouching() ? 1 / 16f : 0), 0.0F);
+                        if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
+                              pose.translate(0.0F, -1 / 16f, 1 / 16f);
+
                         builtInLeatherModel(pose, pBufferSource, pCombinedLight, itemStack);
                         pose.popPose();
                         return;
                   }
 
-                  model.forEach(slot, (attachment, location) -> {
+                  model.attachments().forEach((attachment, location) -> {
                         pose.pushPose();
                         switch (attachment) {
                               case HEAD -> {
@@ -78,6 +84,13 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                                     this.getParentModel().body.translateAndRotate(pose);
                                     if (EquipmentSlot.BODY == slot && player.isCrouching())
                                           pose.translate(0.0F, 1 / 16f, 0);
+                              }
+                              case BACK -> {
+                                    this.getParentModel().body.translateAndRotate(pose);
+                                    if (player.isCrouching())
+                                          pose.translate(0.0F, 1 / 16f, 0);
+                                    if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
+                                          pose.translate(0.0F, -1 / 16f, 1 / 16f);
                               }
                               case L_ARM -> {
                                     this.getParentModel().leftArm.translateAndRotate(pose);

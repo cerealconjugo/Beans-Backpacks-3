@@ -4,15 +4,10 @@
     "sound": "soft"
   },
   "equipable": {
-    "slots": "at_ready",
+    "slots": "body",
     "trait_removable": true,
     "model": {
-      "body": {
-        "body": "beansbackpacks:backpack/quiver"
-      },
-      "offhand": {
-        "body": "beansbackpacks:backpack/quiver_offhand"
-      }
+      "back": "beansbackpacks:backpack/quiver"
     }
   }
 }

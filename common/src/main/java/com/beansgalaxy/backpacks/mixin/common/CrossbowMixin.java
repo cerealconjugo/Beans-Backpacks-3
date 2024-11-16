@@ -37,8 +37,7 @@ public abstract class CrossbowMixin extends ProjectileWeaponItem {
             if (pShooter instanceof Player player) {
                   ProjectileWeaponItem projectileWeaponItem = (ProjectileWeaponItem) pCrossbowStack.getItem();
                   Predicate<ItemStack> predicate = projectileWeaponItem.getAllSupportedProjectiles();
-                  QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
-                        ItemStack quiver = player.getItemBySlot(slot);
+                  QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver) -> {
                         PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
                         QuiverMutable mutable = traits.mutable(holder);
                         List<ItemStack> stacks = mutable.getItemStacks();

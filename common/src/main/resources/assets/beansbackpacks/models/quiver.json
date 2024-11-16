@@ -4,6 +4,28 @@
 		"particle": "#texture",
 		"texture": "#texture"
 	},
+	"display": {
+		"firstperson_righthand": {
+			"rotation": [ 0, 180, 0 ],
+			"translation": [ 4, 2, -6],
+			"scale":[ 1, 1, 1 ]
+		},
+		"firstperson_lefthand": {
+			"rotation": [ 0, 180, 0 ],
+			"translation": [ 2, 2, -6],
+			"scale":[ 1, 1, 1 ]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [ 90, 180, 0 ],
+			"translation": [ -1, -2.015, 10],
+			"scale":[ 1, 1, 1 ]
+		},
+		"thirdperson_righthand": {
+			"rotation": [ 90, 180, 0 ],
+			"translation": [ 1, -2.015, 10],
+			"scale":[ 1, 1, 1 ]
+		}
+	},
 	"elements": [
 		{
 			"from": [7, 0, 2],

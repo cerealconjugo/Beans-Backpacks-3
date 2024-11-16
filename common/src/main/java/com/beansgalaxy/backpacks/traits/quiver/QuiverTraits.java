@@ -1,5 +1,7 @@
 package com.beansgalaxy.backpacks.traits.quiver;
 
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.components.equipable.EquipmentGroups;
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
@@ -7,6 +9,7 @@ import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
+import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -53,7 +56,7 @@ public class QuiverTraits extends BundleLikeTraits {
             });
       }
 
-      public static void runIfQuiverEquipped(Player player, BiPredicate<QuiverTraits, EquipmentSlot> runnable) {
+      public static void runIfQuiverEquipped(Player player, Function3<QuiverTraits, @Nullable EquipmentSlot, ItemStack, Boolean> runnable) {
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                   ItemStack stack = player.getItemBySlot(slot);
                   if (stack.isEmpty())
@@ -63,7 +66,23 @@ public class QuiverTraits extends BundleLikeTraits {
                   if (traits.isEmpty())
                         continue;
 
-                  if (runnable.test(traits.get(), slot))
+                  if (runnable.apply(traits.get(), slot, stack))
+                        return;
+            }
+
+            for (ItemStack stack : player.getInventory().items) {
+                  if (stack.isEmpty())
+                        continue;
+
+                  Optional<QuiverTraits> traits = getQuiver(stack);
+                  if (traits.isEmpty())
+                        continue;
+
+                  Optional<EquipableComponent> optional = EquipableComponent.get(stack);
+                  if (optional.isPresent())
+                        continue;
+
+                  if (runnable.apply(traits.get(), null, stack))
                         return;
             }
       }

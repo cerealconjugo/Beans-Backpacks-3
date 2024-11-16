@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverMutable;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Mixin(BowItem.class)
@@ -43,8 +45,8 @@ public abstract class BowMixin extends ProjectileWeaponItem {
       private void useBackpackQuiverArrow(ItemStack bowStack, Level level, LivingEntity pEntityLiving, int pTimeLeft, CallbackInfo ci) {
             Player player = (Player) pEntityLiving;
             Predicate<ItemStack> predicate = getAllSupportedProjectiles();
-            QuiverTraits.runIfQuiverEquipped(player, (traits, slot) -> {
-                  ItemStack quiver = player.getItemBySlot(slot);
+            QuiverTraits.runIfQuiverEquipped(player, (traits, slot, quiver) -> {
+
                   PatchedComponentHolder holder = PatchedComponentHolder.of(quiver);
                   QuiverMutable mutable = traits.mutable(holder);
                   List<ItemStack> stacks = mutable.getItemStacks();

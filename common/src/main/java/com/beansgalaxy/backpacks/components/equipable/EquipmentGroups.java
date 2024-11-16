@@ -20,8 +20,7 @@ public enum EquipmentGroups implements StringRepresentable {
       ARMOR(4, "armor", slot -> EquipmentSlot.Type.HUMANOID_ARMOR.equals(slot.getType()), EquipmentSlotGroup.ARMOR),
       BODY(5, "body", EquipmentSlot.BODY, EquipmentSlotGroup.BODY),
       TORSO(6, "torso", slot -> EquipmentSlot.BODY.equals(slot) || EquipmentSlot.CHEST.equals(slot), EquipmentSlotGroup.BODY),
-      OFFHAND(7, "offhand", EquipmentSlot.OFFHAND, EquipmentSlotGroup.OFFHAND),
-      AT_READY(8, "at_ready", slot -> EquipmentSlot.BODY.equals(slot) || EquipmentSlot.OFFHAND.equals(slot), EquipmentSlotGroup.BODY);
+      ;
 
       public static final IntFunction<EquipmentGroups> BY_ID = ByIdMap.continuous(EquipmentGroups::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
       public static final Codec<EquipmentGroups> CODEC = StringRepresentable.fromEnum(EquipmentGroups::values);

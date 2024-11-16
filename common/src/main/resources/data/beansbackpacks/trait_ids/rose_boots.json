@@ -2,10 +2,8 @@
   "equipable": {
     "slots": "feet",
     "model": {
-      "feet": {
-        "leftLeg": "beansbackpacks:backpack/rose_boot_left",
-        "rightLeg": "beansbackpacks:backpack/rose_boot_right"
-      }
+      "leftLeg": "beansbackpacks:backpack/rose_boot_left",
+      "rightLeg": "beansbackpacks:backpack/rose_boot_right"
     }
   },
   "modifiers": [

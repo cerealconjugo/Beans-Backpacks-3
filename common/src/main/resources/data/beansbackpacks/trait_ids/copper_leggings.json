@@ -6,11 +6,9 @@
   "equipable": {
     "slots": "legs",
     "model": {
-      "legs": {
-        "body": "beansbackpacks:backpack/copper_legging_body",
-        "leftLeg": "beansbackpacks:backpack/copper_legging_left",
-        "rightLeg": "beansbackpacks:backpack/copper_legging_right"
-      }
+      "body": "beansbackpacks:backpack/copper_legging_body",
+      "leftLeg": "beansbackpacks:backpack/copper_legging_left",
+      "rightLeg": "beansbackpacks:backpack/copper_legging_right"
     }
   },
   "modifiers": [

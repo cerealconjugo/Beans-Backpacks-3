@@ -5,9 +5,7 @@
   "equipable": {
     "slots": "body",
     "model": {
-      "body": {
-        "body": "beansbackpacks:backpack/netherite"
-      }
+      "back": "beansbackpacks:backpack/netherite"
     }
   },
   "placeable": {
