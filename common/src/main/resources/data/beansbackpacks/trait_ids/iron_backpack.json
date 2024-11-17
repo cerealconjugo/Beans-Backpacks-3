@@ -6,7 +6,8 @@
     "slots": "body",
     "model": {
       "back": "beansbackpacks:backpack/iron"
-    }
+    },
+    "sound_event": "beansbackpacks:metal_equip"
   },
   "placeable": {
     "model": "beansbackpacks:backpack/iron"

@@ -514,10 +514,6 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                               player.setItemSlot(EquipmentSlot.MAINHAND, stack);
 
                         killAndUpdate(false);
-
-
-                        ModSound modSound = getPlaceable().sound();
-                        modSound.at(player, ModSound.Type.EQUIP);
                         return InteractionResult.SUCCESS;
                   }
 
@@ -533,9 +529,6 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
                                     player.setItemSlot(slot, toStack());
                                     killAndUpdate(false);
-
-                                    ModSound modSound = getPlaceable().sound();
-                                    modSound.at(player, ModSound.Type.EQUIP);
                                     return InteractionResult.SUCCESS;
                               }
                         }

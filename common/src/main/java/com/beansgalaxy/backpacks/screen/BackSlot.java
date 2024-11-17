@@ -12,12 +12,15 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class BackSlot extends Slot implements EquipmentSlotAccess {
+      private final Player owner;
 
       public BackSlot(Inventory inv, int slot) {
             super(inv, slot, 59, 62);
+            owner = inv.player;
       }
       public BackSlot(Inventory inv, int slot, int x, int y) {
             super(inv, slot, x + 32 + 20 + 16, y - 29 - 13);
+            owner = inv.player;
       }
 
       @Override
@@ -36,6 +39,12 @@ public class BackSlot extends Slot implements EquipmentSlotAccess {
             boolean equipment = EquipableComponent.testIfPresent(stack, EquipableComponent::traitRemovable);
             boolean emptyTrait = !Traits.testIfPresent(stack, traits -> !traits.isEmpty(stack));
             return standardCheck || equipment || emptyTrait;
+      }
+
+      @Override
+      public void setByPlayer(ItemStack pNewStack, ItemStack pOldStack) {
+            this.owner.onEquipItem(EquipmentSlot.BODY, pOldStack, pNewStack);
+            super.setByPlayer(pNewStack, pOldStack);
       }
 
       @Override

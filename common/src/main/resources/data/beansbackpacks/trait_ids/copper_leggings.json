@@ -9,7 +9,8 @@
       "body": "beansbackpacks:backpack/copper_legging_body",
       "leftLeg": "beansbackpacks:backpack/copper_legging_left",
       "rightLeg": "beansbackpacks:backpack/copper_legging_right"
-    }
+    },
+    "sound_event": "item.armor.equip_generic"
   },
   "modifiers": [
     {

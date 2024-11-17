@@ -5,7 +5,8 @@
   },
   "equipable": {
     "slots": "body",
-    "model": true
+    "model": true,
+    "sound_event": "beansbackpacks:leather_equip"
   },
   "placeable": {}
 }
