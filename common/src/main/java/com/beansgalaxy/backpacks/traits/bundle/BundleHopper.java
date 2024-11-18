@@ -56,7 +56,7 @@ public class BundleHopper extends HopperTraitContainer<MutableBundleLike<? exten
 
       @Override
       public void setItem(int i, @NotNull ItemStack itemStack) {
-            ItemStack stack = mutable.addItem(itemStack, i);
+            ItemStack stack = mutable.addItem(itemStack, i, null);
             if (stack != null)
                   setChanged();
       }

@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.util.Tint;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -102,7 +103,7 @@ public interface BackpackRender {
             pose.mulPose(Axis.XP.rotationDegrees(180));
             pose.translate(0, -10/16f, -4/16f);
 
-            ModelResourceLocation modelLocation = new ModelResourceLocation(location, "fabric_resource");
+            ModelResourceLocation modelLocation = Services.PLATFORM.getModelVariant(location);
             ModelManager modelmanager = this.itemRenderer().getItemModelShaper().getModelManager();
             BakedModel backpackModel = modelmanager.getModel(modelLocation);
 

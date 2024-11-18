@@ -141,7 +141,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             if (!level.noCollision(aabb))
                   return null;
 
-            BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY, level);
+            BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY.get(), level);
             backpackEntity.setPos(pos);
             backpackEntity.setYRot(yRot);
             backpackEntity.setDirection(clickedFace);

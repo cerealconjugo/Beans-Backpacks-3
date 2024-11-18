@@ -22,4 +22,5 @@ public interface BackData {
       void setTinySlot(int tinySlot);
 
       int getTinySlot();
+
 }

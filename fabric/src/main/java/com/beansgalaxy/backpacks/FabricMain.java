@@ -6,7 +6,9 @@ import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
 import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -19,6 +21,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import team.reborn.energy.api.EnergyStorage;
@@ -32,8 +35,9 @@ public class FabricMain implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        CommonClass.init();
         NetworkPackages.registerCommon();
-        ModItems.register();
+        EntityDataSerializers.registerSerializer(BackpackEntity.PLACEABLE.serializer());
 
         EnergyStorage.ITEM.registerFallback((stack, ctx) -> {
             BatteryTraits batteryTraits = (BatteryTraits) stack.get(Traits.BATTERY);
@@ -84,13 +88,9 @@ public class FabricMain implements ModInitializer {
         });
 
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(new SyncDataEvent());
-        CommonClass.init();
     }
 
-    public static final CreativeModeTab BACKPACK_TAB = FabricItemGroup.builder()
-                .title(Component.translatable("itemGroup." + Constants.MOD_ID))
-                .icon(() -> ModItems.LEATHER_BACKPACK.get().getDefaultInstance())
-                .displayItems(ModItems.CREATIVE_TAB_GENERATOR).build();
+    public static final CreativeModeTab BACKPACK_TAB = ModItems.CREATIVE_TAB.apply(FabricItemGroup.builder()).build();
 
     public static final CreativeModeTab CREATIVE_TAB =
                 Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,

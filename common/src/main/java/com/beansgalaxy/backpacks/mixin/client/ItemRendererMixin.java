@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelShaper;
@@ -28,7 +28,7 @@ public abstract class ItemRendererMixin {
                   boolean flag = pDisplayContext == ItemDisplayContext.GUI || pDisplayContext == ItemDisplayContext.GROUND || pDisplayContext == ItemDisplayContext.FIXED;
                   if (!flag) {
                         BakedModel itemModel = itemModelShaper.getItemModel(pItemStack);
-                        BakedModel resolve = itemModel.getOverrides().resolve(itemModel, Constants.NO_GUI_STAND_IN, null, null, 0);
+                        BakedModel resolve = itemModel.getOverrides().resolve(itemModel, CommonClient.NO_GUI_STAND_IN, null, null, 0);
                         if (resolve == null)
                               return pModel;
 

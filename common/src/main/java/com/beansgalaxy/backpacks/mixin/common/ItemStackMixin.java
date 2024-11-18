@@ -110,12 +110,4 @@ public abstract class ItemStackMixin {
                   }
             });
       }
-
-      @Inject(method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Ljava/util/function/Consumer;)V",
-                  at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getItem()Lnet/minecraft/world/item/Item;"))
-      private void emptyBrokenArmorTraits(int pDamage, ServerLevel pLevel, ServerPlayer pPlayer, Consumer<Item> pOnBreak, CallbackInfo ci) {
-            ItemStorageTraits.runIfPresent(instance, traits ->
-                        traits.breakTrait(pPlayer, instance)
-            );
-      }
 }

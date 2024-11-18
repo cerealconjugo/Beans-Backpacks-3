@@ -5,10 +5,13 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ItemsMixin"
+    "ItemsMixin",
+    "ItemStackMixin"
   ],
   "client": [
-    "CreativeInventoryMixin"
+    "CreativeInventoryMixin",
+    "GuiMixin",
+    "MinecraftMixin"
   ],
   "server": [],
   "injectors": {

@@ -3,9 +3,12 @@
   "minVersion": "0.8",
   "package": "com.beansgalaxy.backpacks.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "ItemStackMixin"
+  ],
   "client": [
-    "MixinTitleScreen"
+    "GuiMixin",
+    "MinecraftMixin"
   ],
   "server": [],
   "injectors": {

@@ -8,10 +8,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.IntUnaryOperator;
 
 public class SlotSelection {
+      private static int SLOT_SELECTION_COUNT = 0;
       private final Int2IntArrayMap slots = defaultSlotMap();
+      private final int id;
+
+      public SlotSelection() {
+            this.id = SLOT_SELECTION_COUNT;
+            SLOT_SELECTION_COUNT++;
+      }
 
       public void addAll(SlotSelection slotSelection) {
             slots.putAll(slotSelection.slots);
@@ -96,5 +104,17 @@ public class SlotSelection {
 
                   slots.put(key, i);
             }
+      }
+
+      @Override
+      public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SlotSelection that)) return false;
+            return slots == that.slots;
+      }
+
+      @Override
+      public int hashCode() {
+            return Objects.hashCode(id);
       }
 }

@@ -251,7 +251,7 @@ public enum ModSound implements StringRepresentable {
             Events(String id) {
                   ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
                   SoundEvent event = SoundEvent.createVariableRangeEvent(location);
-                  this.event = Registry.register(BuiltInRegistries.SOUND_EVENT, location, event);
+                  this.event = Services.PLATFORM.registerSound(id, event);
             }
 
             public SoundEvent get() {

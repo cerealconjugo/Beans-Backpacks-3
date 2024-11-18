@@ -8,6 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -60,15 +61,12 @@ public class MutableBundleLike<T extends BundleLikeTraits> implements MutableIte
             return returned;
       }
 
+      @Override
       public ItemStack addItem(ItemStack other, Player player) {
             return addItem(other, 0, player);
       }
 
-      public ItemStack addItem(ItemStack inserted, int slot, Player player) {
-            return addItem(inserted, slot);
-      }
-
-      public ItemStack addItem(ItemStack inserted, int slot) {
+      public ItemStack addItem(ItemStack inserted, int slot, @Nullable Player player) {
             if (!traits.canItemFit(holder, inserted))
                   return null;
 
@@ -96,12 +94,13 @@ public class MutableBundleLike<T extends BundleLikeTraits> implements MutableIte
                   int selectedSlot = Math.min(slot, getItemStacks().size());
                   ItemStack split = inserted.split(count);
                   getItemStacks().add(selectedSlot, split);
-                  traits.getSlotSelection(holder).grow(selectedSlot);
+                  traits.growSelectedSlot(holder, selectedSlot);
             }
 
             return inserted;
       }
 
+      @Override
       public int getMaxAmountToAdd(ItemStack stack) {
             Fraction size = Fraction.getFraction(traits.size(), 1);
             Fraction weight = Traits.getWeight(getItemStacks());

@@ -84,11 +84,11 @@ public class BucketMutable extends FluidTank implements MutableTraits {
 
       @Override
       public ModSound sound() {
-            return null;
+            return traits.sound();
       }
 
       @Override
       public Fraction fullness() {
-            return null;
+            return traits.fullness(holder);
       }
 }

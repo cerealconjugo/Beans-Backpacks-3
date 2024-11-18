@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -15,6 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 public class SyncSelectedSlot implements Packet2S {
       final int containerId;
@@ -52,31 +55,35 @@ public class SyncSelectedSlot implements Packet2S {
       @Override
       public void handle(Player sender) {
             AbstractContainerMenu containerMenu = sender.containerMenu;
-            if (containerMenu.containerId != containerId) {
+            if (containerMenu.containerId != containerId)
                   return;
-            }
 
             Slot slot = containerMenu.getSlot(slotIndex);
             ItemStack stack = slot.getItem();
-            if (stack.isEmpty()) {
+            if (stack.isEmpty())
                   return;
-            }
 
-            EnderTraits enderTraits = stack.get(Traits.ENDER);
+            Optional<BundleLikeTraits> optional = BundleLikeTraits.get(stack);
             PatchedComponentHolder holder;
-            if (enderTraits != null) {
-                  holder = enderTraits;
-                  enderTraits.reload(sender.level());
-            }
-            else holder = PatchedComponentHolder.of(stack);
+            BundleLikeTraits traits;
+            if (optional.isEmpty()) {
+                  EnderTraits enderTraits = stack.get(Traits.ENDER);
+                  if (enderTraits == null)
+                        return;
 
-            SlotSelection slotSelection = holder.get(ITraitData.SLOT_SELECTION);
-            if (slotSelection == null) {
-                  slotSelection = new SlotSelection();
-                  holder.set(ITraitData.SLOT_SELECTION, slotSelection);
+                  GenericTraits generic = enderTraits.getTrait(sender.level());
+                  if (generic instanceof BundleLikeTraits) {
+                        traits = (BundleLikeTraits) generic;
+                        holder = enderTraits;
+                  }
+                  else return;
+            }
+            else {
+                  traits = optional.get();
+                  holder = PatchedComponentHolder.of(stack);
             }
 
-            slotSelection.setSelectedSlot(sender, selectedSlot);
+            traits.setSelectedSlot(holder, sender, selectedSlot);
       }
 
       public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_selected_slot_s"));

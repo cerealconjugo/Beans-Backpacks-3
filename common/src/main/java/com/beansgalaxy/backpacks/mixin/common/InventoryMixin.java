@@ -72,7 +72,6 @@ public abstract class InventoryMixin implements BackData {
             return beans_Backpacks_3$body;
       }
 
-
       @Inject(method = "save", at = @At("TAIL"))
       public void writeBackSlot(ListTag tag, CallbackInfoReturnable<ListTag> cir) {
             ItemStack backStack = beans_Backpacks_3$body.getFirst();

@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.traits.battery;
 
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.*;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -16,6 +17,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.ComponentEnergyStorage;
 import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -25,10 +27,10 @@ import java.util.Objects;
 
 public class BatteryTraits extends GenericTraits {
       public static final String NAME = "battery";
-      private final long size;
-      private final long speed;
+      private final int size;
+      private final int speed;
 
-      public BatteryTraits(ResourceLocation location, ModSound sound, long size, long speed) {
+      public BatteryTraits(ResourceLocation location, ModSound sound, int size, int speed) {
             super(location, sound);
             this.size = size;
             this.speed = speed;
@@ -50,12 +52,26 @@ public class BatteryTraits extends GenericTraits {
       }
 
       @Override
+      public BatteryMutable mutable(PatchedComponentHolder holder) {
+            return new BatteryMutable(this, holder);
+      }
+
+      @Override
+      public TraitComponentKind<? extends GenericTraits> kind() {
+            return Traits.BATTERY;
+      }
+
+      @Override
       public BatteryTraits toReference(ResourceLocation location) {
             return new BatteryTraits(location, sound(), size, speed);
       }
 
-      public long size() {
+      public int size() {
             return size;
+      }
+
+      public int speed() {
+            return speed;
       }
 
       @Override
@@ -73,12 +89,34 @@ public class BatteryTraits extends GenericTraits {
 
       @Override
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
+            BatteryMutable mutable = mutable(backpack);
+            if (mutable.item.get().isEmpty() && other.isEmpty()) {
+                  return;
+            }
 
+            boolean empty = !EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable());
+            if (empty) {
+                  if (ClickAction.SECONDARY.equals(click)) {
+                        ItemStack itemStack = mutable.insert(other, player);
+                        access.set(itemStack);
+                        mutable.push(cir);
+                  }
+            }
+            else if (EquipableComponent.canEquip(backpack, slot)) {
+                  ItemStack itemStack = mutable.insert(other, player);
+                  access.set(itemStack);
+                  mutable.push(cir);
+            }
       }
 
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
-
+            if (ClickAction.SECONDARY.equals(click) && EquipableComponent.get(backpack).isEmpty()) {
+                  BatteryMutable mutable = mutable(backpack);
+                  ItemStack itemStack = mutable.insert(other, player);
+                  slot.set(itemStack);
+                  mutable.push(cir);
+            }
       }
 
       @Override
@@ -87,32 +125,7 @@ public class BatteryTraits extends GenericTraits {
             if (stack == null || stack.isEmpty())
                   return;
 
-            Iterator<TypedDataComponent<?>> iterator = stack.getComponents().iterator();
-            TypedDataComponent<? extends ComponentEnergyStorage> typedData = null;
-            while (iterator.hasNext() && typedData == null) {
-                  TypedDataComponent<?> next = iterator.next();
-                  if (next.value() instanceof ComponentEnergyStorage componentEnergyStorage) {
-                        typedData = (TypedDataComponent<? extends ComponentEnergyStorage>) next;
-                  }
-            }
-            
-            if (typedData == null) 
-                  return;
-
-            DataComponentMap components = stack.getComponents();
-            if (components instanceof PatchedDataComponentMap map) {
-                  typedData.applyTo(map);
-            }
-      }
-
-      @Override
-      public MutableTraits mutable(PatchedComponentHolder holder) {
-            return null;
-      }
-
-      @Override
-      public TraitComponentKind<? extends GenericTraits> kind() {
-            return Traits.BATTERY;
+            return;
       }
 
       @Override
@@ -137,8 +150,8 @@ public class BatteryTraits extends GenericTraits {
                         ", speed=" + speed +
                         ", sound=" + sound() +
                         location().map(location ->
-                                                ", location=" + location + '}')
-                                    .orElse("}"
-                                    );
+                              ", location=" + location + '}')
+                              .orElse("}"
+                        );
       }
 }

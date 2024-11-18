@@ -1,11 +1,10 @@
-package com.beansgalaxy.backpacks.mixin.client;
+package com.beansgalaxy.backpacks.mixin;
 
 import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +24,5 @@ public class GuiMixin {
                         trait.client().renderEntityOverlay(minecraft, backpack, trait, drawContext, tickCounter);
                   });
             }
-
       }
 }

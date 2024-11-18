@@ -1,4 +1,4 @@
-package com.beansgalaxy.backpacks.mixin.client;
+package com.beansgalaxy.backpacks.mixin;
 
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;

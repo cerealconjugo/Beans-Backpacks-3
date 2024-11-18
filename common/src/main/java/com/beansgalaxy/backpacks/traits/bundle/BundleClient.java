@@ -90,26 +90,25 @@ public class BundleClient implements IClientTraits<BundleLikeTraits> {
       @Override
       public boolean mouseScrolled(BundleLikeTraits trait, PatchedComponentHolder holder, Level level, Slot hoveredSlot, int containerId, int scrolled) {
             LocalPlayer player = Minecraft.getInstance().player;
-
             int startSlot = trait.getSelectedSlot(holder, player);
-            int i = trait.getSlotSelection(holder).modSelectedSlot(player, slot -> {
-                  boolean carriedEmpty = player.containerMenu.getCarried().isEmpty();
-                  boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344);
-                  boolean hideEmptySlot = carriedEmpty || isQuickMove || trait.isFull(holder);
 
-                  int selectedSlot = slot - scrolled;
-                  if (hideEmptySlot && slot == 0 && scrolled == -1)
-                        selectedSlot++;
+            boolean carriedEmpty = player.containerMenu.getCarried().isEmpty();
+            boolean isQuickMove =  BackData.get(player).isMenuKeyDown() || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344);
+            boolean hideEmptySlot = carriedEmpty || isQuickMove || trait.isFull(holder);
 
-                  List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
-                  int size = stacks == null ? 0 :stacks.size();
-                  return size == 0 || selectedSlot < 0 ? 0
-                              : Math.min(selectedSlot, size);
-            });
+            int selectedSlot = startSlot - scrolled;
+            if (hideEmptySlot && startSlot == 0 && scrolled == -1)
+                  selectedSlot++;
+
+            List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
+            int size = stacks == null ? 0 : stacks.size();
+            int i = size == 0 || selectedSlot < 0 ? 0
+                        : Math.min(selectedSlot, size);
 
             if (startSlot == i)
                   return false;
 
+            trait.setSelectedSlot(holder, player, i);
             SyncSelectedSlot.send(containerId, hoveredSlot.index, i);
 
             return true;

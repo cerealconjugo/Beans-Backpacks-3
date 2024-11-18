@@ -6,17 +6,27 @@ import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
 import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.platform.services.IPlatformHelper;
-import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.battery.BatteryCodecs;
+import com.beansgalaxy.backpacks.traits.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.traits.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.traits.bucket.BucketTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.function.Supplier;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
 
@@ -35,13 +45,6 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         return !FMLLoader.isProduction();
     }
 
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Constants.MOD_ID);
-
-    @Override
-    public void register(ModItems value) {
-        ITEMS.register(value.id, () -> value.item);
-    }
-
     @Override
     public void send(Network2C network, Packet2C packet2C, ServerPlayer to) {
         PacketDistributor.sendToPlayer(to, packet2C);
@@ -57,13 +60,59 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         PacketDistributor.sendToServer(packet2S);
     }
 
+    public static final DeferredRegister.Items ITEMS_REGISTRY = DeferredRegister.createItems(Constants.MOD_ID);
+
+    @Override
+    public Supplier<Item> register(String id, Supplier<Item> item) {
+        DeferredRegister.Items items = ITEMS_REGISTRY;
+        return items.register(id, item);
+    }
+
+    public static final DeferredRegister.DataComponents COMPONENTS_REGISTRY =
+                DeferredRegister.createDataComponents(Constants.MOD_ID);
+
+    @Override
+    public <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type) {
+        DeferredRegister.DataComponents components = COMPONENTS_REGISTRY;
+        components.register(name, () -> type);
+        return type;
+    }
+
+    public static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY =
+                DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Constants.MOD_ID);
+
+    public <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type) {
+        DeferredRegister<EntityType<?>> registry = ENTITY_REGISTRY;
+        return registry.register(name, () -> type.build(name));
+    }
+
+    public static final DeferredRegister<SoundEvent> SOUND_REGISTRY =
+                DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Constants.MOD_ID);
+
+    @Override
+    public SoundEvent registerSound(String name, SoundEvent event) {
+        DeferredRegister<SoundEvent> registry = SOUND_REGISTRY;
+        registry.register(name, () -> event);
+        return event;
+    }
+
+    @Override
+    public String getModelVariant() {
+        return ModelResourceLocation.STANDALONE_VARIANT;
+    }
+
+    @Override
+    public ModelResourceLocation getModelVariant(ResourceLocation location) {
+        return ModelResourceLocation.standalone(location);
+    }
+
     @Override
     public TraitComponentKind<BucketTraits> registerBucket() {
         return TraitComponentKind.register(BucketTraits.NAME, BucketCodecs.INSTANCE);
     }
 
     @Override
-    public <T extends GenericTraits> TraitComponentKind<T> registerBattery() {
-        return null;
+    public TraitComponentKind<BatteryTraits> registerBattery() {
+        return TraitComponentKind.register(BatteryTraits.NAME, BatteryCodecs.INSTANCE);
     }
 }

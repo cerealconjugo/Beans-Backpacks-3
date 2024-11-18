@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipmentModel;
+import com.beansgalaxy.backpacks.platform.Services;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -109,7 +110,7 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                         pose.translate(-8 / 16f, -12 / 16f, -8 / 16f - 0.001f);
 
                         ModelManager modelmanager = this.itemRenderer().getItemModelShaper().getModelManager();
-                        ModelResourceLocation modelLocation = new ModelResourceLocation(location, "fabric_resource");
+                        ModelResourceLocation modelLocation = Services.PLATFORM.getModelVariant(location);
                         BakedModel bakedModel = modelmanager.getModel(modelLocation);
                         BakedModel backpackModel = bakedModel.getOverrides().resolve(bakedModel, itemStack, (ClientLevel) player.level(), player, player.getId());
 

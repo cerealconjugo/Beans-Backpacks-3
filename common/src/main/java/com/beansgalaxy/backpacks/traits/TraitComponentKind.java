@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
+import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -64,9 +65,8 @@ public class TraitComponentKind<T extends GenericTraits> implements DataComponen
             int i = TraitComponentKind.TRAITS.size();
             TraitComponentKind<T> componentType = new TraitComponentKind<>(i, name, codecs);
             TRAITS.add(componentType);
-            return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
-                        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
-                        componentType);
+            Services.PLATFORM.registerComponents(name, componentType);
+            return componentType;
       }
 
       @Override @NotNull

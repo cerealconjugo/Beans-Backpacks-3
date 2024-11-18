@@ -1,18 +1,16 @@
 package com.beansgalaxy.backpacks.traits;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.traits.bulk.BulkMutable;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.SlotSelection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,9 +53,8 @@ public abstract class ITraitData<T> {
 
       public static <T> TraitDataComponentType<T> register(String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, Function<PatchedComponentHolder, ITraitData<T>> getData) {
             TraitDataComponentType<T> type = new TraitDataComponentType<>(codec, streamCodec, getData);
-            return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
-                        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
-                        type);
+            Services.PLATFORM.registerComponents(name, type);
+            return type;
       }
 
       public @Nullable T remove() {

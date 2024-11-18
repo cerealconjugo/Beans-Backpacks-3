@@ -7,9 +7,11 @@ import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public enum ModItems {
@@ -18,8 +20,8 @@ public enum ModItems {
       GOLD_BACKPACK("gold_backpack", "gold_backpack"),
       NETHERITE_BACKPACK("netherite_backpack", "netherite_backpack",
                   properties -> properties.fireResistant().stacksTo(1)),
-      ENDER_POUCH("ender_pouch", new EnderItem(), false),
-      EMPTY_ENDER_POUCH("empty_ender_pouch", new EmptyEnderItem("vanilla_bundle")),
+      ENDER_POUCH("ender_pouch", EnderItem::new, false),
+      EMPTY_ENDER_POUCH("empty_ender_pouch", () -> new EmptyEnderItem("vanilla_bundle")),
       BUNDLE("bundle", "vanilla_bundle"),
       LUNCH_BOX("lunch_box", "lunch_box"),
       COPPER_LEGGINGS("copper_leggings", "copper_leggings"),
@@ -31,16 +33,20 @@ public enum ModItems {
       NETHERITE_LUNCH_BOX("netherite_lunch_box", "netherite_lunch_box"),
       ;
 
-      public static final CreativeModeTab.DisplayItemsGenerator CREATIVE_TAB_GENERATOR = (params, output) -> {
-            for (ModItems value : ModItems.values()) {
-                  if (value.creativeIncluded)
-                        output.accept(value.item);
-            }
-            output.accept(Items.LEATHER_LEGGINGS);
-            output.accept(Items.DECORATED_POT);
-      };
+      public static final UnaryOperator<CreativeModeTab.Builder> CREATIVE_TAB = builder -> builder
+                  .title(Component.translatable("itemGroup." + Constants.MOD_ID))
+                  .icon(() -> ModItems.LEATHER_BACKPACK.get().getDefaultInstance())
+                  .displayItems((params, output) -> {
+                        for (ModItems value : ModItems.values()) {
+                              if (value.creativeIncluded)
+                                    output.accept(value.get());
+                        }
+                        output.accept(Items.LEATHER_LEGGINGS);
+                        output.accept(Items.DECORATED_POT);
+                  });
+
       public final String id;
-      public final Item item;
+      public final Supplier<Item> item;
       public final boolean creativeIncluded;
 
       ModItems(String id, String reference) {
@@ -49,31 +55,32 @@ public enum ModItems {
 
       ModItems(String id, String reference, UnaryOperator<Item.Properties> properties) {
             this.id = id;
-            this.item = new Item(properties.apply(new Item.Properties().component(Traits.REFERENCE, new ReferenceTrait(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, reference)))));
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, reference);
+            ReferenceTrait referenceTrait = new ReferenceTrait(location);
+            Item.Properties properties1 = new Item.Properties().component(Traits.REFERENCE, referenceTrait);
+            this.item = Services.PLATFORM.register(id, () -> new Item(properties.apply(properties1)));
             this.creativeIncluded = true;
       }
 
-      ModItems(String id, Item item, boolean creativeIncluded) {
+      ModItems(String id, Supplier<Item> item, boolean creativeIncluded) {
             this.id = id;
-            this.item = item;
+            this.item = Services.PLATFORM.register(id, item);
             this.creativeIncluded = creativeIncluded;
       }
 
-      ModItems(String id, Item item) {
+      ModItems(String id, Supplier<Item> item) {
             this(id, item, true);
       }
 
       public static void register() {
-            for (ModItems value : ModItems.values()) {
-                  Services.PLATFORM.register(value);
-            }
+
       }
 
       public Item get() {
-            return item;
+            return item.get();
       }
 
       public boolean is(ItemStack stack) {
-            return stack.is(item);
+            return stack.is(get());
       }
 }

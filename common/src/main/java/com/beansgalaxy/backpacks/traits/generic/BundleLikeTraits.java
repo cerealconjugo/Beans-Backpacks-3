@@ -43,6 +43,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
       public BundleLikeTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
             super(location, sound);
             this.size = size;
+            this.selection.addAll(selection);
       }
 
       public static Optional<BundleLikeTraits> get(DataComponentHolder stack) {
@@ -104,7 +105,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             return stacks == null ? null : stacks.getFirst();
       }
 
-      public SlotSelection getSlotSelection(PatchedComponentHolder holder) {
+      private SlotSelection getSlotSelection(PatchedComponentHolder holder) {
             SlotSelection slotSelection = holder.get(ITraitData.SLOT_SELECTION);
             if (slotSelection != null)
                   return slotSelection;
@@ -119,7 +120,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
       }
 
       public int getSelectedSlotSafe(PatchedComponentHolder holder, Player player) {
-            int selectedSlot = getSlotSelection(holder).getSelectedSlot(player);
+            int selectedSlot = getSelectedSlot(holder, player);
             return selectedSlot == 0 ? selectedSlot : selectedSlot - 1;
       }
 
@@ -129,6 +130,10 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
       public void limitSelectedSlot(PatchedComponentHolder holder, int slot, int size) {
             getSlotSelection(holder).limit(slot, size);
+      }
+
+      public void growSelectedSlot(PatchedComponentHolder holder, int slot) {
+            getSlotSelection(holder).grow(slot);
       }
 
       @Override
@@ -245,32 +250,31 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
 
       @Override
       public void stackedOnOther(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, CallbackInfoReturnable<Boolean> cir) {
-            boolean empty = !EquipableComponent.testIfPresent(backpack, equipable ->
-                        !equipable.slots().test(EquipmentSlot.OFFHAND)
-            );
+            if (!ClickAction.SECONDARY.equals(click))
+                  return;
 
-            boolean equals = ClickAction.SECONDARY.equals(click);
-            if (equals && empty) {
-                  MutableBundleLike<?> mutable = mutable(backpack);
-                  ModSound sound = sound();
-                  if (other.isEmpty()) {
-                        ItemStack stack = mutable.removeItem(other, player);
-                        if (stack.isEmpty() || !slot.mayPlace(stack))
-                              return;
+            if (EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable()))
+                  return;
 
-                        slot.set(stack);
-                        sound.atClient(player, ModSound.Type.REMOVE);
-                        int size = mutable.stacks.get().size();
-                        limitSelectedSlot(backpack, 0, size);
-                  }
-                  else if (slot.mayPickup(player)) {
-                        if (mutable.addItem(other, player) != null)
-                              sound.atClient(player, ModSound.Type.INSERT);
-                  }
-                  else return;
+            MutableBundleLike<?> mutable = mutable(backpack);
+            ModSound sound = sound();
+            if (other.isEmpty()) {
+                  ItemStack stack = mutable.removeItem(other, player);
+                  if (stack.isEmpty() || !slot.mayPlace(stack))
+                        return;
 
-                  mutable.push(cir);
+                  slot.set(stack);
+                  sound.atClient(player, ModSound.Type.REMOVE);
+                  int size = mutable.stacks.get().size();
+                  limitSelectedSlot(backpack, 0, size);
             }
+            else if (slot.mayPickup(player)) {
+                  if (mutable.addItem(other, player) != null)
+                        sound.atClient(player, ModSound.Type.INSERT);
+            }
+            else return;
+
+            mutable.push(cir);
       }
 
       @Override
@@ -322,7 +326,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                         boolean cancelled = ci.isCancelled();
                         if (cancelled) {
                               sound().atClient(player, ModSound.Type.REMOVE);
-                              getSlotSelection(holder).limit(0, stacks.size());
+                              limitSelectedSlot(holder, 0, stacks.size());
                               mutable.push();
                         }
                         return;
@@ -336,7 +340,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                   if (stackableSlot != -1 && inventory.add(-1, stack)) {
                         sound().atClient(player, ModSound.Type.REMOVE);
                         int size = mutable.getItemStacks().size();
-                        getSlotSelection(holder).limit(0, size);
+                        limitSelectedSlot(holder, 0, size);
                         mutable.push();
                         ci.cancel();
                   }

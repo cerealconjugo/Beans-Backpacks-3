@@ -1,9 +1,6 @@
 package com.beansgalaxy.backpacks;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -11,7 +8,6 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,12 +63,4 @@ public class Constants {
 			}
 		};
 	}
-
-	public static final ItemStack NO_GUI_STAND_IN = new ItemStack(Items.AIR);
-	public static final ClampedItemPropertyFunction NO_GUI_PREDICATE = (itemStack, clientLevel, livingEntity, i) -> {
-		if (itemStack == NO_GUI_STAND_IN && clientLevel == null && livingEntity == null && i == 0)
-			return 1;
-
-		return 0;
-	};
 }
