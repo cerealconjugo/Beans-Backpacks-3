@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.data;
 
-import com.beansgalaxy.backpacks.client.CommonAtClient;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.network.clientbound.SendEnderEntry;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
@@ -26,7 +26,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class EnderStorage {
       private final HashMap<UUID, PlayerEntry> storage = new HashMap<>();
@@ -34,7 +36,7 @@ public class EnderStorage {
       public static EnderStorage get(Level level) {
             MinecraftServer server = level.getServer();
             if (server == null) {
-                  return CommonAtClient.getEnderStorage();
+                  return CommonClient.getEnderStorage();
             }
             else return ServerSave.getSave(server, true).enderStorage;
       }

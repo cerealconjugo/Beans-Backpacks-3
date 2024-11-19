@@ -1,10 +1,9 @@
-package com.beansgalaxy.backpacks.util;
+package com.beansgalaxy.backpacks.data;
 
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 
 public abstract class HopperTraitContainer<M extends MutableTraits> implements Container {
       private final BackpackEntity backpack;

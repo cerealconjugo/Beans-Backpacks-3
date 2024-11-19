@@ -1,13 +1,11 @@
-package com.beansgalaxy.backpacks.registry;
+package com.beansgalaxy.backpacks.util;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.client.CommonAtClient;
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -180,7 +178,7 @@ public enum ModSound implements StringRepresentable {
 
       public void atClient(Player player, Type type, float volume, float pitch) {
             if (player.level().isClientSide) {
-                  CommonAtClient.playSound(get(type), volume, pitch);
+                  CommonClient.playSound(get(type), volume, pitch);
             }
       }
 
@@ -249,7 +247,7 @@ public enum ModSound implements StringRepresentable {
 
             public final SoundEvent event;
             Events(String id) {
-                  ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
+                  ResourceLocation location = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, id);
                   SoundEvent event = SoundEvent.createVariableRangeEvent(location);
                   this.event = Services.PLATFORM.registerSound(id, event);
             }

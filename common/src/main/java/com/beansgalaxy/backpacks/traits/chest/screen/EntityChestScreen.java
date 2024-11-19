@@ -4,7 +4,7 @@ import com.beansgalaxy.backpacks.network.serverbound.TinyHotbarClick;
 import com.beansgalaxy.backpacks.network.serverbound.TinyMenuClick;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

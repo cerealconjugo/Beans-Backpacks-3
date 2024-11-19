@@ -1,9 +1,8 @@
 package com.beansgalaxy.backpacks.components.equipable;
 
 import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
-import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
-import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.serialization.Codec;
@@ -22,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;

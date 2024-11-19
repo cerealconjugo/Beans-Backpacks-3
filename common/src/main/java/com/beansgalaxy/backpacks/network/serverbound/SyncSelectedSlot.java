@@ -1,14 +1,12 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.network.Network2S;
-import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import com.beansgalaxy.backpacks.util.SlotSelection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -86,7 +84,7 @@ public class SyncSelectedSlot implements Packet2S {
             traits.setSelectedSlot(holder, sender, selectedSlot);
       }
 
-      public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_selected_slot_s"));
+      public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":sync_selected_slot_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

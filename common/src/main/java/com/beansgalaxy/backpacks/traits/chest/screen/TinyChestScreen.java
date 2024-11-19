@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.traits.chest.screen;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.screen.TinyTraitScreen;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class TinyChestScreen extends TinyTraitScreen {
-      private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.parse(Constants.MOD_ID + ":textures/gui/generic_scalable.png");
+      private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.parse(CommonClass.MOD_ID + ":textures/gui/generic_scalable.png");
       final ChestTraits traits;
 
       public TinyChestScreen(ChestTraits traits) {

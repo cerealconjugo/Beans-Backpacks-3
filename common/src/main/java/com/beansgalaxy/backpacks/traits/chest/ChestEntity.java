@@ -2,8 +2,7 @@ package com.beansgalaxy.backpacks.traits.chest;
 
 import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.chest.screen.EntityChestScreen;
-import com.beansgalaxy.backpacks.traits.chest.screen.TinyChestScreen;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

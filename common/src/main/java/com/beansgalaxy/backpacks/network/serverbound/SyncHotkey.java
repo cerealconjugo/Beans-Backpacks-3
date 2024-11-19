@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.network.Network2S;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -48,7 +48,7 @@ public class SyncHotkey implements Packet2S {
             backData.setTinySlot(tinySlot);
       }
 
-      public static Type<SyncHotkey> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_hotkey_s"));
+      public static Type<SyncHotkey> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":sync_hotkey_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

@@ -1,6 +1,5 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
-import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;

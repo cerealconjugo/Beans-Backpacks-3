@@ -2,7 +2,6 @@ package com.beansgalaxy.backpacks.traits.alchemy;
 
 import com.beansgalaxy.backpacks.traits.bundle.BundleClient;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;

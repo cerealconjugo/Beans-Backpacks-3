@@ -1,9 +1,8 @@
 package com.beansgalaxy.backpacks.traits.lunch_box;
 
-import com.beansgalaxy.backpacks.screen.TinyTraitScreen;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

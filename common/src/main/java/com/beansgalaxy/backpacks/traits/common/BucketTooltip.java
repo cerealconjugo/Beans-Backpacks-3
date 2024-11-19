@@ -1,4 +1,4 @@
-package com.beansgalaxy.backpacks.traits.bucket;
+package com.beansgalaxy.backpacks.traits.common;
 
 import com.beansgalaxy.backpacks.traits.bundle.BundleTooltip;
 import com.beansgalaxy.backpacks.util.Tint;

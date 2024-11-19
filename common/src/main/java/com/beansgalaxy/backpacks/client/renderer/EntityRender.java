@@ -1,8 +1,7 @@
 package com.beansgalaxy.backpacks.client.renderer;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -25,8 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 public class EntityRender extends EntityRenderer<BackpackEntity> implements BackpackRender {
-      ModelLayerLocation BACKPACK_MODEL = new ModelLayerLocation(ResourceLocation.parse(Constants.MOD_ID + ":backpack_model"), "main");
-      ResourceLocation TEXTURE = ResourceLocation.parse(Constants.MOD_ID + ":textures/entity/backpack/null.png");
+      ModelLayerLocation BACKPACK_MODEL = new ModelLayerLocation(ResourceLocation.parse(CommonClass.MOD_ID + ":backpack_model"), "main");
+      ResourceLocation TEXTURE = ResourceLocation.parse(CommonClass.MOD_ID + ":textures/entity/backpack/null.png");
       public final BackpackModel<BackpackEntity> model;
       private final ItemRenderer itemRenderer;
       private final BlockRenderDispatcher blockDispatcher;
@@ -91,7 +90,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
             if (!minecraft.options.hideGui && minecraft.hitResult instanceof EntityHitResult hitResult && hitResult.getEntity() == entity) {
                   if (this.shouldShowName(entity)) {
                         Component displayName = entity.getDisplayName();
-                        if (!Constants.isEmpty(displayName)) {
+                        if (!CommonClass.isEmpty(displayName)) {
                               pose.pushPose();
                               double $$5 = this.entityRenderDispatcher.distanceToSqr(entity);
                               if (!($$5 > 4096.0)) {

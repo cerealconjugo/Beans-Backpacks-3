@@ -1,9 +1,9 @@
 package com.beansgalaxy.backpacks.traits.chest;
 
-import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitData;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.MutableItemStorage;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;

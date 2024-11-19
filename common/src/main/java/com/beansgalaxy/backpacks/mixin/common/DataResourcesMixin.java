@@ -1,12 +1,12 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
-import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
-import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
+import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
@@ -69,7 +69,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                Constants.LOG.warn("{}{}", message, error);
+                                                CommonClass.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -83,7 +83,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                Constants.LOG.warn("{}{}", message, error);
+                                                CommonClass.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -97,7 +97,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                Constants.LOG.warn("{}{}", message, error);
+                                                CommonClass.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -111,7 +111,7 @@ public class DataResourcesMixin {
                                           TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.get(type);
                                           if (kind == null) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; The trait \"" + type + "\" does not exist!";
-                                                Constants.LOG.warn(message);
+                                                CommonClass.LOG.warn(message);
                                                 continue;
                                           }
 
@@ -119,7 +119,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                Constants.LOG.warn("{}{}", message, error);
+                                                CommonClass.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 

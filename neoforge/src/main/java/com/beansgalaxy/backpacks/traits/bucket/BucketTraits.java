@@ -2,11 +2,10 @@ package com.beansgalaxy.backpacks.traits.bucket;
 
 import com.beansgalaxy.backpacks.NeoForgeMain;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SlotAccess;

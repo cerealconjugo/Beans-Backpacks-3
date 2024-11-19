@@ -1,14 +1,15 @@
-package com.beansgalaxy.backpacks.traits.generic;
+package com.beansgalaxy.backpacks.traits.common;
 
 import com.beansgalaxy.backpacks.CommonClass;
-import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.registry.ModItems;
-import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
+import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
+import com.beansgalaxy.backpacks.util.ModItems;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -348,7 +349,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       @Override
       public Component getName() {
-            return Constants.getName(toStack());
+            return CommonClass.getName(toStack());
       }
 
       @Override

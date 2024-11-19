@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -47,7 +47,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public Supplier<Item> register(String id, Supplier<Item> item) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
+        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, id);
         return () -> Registry.register(BuiltInRegistries.ITEM, resourceLocation, item.get());
     }
 
@@ -82,7 +82,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
     public <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type) {
         return Registry.register(
                     BuiltInRegistries.DATA_COMPONENT_TYPE,
-                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), type
+                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), type
         );
     }
 
@@ -90,7 +90,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
     public <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type) {
         return () -> Registry.register(
                     BuiltInRegistries.ENTITY_TYPE,
-                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), type.build(name)
+                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), type.build(name)
         );
     }
 
@@ -98,7 +98,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
     public SoundEvent registerSound(String name, SoundEvent event) {
         return Registry.register(
                     BuiltInRegistries.SOUND_EVENT,
-                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), event
+                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), event
         );
     }
 

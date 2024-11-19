@@ -2,7 +2,7 @@ package com.beansgalaxy.backpacks.traits.bucket;
 
 import com.beansgalaxy.backpacks.NeoForgeMain;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.common.BucketTooltip;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
 import com.beansgalaxy.backpacks.util.TraitTooltip;

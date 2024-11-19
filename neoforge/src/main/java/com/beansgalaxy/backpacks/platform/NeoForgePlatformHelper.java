@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -60,7 +60,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         PacketDistributor.sendToServer(packet2S);
     }
 
-    public static final DeferredRegister.Items ITEMS_REGISTRY = DeferredRegister.createItems(Constants.MOD_ID);
+    public static final DeferredRegister.Items ITEMS_REGISTRY = DeferredRegister.createItems(CommonClass.MOD_ID);
 
     @Override
     public Supplier<Item> register(String id, Supplier<Item> item) {
@@ -69,7 +69,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     public static final DeferredRegister.DataComponents COMPONENTS_REGISTRY =
-                DeferredRegister.createDataComponents(Constants.MOD_ID);
+                DeferredRegister.createDataComponents(CommonClass.MOD_ID);
 
     @Override
     public <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type) {
@@ -79,7 +79,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     public static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY =
-                DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Constants.MOD_ID);
+                DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, CommonClass.MOD_ID);
 
     public <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type) {
         DeferredRegister<EntityType<?>> registry = ENTITY_REGISTRY;
@@ -87,7 +87,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     public static final DeferredRegister<SoundEvent> SOUND_REGISTRY =
-                DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Constants.MOD_ID);
+                DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, CommonClass.MOD_ID);
 
     @Override
     public SoundEvent registerSound(String name, SoundEvent event) {

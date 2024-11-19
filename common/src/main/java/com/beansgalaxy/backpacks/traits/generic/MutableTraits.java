@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.traits.generic;
 
-import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.ModSound;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;

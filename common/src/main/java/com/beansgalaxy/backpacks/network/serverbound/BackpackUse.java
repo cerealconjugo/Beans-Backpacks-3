@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 public class BackpackUse implements Packet2S {
-      public static final Type<BackpackUse> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":use_backpack_s"));
+      public static final Type<BackpackUse> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":use_backpack_s"));
 
       public BackpackUse(RegistryFriendlyByteBuf buf) {
             this();

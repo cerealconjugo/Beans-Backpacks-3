@@ -3,8 +3,8 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.client.renderer.BackpackModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackRender;
 import com.beansgalaxy.backpacks.client.renderer.EntityRender;
-import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -22,10 +22,9 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
-import java.util.HashSet;
 import java.util.Map;
 
-@Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
+@Mod(value = CommonClass.MOD_ID, dist = Dist.CLIENT)
 public class NeoForgeClient {
 
       public NeoForgeClient(IEventBus eventBus) {
@@ -35,7 +34,7 @@ public class NeoForgeClient {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("searching"), CommonClient.ENDER_SEARCHING_PREDICATE);
       }
 
-      @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+      @EventBusSubscriber(modid = CommonClass.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
       public static class ModEvents {
 
             @SubscribeEvent

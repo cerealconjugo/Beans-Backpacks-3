@@ -1,6 +1,5 @@
 package com.beansgalaxy.backpacks.util;
 
-import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -11,6 +10,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 public interface PatchedComponentHolder {
+
+      static PatchedComponentHolder of(Slot slot) {
+            return new SlotTraitHolder(slot);
+      }
+
+      static PatchedComponentHolder of(ItemStack stack) {
+            return new ItemStackTraitHolder(stack);
+      }
+
+      static PatchedComponentHolder of(ItemStack stack, Player player) {
+            return new StackReturningTraitHolder(stack, player);
+      }
 
       @Nullable
       <T> T remove(DataComponentType<? extends T> type);
@@ -32,18 +43,6 @@ public interface PatchedComponentHolder {
       default <T> T getOrElse(DataComponentType<? extends T> type, Supplier<T> orElse) {
             T t = get(type);
             return t == null ? orElse.get() : t;
-      }
-
-      static PatchedComponentHolder of(Slot slot) {
-            return new SlotTraitHolder(slot);
-      }
-
-      static PatchedComponentHolder of(ItemStack stack) {
-            return new ItemStackTraitHolder(stack);
-      }
-
-      static PatchedComponentHolder of(ItemStack stack, Player player) {
-            return new StackReturningTraitHolder(stack, player);
       }
 
       default <T> T getOrDefault(DataComponentType<T> type, T defau) {
@@ -86,8 +85,7 @@ public interface PatchedComponentHolder {
                         copy.set(type, data);
                         player.addItem(copy);
                         stack.shrink(1);
-                  }
-                  else stack.set(type, data);
+                  } else stack.set(type, data);
             }
 
             @Override
@@ -104,8 +102,8 @@ public interface PatchedComponentHolder {
                   this.stack = stack;
             }
 
-            @Override
-            public <T> @Nullable T remove(DataComponentType<? extends T> type) {
+            @Override @Nullable
+            public <T> T remove(DataComponentType<? extends T> type) {
                   return stack.remove(type);
             }
 
@@ -128,8 +126,8 @@ public interface PatchedComponentHolder {
                   this.slot = slot;
             }
 
-            @Override
-            public <T> @Nullable T remove(DataComponentType<? extends T> type) {
+            @Override @Nullable
+            public <T> T remove(DataComponentType<? extends T> type) {
                   return slot.getItem().remove(type);
             }
 
@@ -138,8 +136,8 @@ public interface PatchedComponentHolder {
                   slot.getItem().set(type, trait);
             }
 
-            @Override
-            public <T> @Nullable T get(DataComponentType<? extends T> type) {
+            @Override @Nullable
+            public <T> T get(DataComponentType<? extends T> type) {
                   return slot.getItem().get(type);
             }
       }

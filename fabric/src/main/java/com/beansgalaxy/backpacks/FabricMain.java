@@ -1,16 +1,15 @@
 package com.beansgalaxy.backpacks;
 
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.events.NetworkPackages;
 import com.beansgalaxy.backpacks.events.SyncDataEvent;
-import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
-import com.beansgalaxy.backpacks.components.EnderTraits;
-import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
+import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -20,7 +19,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -94,7 +92,7 @@ public class FabricMain implements ModInitializer {
 
     public static final CreativeModeTab CREATIVE_TAB =
                 Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
-                            ResourceLocation.parse(Constants.MOD_ID + ":backpacks"), BACKPACK_TAB);
+                            ResourceLocation.parse(CommonClass.MOD_ID + ":backpacks"), BACKPACK_TAB);
 
 
 }

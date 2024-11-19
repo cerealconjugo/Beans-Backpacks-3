@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.traits;
 
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.ChatFormatting;

@@ -1,12 +1,12 @@
 package com.beansgalaxy.backpacks.traits.bundle;
 
-import com.beansgalaxy.backpacks.network.serverbound.TinyMenuClick;
 import com.beansgalaxy.backpacks.network.serverbound.TinyHotbarClick;
+import com.beansgalaxy.backpacks.network.serverbound.TinyMenuClick;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
-import com.beansgalaxy.backpacks.traits.ITraitData;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.screen.TinyTraitScreen;
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;

@@ -1,9 +1,8 @@
 package com.beansgalaxy.backpacks.traits.bulk;
 
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.beansgalaxy.backpacks.util.HopperTraitContainer;
+import com.beansgalaxy.backpacks.data.HopperTraitContainer;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import net.minecraft.core.Holder;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

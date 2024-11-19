@@ -1,14 +1,13 @@
 package com.beansgalaxy.backpacks.traits.battery;
 
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.registry.ModSound;
-import com.beansgalaxy.backpacks.traits.*;
+import com.beansgalaxy.backpacks.traits.IClientTraits;
+import com.beansgalaxy.backpacks.traits.ITraitData;
+import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
-import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.PatchedDataComponentMap;
-import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
@@ -17,12 +16,9 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.ComponentEnergyStorage;
 import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Iterator;
 import java.util.Objects;
 
 public class BatteryTraits extends GenericTraits {
@@ -79,7 +75,7 @@ public class BatteryTraits extends GenericTraits {
             Long aLong = holder.get(ITraitData.LONG);
             if (aLong == null || aLong == 0)
                   return Fraction.ZERO;
-            return Fraction.getFraction(aLong.intValue(), ((int) size()));
+            return Fraction.getFraction(aLong.intValue(), size());
       }
 
       @Override
@@ -125,7 +121,6 @@ public class BatteryTraits extends GenericTraits {
             if (stack == null || stack.isEmpty())
                   return;
 
-            return;
       }
 
       @Override

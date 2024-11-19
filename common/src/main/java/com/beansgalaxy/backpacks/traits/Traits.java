@@ -1,11 +1,11 @@
 package com.beansgalaxy.backpacks.traits;
 
-import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
-import com.beansgalaxy.backpacks.components.EnderTraits;
-import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
-import com.beansgalaxy.backpacks.items.EmptyEnderItem;
+import com.beansgalaxy.backpacks.components.ender.EmptyEnderItem;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.traits.alchemy.AlchemyCodecs;
 import com.beansgalaxy.backpacks.traits.alchemy.AlchemyTraits;
@@ -24,16 +24,12 @@ import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxCodecs;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverCodecs;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
-import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -42,7 +38,9 @@ import org.apache.commons.lang3.math.Fraction;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.*;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface Traits {
 

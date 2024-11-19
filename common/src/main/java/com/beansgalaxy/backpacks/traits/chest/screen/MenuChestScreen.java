@@ -1,10 +1,9 @@
 package com.beansgalaxy.backpacks.traits.chest.screen;
 
 import com.beansgalaxy.backpacks.client.KeyPress;
-import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.network.serverbound.TinyChestClick;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
-import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -154,11 +153,7 @@ public class MenuChestScreen extends TinyChestScreen {
             }
 
             int width = traits.columns * 18;
-            if (pMouseX < leftPos || pMouseX > leftPos + width) {
-                  return true;
-            }
-
-            return false;
+            return pMouseX < leftPos || pMouseX > leftPos + width;
       }
 
       @Override

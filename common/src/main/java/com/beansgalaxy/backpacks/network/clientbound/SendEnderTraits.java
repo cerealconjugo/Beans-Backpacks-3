@@ -1,7 +1,7 @@
 package com.beansgalaxy.backpacks.network.clientbound;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.client.CommonAtClient;
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.Network2C;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -50,10 +50,10 @@ public class SendEnderTraits implements Packet2C {
 
       @Override
       public void handle() {
-            CommonAtClient.getEnderStorage().set(owner, location, map);
+            CommonClient.getEnderStorage().set(owner, location, map);
       }
 
-      public static Type<SendEnderTraits> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_ender_traits_c"));
+      public static Type<SendEnderTraits> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":send_ender_traits_c"));
 
       @Override
       public Type<SendEnderTraits> type() {

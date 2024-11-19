@@ -2,8 +2,7 @@ package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
-import com.beansgalaxy.backpacks.components.EnderTraits;
-import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.entity.player.Player;

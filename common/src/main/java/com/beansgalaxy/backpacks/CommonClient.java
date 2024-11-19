@@ -1,20 +1,23 @@
 package com.beansgalaxy.backpacks;
 
-import com.beansgalaxy.backpacks.components.EnderTraits;
-import com.beansgalaxy.backpacks.registry.ModItems;
+import com.beansgalaxy.backpacks.access.MinecraftAccessor;
+import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.math.Fraction;
 
 import java.util.Optional;
@@ -73,8 +76,8 @@ public class CommonClient {
       };
 
       public static final ItemColor LEATHER_BACKPACK_ITEM_COLOR = (itemStack, layer) -> switch (layer) {
-            case 0, 2 -> componentTint(itemStack, Constants.DEFAULT_LEATHER_COLOR);
-            case 4 -> componentHighlight(itemStack, Constants.DEFAULT_LEATHER_COLOR);
+            case 0, 2 -> componentTint(itemStack, CommonClass.DEFAULT_LEATHER_COLOR);
+            case 4 -> componentHighlight(itemStack, CommonClass.DEFAULT_LEATHER_COLOR);
             default -> 0xFFFFFFFF;
       };
 
@@ -115,4 +118,22 @@ public class CommonClient {
             tintHsl.modLum(l -> (Math.sqrt(l) + l + l) / 3);
             return tintHsl;
       }
+
+      public static void playSound(SoundEvent soundEvent, float volume, float pitch) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, pitch, volume));
+      }
+
+      public static EnderStorage getEnderStorage() {
+            MinecraftAccessor instance = (MinecraftAccessor) Minecraft.getInstance();
+            return instance.beans_Backpacks_2$getEnder();
+      }
+
+      public static Level getLevel() {
+            return Minecraft.getInstance().level;
+      }
+
+      public static int getInt() {
+            return 200;
+      }
+
 }

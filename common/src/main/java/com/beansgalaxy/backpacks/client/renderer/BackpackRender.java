@@ -1,9 +1,9 @@
 package com.beansgalaxy.backpacks.client.renderer;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.platform.Services;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.Tint;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -30,7 +30,7 @@ import java.util.Optional;
 public interface BackpackRender {
 
       ModelLayerLocation BACKPACK_MODEL =
-                  new ModelLayerLocation(ResourceLocation.parse(Constants.MOD_ID + ":backpack_model"), "main");
+                  new ModelLayerLocation(ResourceLocation.parse(CommonClass.MOD_ID + ":backpack_model"), "main");
 
       BackpackModel<?> model();
 
@@ -41,9 +41,9 @@ public interface BackpackRender {
       default void builtInLeatherModel(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, ItemStack pItemStack) {
             pose.translate(0, 13 / 16f, 0);
             DyedItemColor dyedItemColor = pItemStack.get(DataComponents.DYED_COLOR);
-            int color = dyedItemColor == null ? Constants.DEFAULT_LEATHER_COLOR : dyedItemColor.rgb();
+            int color = dyedItemColor == null ? CommonClass.DEFAULT_LEATHER_COLOR : dyedItemColor.rgb();
 
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/backpack/leather/base.png");
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, "textures/backpack/leather/base.png");
             VertexConsumer outer = pBufferSource.getBuffer(RenderType.entityCutout(location));
             model().renderToBuffer(pose, outer, pCombinedLight, OverlayTexture.NO_OVERLAY, color);
 
@@ -54,7 +54,7 @@ public interface BackpackRender {
             hsl.setLum((Math.cbrt(lum + 0.2) + lum) / 2).rotate(5).setSat(Math.sqrt((hsl.getSat() + brightness) / 2));
             int highColor = hsl.pushToNew().getRGBA();
 
-            ResourceLocation highlight = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/backpack/leather/highlights.png");
+            ResourceLocation highlight = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, "textures/backpack/leather/highlights.png");
             VertexConsumer highVC = pBufferSource.getBuffer(RenderType.entityTranslucentCull(highlight));
             model().renderToBuffer(pose, highVC, pCombinedLight, OverlayTexture.NO_OVERLAY, highColor);
 

@@ -1,11 +1,10 @@
 package com.beansgalaxy.backpacks.network.clientbound;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.client.CommonAtClient;
+import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
-import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.component.DataComponentType;
@@ -73,11 +72,11 @@ public class SendEnderEntry<T extends GenericTraits> implements Packet2C {
 
       @Override
       public void handle() {
-            EnderStorage enderStorage = CommonAtClient.getEnderStorage();
+            EnderStorage enderStorage = CommonClient.getEnderStorage();
             enderStorage.set(owner, location, kind, trait, map, name);
       }
 
-      public static Type<SendEnderEntry> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_ender_entry_c"));
+      public static Type<SendEnderEntry> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":send_ender_entry_c"));
 
       @Override
       public Type<SendEnderEntry> type() {

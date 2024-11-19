@@ -6,13 +6,12 @@ import com.beansgalaxy.backpacks.network.clientbound.ConfigureReferences;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
 import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.platform.NeoForgePlatformHelper;
-import com.beansgalaxy.backpacks.registry.ModItems;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.ModItems;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
@@ -26,16 +25,14 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-import java.util.function.Supplier;
-
-@Mod(Constants.MOD_ID)
+@Mod(CommonClass.MOD_ID)
 public class NeoForgeMain {
 
     public static final DataComponentType<FluidStack>
                 DATA_FLUID = Traits.register("data_fluid", FluidStack.CODEC, FluidStack.STREAM_CODEC);
 
-    public static final DeferredRegister<EntityDataSerializer<?>> ENTITY_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS.key(), Constants.MOD_ID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_TAB_REGISTRY = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Constants.MOD_ID);
+    public static final DeferredRegister<EntityDataSerializer<?>> ENTITY_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS.key(), CommonClass.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TAB_REGISTRY = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CommonClass.MOD_ID);
 
     public NeoForgeMain(IEventBus eventBus) {
         NeoForgePlatformHelper.ITEMS_REGISTRY.register(eventBus);
@@ -50,7 +47,7 @@ public class NeoForgeMain {
         CommonClass.init();
     }
 
-    @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = CommonClass.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModEvents {
 
         @SubscribeEvent
@@ -79,7 +76,7 @@ public class NeoForgeMain {
         }
     }
 
-    @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+    @EventBusSubscriber(modid = CommonClass.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameEvents {
 
         @SubscribeEvent

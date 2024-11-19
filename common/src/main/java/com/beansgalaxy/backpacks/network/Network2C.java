@@ -1,6 +1,9 @@
 package com.beansgalaxy.backpacks.network;
 
-import com.beansgalaxy.backpacks.network.clientbound.*;
+import com.beansgalaxy.backpacks.network.clientbound.ConfigureReferences;
+import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
+import com.beansgalaxy.backpacks.network.clientbound.SendEnderEntry;
+import com.beansgalaxy.backpacks.network.clientbound.SendEnderTraits;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

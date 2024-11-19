@@ -1,7 +1,6 @@
-package com.beansgalaxy.backpacks.items;
+package com.beansgalaxy.backpacks.components.ender;
 
-import com.beansgalaxy.backpacks.client.CommonAtClient;
-import com.beansgalaxy.backpacks.components.EnderTraits;
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
@@ -18,6 +17,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class EnderItem extends BackpackItem {
+public class EnderItem extends Item {
+
       public EnderItem() {
             super(new Properties().stacksTo(1));
       }
@@ -114,7 +115,7 @@ public class EnderItem extends BackpackItem {
                   return false;
 
             EnderCallback<Boolean> enderCallback = EnderCallback.of(false);
-            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
             trait.client().isBarVisible(trait, enderTraits, enderCallback);
             return enderCallback.getReturnValue();
 
@@ -127,7 +128,7 @@ public class EnderItem extends BackpackItem {
                   return 13;
 
             EnderCallback<Integer> cir = EnderCallback.of(13);
-            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
             trait.client().getBarWidth(trait, enderTraits, cir);
             return cir.getReturnValue();
       }
@@ -139,7 +140,7 @@ public class EnderItem extends BackpackItem {
                   return 0x000000;
 
             EnderCallback<Integer> cir = EnderCallback.of(0x000000);
-            GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
             trait.client().getBarColor(trait, enderTraits, cir);
 
             return cir.getReturnValue();
@@ -207,7 +208,7 @@ public class EnderItem extends BackpackItem {
       @Override
       public void appendHoverText(ItemStack ender, TooltipContext $$1, List<Component> lines, TooltipFlag flag) {
             getEnderTrait(ender).ifPresent(enderTraits -> {
-                  GenericTraits trait = enderTraits.getTrait(CommonAtClient.getLevel());
+                  GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
                   Component displayName = enderTraits.getDisplayName();
 
                   lines.add(Component.translatable("ender.beansbackpacks.bound_player", displayName).withStyle(ChatFormatting.GOLD));

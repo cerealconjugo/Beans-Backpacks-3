@@ -1,10 +1,10 @@
 package com.beansgalaxy.backpacks.traits.quiver;
 
-import com.beansgalaxy.backpacks.registry.ModSound;
+import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
-import com.beansgalaxy.backpacks.util.SlotSelection;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.PrimitiveCodec;

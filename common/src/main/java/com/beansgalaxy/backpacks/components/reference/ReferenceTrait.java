@@ -1,11 +1,12 @@
 package com.beansgalaxy.backpacks.components.reference;
 
-import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +66,7 @@ public class ReferenceTrait {
       }
 
       public static ReferenceTrait of(String location) {
-            return of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, location));
+            return of(ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, location));
       }
 
       public static ReferenceTrait of(String namespace, String location) {

@@ -2,7 +2,7 @@ package com.beansgalaxy.backpacks.trait.battery;
 
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
-import com.beansgalaxy.backpacks.traits.generic.BatteryTooltip;
+import com.beansgalaxy.backpacks.traits.common.BatteryTooltip;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import net.minecraft.ChatFormatting;

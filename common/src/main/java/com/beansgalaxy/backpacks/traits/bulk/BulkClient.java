@@ -1,10 +1,9 @@
 package com.beansgalaxy.backpacks.traits.bulk;
 
-import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.mojang.blaze3d.platform.Window;
@@ -36,7 +35,7 @@ public class BulkClient implements IClientTraits<BulkTraits> {
                   Minecraft minecraft = Minecraft.getInstance();
                   BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
                   ItemStack stack = first.withItem(bulkStacks.itemHolder());
-                  Component title = Constants.getName(stack);
+                  Component title = CommonClass.getName(stack);
 
                   TraitTooltip<?> tooltip = new TraitTooltip<>(trait, itemStack, holder, title);
                   gui.renderTooltip(minecraft.font, List.of(title), Optional.of(tooltip), mouseX, mouseY);

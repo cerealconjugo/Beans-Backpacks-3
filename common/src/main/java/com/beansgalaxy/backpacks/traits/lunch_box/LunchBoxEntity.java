@@ -1,10 +1,8 @@
 package com.beansgalaxy.backpacks.traits.lunch_box;
 
-import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleEntity;
-import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
-import com.beansgalaxy.backpacks.traits.generic.BackpackEntity;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;

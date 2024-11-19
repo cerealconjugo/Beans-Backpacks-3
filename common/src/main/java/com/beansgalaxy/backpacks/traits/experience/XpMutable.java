@@ -1,8 +1,8 @@
 package com.beansgalaxy.backpacks.traits.experience;
 
-import com.beansgalaxy.backpacks.registry.ModSound;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.math.Fraction;
