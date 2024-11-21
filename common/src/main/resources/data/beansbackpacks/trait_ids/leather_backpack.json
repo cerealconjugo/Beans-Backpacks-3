@@ -13,7 +13,7 @@
   },
   "modifiers": [
     {
-      "type": "beansbackpacks:player.weapon_slots",
+      "type": "beansbackpacks:player.shorthand",
       "amount": 1,
       "slot": "body",
       "id": "leather_testing",

@@ -172,12 +172,12 @@ public class Shorthand {
 
       public int getToolsSize() {
             int maxSlot = 8 - weapons.getContainerSize();
-            double attributeValue = owner.getAttributeValue(CommonClass.TOOL_SLOTS_ATTRIBUTE);
+            double attributeValue = owner.getAttributeValue(CommonClass.TOOL_BELT_ATTRIBUTE);
             return Math.min((int) attributeValue, maxSlot);
       }
 
       public int getWeaponsSize() {
-            double attributeValue = owner.getAttributeValue(CommonClass.WEAPON_SLOTS_ATTRIBUTE);
+            double attributeValue = owner.getAttributeValue(CommonClass.SHORTHAND_ATTRIBUTE);
             return (int) attributeValue;
       }
 

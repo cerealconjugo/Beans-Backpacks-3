@@ -35,7 +35,7 @@ public class KeyPress {
       public static final String MENUS_KEY_IDENTIFIER = "key.beansbackpacks.inventory";
       public static final String ACTION_KEY_DESC = "key.beansbackpacks.desc.action";
       public static final String MENUS_KEY_DESC = "key.beansbackpacks.desc.inventory";
-      public static final String WEAPON_KEY_IDENTIFIER = "key.beansbackpacks.weapon";
+      public static final String SHORTHAND_KEY_IDENTIFIER = "key.beansbackpacks.shorthand";
       public static final String UTILITY_KEY_IDENTIFIER = "key.beansbackpacks.utility";
 
       public final KeyMapping ACTION_KEY = new KeyMapping(
@@ -48,8 +48,8 @@ public class KeyPress {
                   GLFW.GLFW_KEY_UNKNOWN,
                   KEY_CATEGORY);
 
-      public final KeyMapping WEAPON_KEY = new KeyMapping(
-                  WEAPON_KEY_IDENTIFIER,
+      public final KeyMapping SHORTHAND_KEY = new KeyMapping(
+                  SHORTHAND_KEY_IDENTIFIER,
                   GLFW.GLFW_KEY_GRAVE_ACCENT,
                   KEY_CATEGORY);
 

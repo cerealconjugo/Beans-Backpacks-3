@@ -69,8 +69,8 @@
   "tooltip.beansbackpacks.advanced.kind": "backpack_kind:%d",
   "tooltip.beansbackpacks.advanced.reference": "§o%d",
 
-  "attribute.name.player.tool_slots": "Tool Slots",
-  "attribute.name.player.weapon_slots": "Utility Slots",
+  "attribute.name.player.tool_belt": "Tool Belt",
+  "attribute.name.player.shorthand": "Shorthand",
 
   "key.beansbackpacks.category": "Beans' Backpacks",
   "key.beansbackpacks.action": "Place/Pickup",
@@ -78,5 +78,5 @@
   "key.beansbackpacks.inventory": "Quick Menu Click",
   "key.beansbackpacks.desc.inventory": "Leave unbound to pair this action with the key for %d.",
   "key.beansbackpacks.utility": "Shorthand Slot 2 (Previous)",
-  "key.beansbackpacks.weapon": "Shorthand Slot 1 (Next)"
+  "key.beansbackpacks.shorthand": "Shorthand Slot 1 (Next)"
 }

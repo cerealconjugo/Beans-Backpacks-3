@@ -5,16 +5,13 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.core.Holder;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -67,7 +64,7 @@ public class PlayerMixin {
       @Inject(method = "createAttributes", cancellable = true, at = @At(value = "RETURN"))
       private static void addShortAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
             AttributeSupplier.Builder returnValue = cir.getReturnValue();
-            AttributeSupplier.Builder add = returnValue.add(CommonClass.TOOL_SLOTS_ATTRIBUTE, 2).add(CommonClass.WEAPON_SLOTS_ATTRIBUTE, 1);
+            AttributeSupplier.Builder add = returnValue.add(CommonClass.TOOL_BELT_ATTRIBUTE, 2).add(CommonClass.SHORTHAND_ATTRIBUTE, 1);
             cir.setReturnValue(add);
       }
 }

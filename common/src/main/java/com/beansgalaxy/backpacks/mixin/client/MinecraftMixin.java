@@ -5,15 +5,11 @@ import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
-import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +17,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 
 @Mixin(Minecraft.class)
@@ -56,7 +51,7 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
       @Inject(method = "handleKeybinds", at = @At("TAIL"))
       private void handleBackpackKeybinds(CallbackInfo ci) {
             KeyPress keyPress = KeyPress.INSTANCE;
-            while (keyPress.WEAPON_KEY.consumeClick()) {
+            while (keyPress.SHORTHAND_KEY.consumeClick()) {
                   Shorthand shorthand = Shorthand.get(player);
                   Inventory inventory = player.getInventory();
                   if (keyPress.UTILITY_KEY.isDown()) {
@@ -70,7 +65,7 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
             while (keyPress.UTILITY_KEY.consumeClick()) {
                   Shorthand shorthand = Shorthand.get(player);
                   Inventory inventory = player.getInventory();
-                  if (keyPress.WEAPON_KEY.isDown()) {
+                  if (keyPress.SHORTHAND_KEY.isDown()) {
                         keyPress.UTILITY_KEY.consumeClick();
                         shorthand.resetSelected(inventory);
                         return;

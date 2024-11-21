@@ -22,10 +22,10 @@ public class CommonClass {
                                         .eyeHeight(0.5f)
                 );
 
-    public static final Holder<Attribute> TOOL_SLOTS_ATTRIBUTE = Services.PLATFORM.register("player.tool_slots",
-                new RangedAttribute("attribute.name.player.tool_slots", 2, 0, 8).setSyncable(true));
-    public static final Holder<Attribute> WEAPON_SLOTS_ATTRIBUTE = Services.PLATFORM.register("player.weapon_slots",
-                new RangedAttribute("attribute.name.player.weapon_slots", 1, 0, 8).setSyncable(true));
+    public static final Holder<Attribute> TOOL_BELT_ATTRIBUTE = Services.PLATFORM.register("player.tool_belt",
+                new RangedAttribute("attribute.name.player.tool_belt", 2, 0, 8).setSyncable(true));
+    public static final Holder<Attribute> SHORTHAND_ATTRIBUTE = Services.PLATFORM.register("player.shorthand",
+                new RangedAttribute("attribute.name.player.shorthand", 1, 0, 8).setSyncable(true));
 
       public static void init() {
         ModSound.Events.register();

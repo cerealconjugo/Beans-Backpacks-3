@@ -78,7 +78,7 @@ public class NeoForgeClient {
             public static void registerKeys(RegisterKeyMappingsEvent event) {
                   event.register(KeyPress.INSTANCE.ACTION_KEY);
                   event.register(KeyPress.INSTANCE.MENUS_KEY);
-                  event.register(KeyPress.INSTANCE.WEAPON_KEY);
+                  event.register(KeyPress.INSTANCE.SHORTHAND_KEY);
                   event.register(KeyPress.INSTANCE.UTILITY_KEY);
             }
       }

@@ -48,7 +48,7 @@ public class SendWeaponSlot implements Packet2C {
             CommonClient.handleSendWeaponSlot(player, selectedSlot, stack);
       }
 
-      public static Type<SendWeaponSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_weapon_slot_c"));
+      public static Type<SendWeaponSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_shorthand_c"));
 
       @Override
       public Type<SendWeaponSlot> type() {

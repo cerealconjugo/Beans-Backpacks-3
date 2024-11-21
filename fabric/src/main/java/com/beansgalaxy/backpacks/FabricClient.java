@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 
 public class FabricClient implements ClientModInitializer {
 
@@ -37,7 +36,7 @@ public class FabricClient implements ClientModInitializer {
 
             KeyBindingHelper.registerKeyBinding(KeyPress.INSTANCE.ACTION_KEY);
             KeyBindingHelper.registerKeyBinding(KeyPress.INSTANCE.MENUS_KEY);
-            KeyBindingHelper.registerKeyBinding(KeyPress.INSTANCE.WEAPON_KEY);
+            KeyBindingHelper.registerKeyBinding(KeyPress.INSTANCE.SHORTHAND_KEY);
             KeyBindingHelper.registerKeyBinding(KeyPress.INSTANCE.UTILITY_KEY);
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
