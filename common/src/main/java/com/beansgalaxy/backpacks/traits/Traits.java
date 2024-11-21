@@ -104,7 +104,7 @@ public interface Traits {
       static <T> DataComponentType<T> register(String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
             DataComponentType.Builder<T> builder = DataComponentType.builder();
             DataComponentType<T> type = builder.persistent(codec).networkSynchronized(streamCodec).cacheEncoding().build();
-            return Services.PLATFORM.registerComponents(name, type);
+            return Services.PLATFORM.register(name, type);
       }
 
       static Optional<GenericTraits> get(ItemStack stack) {

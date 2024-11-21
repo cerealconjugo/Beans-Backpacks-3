@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.NonTrait;
@@ -69,7 +69,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                CommonClass.LOG.warn("{}{}", message, error);
+                                                Constants.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -83,7 +83,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                CommonClass.LOG.warn("{}{}", message, error);
+                                                Constants.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -97,7 +97,7 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                CommonClass.LOG.warn("{}{}", message, error);
+                                                Constants.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
@@ -111,7 +111,7 @@ public class DataResourcesMixin {
                                           TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.get(type);
                                           if (kind == null) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; The trait \"" + type + "\" does not exist!";
-                                                CommonClass.LOG.warn(message);
+                                                Constants.LOG.warn(message);
                                                 continue;
                                           }
 
@@ -119,11 +119,11 @@ public class DataResourcesMixin {
                                           if (result.isError()) {
                                                 String message = "Failure while parsing trait_id \"" + location + "\"; Error while decoding \"" + type + "\"; ";
                                                 String error = result.error().get().message();
-                                                CommonClass.LOG.warn("{}{}", message, error);
+                                                Constants.LOG.warn("{}{}", message, error);
                                                 continue;
                                           }
 
-                                          fields = result.getOrThrow().toReference(location);
+                                          fields = result.getOrThrow();
                                     }
                               }
                         }

@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.data;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -32,7 +32,7 @@ public class ServerSave extends SavedData {
       public static ServerSave getSave(MinecraftServer server, boolean updateSave) {
             ServerLevel level = server.getLevel(Level.OVERWORLD);
             DimensionDataStorage dataStorage = level.getDataStorage();
-            ServerSave save = dataStorage.computeIfAbsent(ServerSave.factory(), CommonClass.MOD_ID);
+            ServerSave save = dataStorage.computeIfAbsent(ServerSave.factory(), Constants.MOD_ID);
 
             if (updateSave)
                   save.setDirty();

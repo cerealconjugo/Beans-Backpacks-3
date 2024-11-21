@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
@@ -58,7 +58,7 @@ public class TinyHotbarClick implements Packet2S {
             }
       }
 
-      public static Type<TinyHotbarClick> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":tiny_hotbar_click_s"));
+      public static Type<TinyHotbarClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_hotbar_click_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

@@ -33,11 +33,6 @@ public class BundleTraits extends BundleLikeTraits {
       }
 
       @Override
-      public BundleTraits toReference(ResourceLocation location) {
-            return new BundleTraits(location, sound(), size());
-      }
-
-      @Override
       public String name() {
             return NAME;
       }
@@ -52,9 +47,7 @@ public class BundleTraits extends BundleLikeTraits {
             return "BundleTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 
       @Override

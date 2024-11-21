@@ -1,7 +1,7 @@
 package com.beansgalaxy.backpacks.util;
 
-import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.CommonClient;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -247,9 +247,9 @@ public enum ModSound implements StringRepresentable {
 
             public final SoundEvent event;
             Events(String id) {
-                  ResourceLocation location = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, id);
+                  ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, id);
                   SoundEvent event = SoundEvent.createVariableRangeEvent(location);
-                  this.event = Services.PLATFORM.registerSound(id, event);
+                  this.event = Services.PLATFORM.register(id, event);
             }
 
             public SoundEvent get() {

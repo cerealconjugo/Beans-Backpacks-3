@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 
 import java.util.function.Supplier;
@@ -46,9 +48,10 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public Supplier<Item> register(String id, Supplier<Item> item) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, id);
-        return () -> Registry.register(BuiltInRegistries.ITEM, resourceLocation, item.get());
+    public Supplier<Item> register(String name, Supplier<Item> item) {
+        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        Item register = Registry.register(BuiltInRegistries.ITEM, resourceLocation, item.get());
+          return () -> register;
     }
 
     @Override
@@ -69,6 +72,14 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public void send(Network2C network2C, Packet2C msg, MinecraftServer server, ServerPlayer sender) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (player != sender)
+                send(network2C, msg, player);
+        }
+    }
+
+    @Override
     public TraitComponentKind<BucketTraits> registerBucket() {
         return TraitComponentKind.register(BucketTraits.NAME, BucketCodecs.INSTANCE);
     }
@@ -79,32 +90,39 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type) {
+    public <T> DataComponentType<T> register(String name, DataComponentType<T> type) {
         return Registry.register(
                     BuiltInRegistries.DATA_COMPONENT_TYPE,
-                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), type
+                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
+                    type
         );
     }
 
     @Override
-    public <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type) {
+    public <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> type) {
         return () -> Registry.register(
                     BuiltInRegistries.ENTITY_TYPE,
-                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), type.build(name)
+                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
+                    type.build(name)
         );
     }
 
     @Override
-    public SoundEvent registerSound(String name, SoundEvent event) {
+    public SoundEvent register(String name, SoundEvent event) {
         return Registry.register(
                     BuiltInRegistries.SOUND_EVENT,
-                    ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, name), event
+                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
+                    event
         );
     }
 
     @Override
-    public String getModelVariant() {
-        return "fabric_resource";
+    public Holder<Attribute> register(String name, Attribute attribute) {
+        return Registry.registerForHolder(
+                    BuiltInRegistries.ATTRIBUTE,
+                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
+                    attribute
+        );
     }
 
     @Override

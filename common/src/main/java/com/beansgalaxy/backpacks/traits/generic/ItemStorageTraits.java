@@ -12,7 +12,6 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,8 +34,8 @@ import java.util.function.Predicate;
 
 public abstract class ItemStorageTraits extends GenericTraits {
 
-      public ItemStorageTraits(ResourceLocation location, ModSound sound) {
-            super(location, sound);
+      public ItemStorageTraits(ModSound sound) {
+            super(sound);
       }
 
       private static Optional<ItemStorageTraits> get(DataComponentHolder stack) {

@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -12,6 +12,7 @@ import com.beansgalaxy.backpacks.traits.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.traits.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.traits.bucket.BucketTraits;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
@@ -56,49 +58,57 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public void send(Network2C network, Packet2C packet2C, MinecraftServer server, ServerPlayer player) {
+        PacketDistributor.sendToPlayersTrackingEntity(player, packet2C);
+    }
+
+    @Override
     public void send(Network2S network, Packet2S packet2S) {
         PacketDistributor.sendToServer(packet2S);
     }
 
-    public static final DeferredRegister.Items ITEMS_REGISTRY = DeferredRegister.createItems(CommonClass.MOD_ID);
+    public static final DeferredRegister.Items ITEMS_REGISTRY = DeferredRegister.createItems(Constants.MOD_ID);
 
     @Override
-    public Supplier<Item> register(String id, Supplier<Item> item) {
+    public Supplier<Item> register(String name, Supplier<Item> item) {
         DeferredRegister.Items items = ITEMS_REGISTRY;
-        return items.register(id, item);
+        return items.register(name, item);
     }
 
     public static final DeferredRegister.DataComponents COMPONENTS_REGISTRY =
-                DeferredRegister.createDataComponents(CommonClass.MOD_ID);
+                DeferredRegister.createDataComponents(Constants.MOD_ID);
 
     @Override
-    public <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type) {
+    public <T> DataComponentType<T> register(String name, DataComponentType<T> type) {
         DeferredRegister.DataComponents components = COMPONENTS_REGISTRY;
         components.register(name, () -> type);
         return type;
     }
 
     public static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY =
-                DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, CommonClass.MOD_ID);
+                DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Constants.MOD_ID);
 
-    public <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type) {
+    public <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> type) {
         DeferredRegister<EntityType<?>> registry = ENTITY_REGISTRY;
         return registry.register(name, () -> type.build(name));
     }
 
     public static final DeferredRegister<SoundEvent> SOUND_REGISTRY =
-                DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, CommonClass.MOD_ID);
+                DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Constants.MOD_ID);
 
     @Override
-    public SoundEvent registerSound(String name, SoundEvent event) {
+    public SoundEvent register(String name, SoundEvent event) {
         DeferredRegister<SoundEvent> registry = SOUND_REGISTRY;
         registry.register(name, () -> event);
         return event;
     }
 
+    public static final DeferredRegister<Attribute> ATTRIBUTE_REGISTRY =
+                DeferredRegister.create(BuiltInRegistries.ATTRIBUTE, Constants.MOD_ID);
+
     @Override
-    public String getModelVariant() {
-        return ModelResourceLocation.STANDALONE_VARIANT;
+    public Holder<Attribute> register(String name, Attribute attribute) {
+        return ATTRIBUTE_REGISTRY.register(name, () -> attribute);
     }
 
     @Override

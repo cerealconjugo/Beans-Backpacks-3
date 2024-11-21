@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -39,8 +38,8 @@ public class BucketTraits extends GenericTraits {
       public static final String NAME = "bucket";
       private final int size;
 
-      public BucketTraits(ResourceLocation location, ModSound sound, int size) {
-            super(location, sound);
+      public BucketTraits(ModSound sound, int size) {
+            super(sound);
             this.size = size;
       }
 
@@ -57,11 +56,6 @@ public class BucketTraits extends GenericTraits {
       @Override
       public BucketEntity entity() {
             return BucketEntity.INSTANCE;
-      }
-
-      @Override
-      public BucketTraits toReference(ResourceLocation location) {
-            return new BucketTraits(location, sound(), size);
       }
 
       public int size() {
@@ -207,12 +201,12 @@ public class BucketTraits extends GenericTraits {
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof BucketTraits that)) return false;
-            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
+            return size() == that.size() && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(size(), sound(), location());
+            return Objects.hash(size(), sound());
       }
 
       @Override
@@ -220,8 +214,6 @@ public class BucketTraits extends GenericTraits {
             return "BucketTraits{" +
                         "size=" + size() +
                         "sound=" + sound() +
-                        location().map(
-                                    location -> "location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 }

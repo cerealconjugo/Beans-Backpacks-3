@@ -35,13 +35,11 @@ public class ChestCodecs implements ITraitCodec<ChestTraits> {
       }
 
       public static final StreamCodec<RegistryFriendlyByteBuf, ChestTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
-            GenericTraits.encodeLocation(buf, traits);
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
             buf.writeByte(traits.rows);
             buf.writeByte(traits.columns);
       }, buf ->
-            new ChestTraits(
-                  GenericTraits.decodeLocation(buf),
+            new ChestTraits(null,
                   ModSound.STREAM_CODEC.decode(buf),
                   buf.readByte(),
                   buf.readByte()

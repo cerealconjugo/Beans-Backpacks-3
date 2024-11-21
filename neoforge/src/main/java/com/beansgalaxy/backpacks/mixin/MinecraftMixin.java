@@ -24,23 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin implements MinecraftAccessor {
-      @Shadow static Minecraft instance;
+public abstract class MinecraftMixin {
       @Shadow @Nullable public LocalPlayer player;
-      @Shadow public ClientLevel level;
-      @Unique public final EnderStorage beans_Backpacks_2$enderStorage = new EnderStorage();
-
-      @Override
-      public EnderStorage beans_Backpacks_2$getEnder() {
-            return beans_Backpacks_2$enderStorage;
-      }
-
-      @Inject(method = "startUseItem", cancellable = true, at = @At(value = "INVOKE",
-                  ordinal = 0, target = "Lnet/minecraft/world/item/ItemStack;getCount()I"))
-      private void hotkeyUseItemOn(CallbackInfo ci) {
-            if(BackData.get(player).isActionKeyDown() && instance.hitResult instanceof BlockHitResult blockHitResult && KeyPress.INSTANCE.consumeActionUseOn(instance, blockHitResult))
-                  ci.cancel();
-      }
 
       @SuppressWarnings("InvalidInjectorMethodSignature")
       @Inject(method = "pickBlock", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, at = @At(value = "INVOKE",
@@ -51,12 +36,4 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
                   return ci.isCancelled();
             });
       }
-
-      @Inject(method = "startUseItem", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
-                  ordinal = 1, target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"))
-      private void hotkeyUseItem(CallbackInfo ci) {
-            if(BackData.get(player).isActionKeyDown() && KeyPress.INSTANCE.consumeActionUse(level, player))
-                  ci.cancel();
-      }
-
 }

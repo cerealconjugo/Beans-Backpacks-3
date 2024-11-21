@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.clientbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
@@ -31,7 +31,7 @@ public class ConfigureReferences implements Packet2C {
                   ResourceLocation location = ResourceLocation.STREAM_CODEC.decode(buf);
 
                   TraitComponentKind<? extends GenericTraits> kind = TraitComponentKind.STREAM_CODEC.decode(buf);
-                  GenericTraits fields = buf.readJsonWithCodec(kind.codec()).toReference(location);
+                  GenericTraits fields = buf.readJsonWithCodec(kind.codec());
 
                   ItemAttributeModifiers modifiers = ItemAttributeModifiers.STREAM_CODEC.decode(buf);
 
@@ -91,7 +91,7 @@ public class ConfigureReferences implements Packet2C {
             references.forEach(ReferenceRegistry::put);
       }
 
-      public static Type<ConfigureReferences> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":config_references_c"));
+      public static Type<ConfigureReferences> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":config_references_c"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

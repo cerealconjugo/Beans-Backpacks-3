@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.traits.lunch_box;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleClient;
@@ -53,7 +53,7 @@ public class LunchBoxClient extends BundleClient {
                               selected = stacks.get(selectedSlotSafe);
                         }
 
-                        title = CommonClass.getName(selected);
+                        title = Constants.getName(selected);
                   }
 
                   TraitTooltip<?> tooltip = new TraitTooltip<>(trait, itemStack, holder, title);

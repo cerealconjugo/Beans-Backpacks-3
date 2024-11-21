@@ -8,5 +8,16 @@
     "model": true,
     "sound_event": "beansbackpacks:leather_equip"
   },
-  "placeable": {}
+  "placeable": {
+
+  },
+  "modifiers": [
+    {
+      "type": "beansbackpacks:player.weapon_slots",
+      "amount": 1,
+      "slot": "body",
+      "id": "leather_testing",
+      "operation": "add_value"
+    }
+  ]
 }

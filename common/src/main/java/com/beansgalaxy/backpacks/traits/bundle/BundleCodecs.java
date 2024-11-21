@@ -32,12 +32,10 @@ public class BundleCodecs implements ITraitCodec<BundleTraits> {
       }
 
       public static final StreamCodec<RegistryFriendlyByteBuf, BundleTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
-            GenericTraits.encodeLocation(buf, traits);
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
             buf.writeInt(traits.size());
             SlotSelection.STREAM_CODEC.encode(buf, traits.selection);
-      }, buf -> new BundleTraits(
-                  GenericTraits.decodeLocation(buf),
+      }, buf -> new BundleTraits(null,
                   ModSound.STREAM_CODEC.decode(buf),
                   buf.readInt(),
                   SlotSelection.STREAM_CODEC.decode(buf)

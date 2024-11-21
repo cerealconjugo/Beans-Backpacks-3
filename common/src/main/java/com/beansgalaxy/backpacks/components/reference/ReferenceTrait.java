@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.components.reference;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -66,7 +66,7 @@ public class ReferenceTrait {
       }
 
       public static ReferenceTrait of(String location) {
-            return of(ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, location));
+            return of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, location));
       }
 
       public static ReferenceTrait of(String namespace, String location) {
@@ -144,7 +144,7 @@ public class ReferenceTrait {
             if (referenceRegistry == null)
                   return DataResult.error(() -> "No trait is registered using the given location; " + location, new ReferenceTrait(location));
 
-            return DataResult.success(new ReferenceTrait(location, referenceRegistry.traits().toReference(location), referenceRegistry.placeable(), referenceRegistry.equipable()));
+            return DataResult.success(new ReferenceTrait(location, referenceRegistry.traits(), referenceRegistry.placeable(), referenceRegistry.equipable()));
       }, reference ->
             DataResult.success(reference.location)
       );
@@ -165,7 +165,7 @@ public class ReferenceTrait {
                   if (buf.readBoolean()) {
                         ReferenceRegistry reference = ReferenceRegistry.get(location);
                         GenericTraits fields = reference.traits();
-                        return new ReferenceTrait(location, fields.toReference(location), reference.placeable(), reference.equipable());
+                        return new ReferenceTrait(location, fields, reference.placeable(), reference.equipable());
                   }
                   return new ReferenceTrait(location);
             }

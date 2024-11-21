@@ -23,9 +23,13 @@
   "client": [
     "client.AbstractScreenMixin",
     "client.BlockStateModelMixin",
+    "client.InventoryScreenMixin",
+    "client.ItemInHandMixin",
     "client.ItemRendererMixin",
     "client.KeyBindEntriesMixin",
     "client.LocalPlayerMixin",
+    "client.MinecraftMixin",
+    "client.MouseHandlerMixin",
     "client.PlayerRendererMixin",
     "client.SimpleBakedModelMixin"
   ],

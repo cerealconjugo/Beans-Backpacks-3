@@ -140,11 +140,6 @@ public class QuiverTraits extends BundleLikeTraits {
       }
 
       @Override
-      public QuiverTraits toReference(ResourceLocation location) {
-            return new QuiverTraits(location, sound(), size());
-      }
-
-      @Override
       public boolean isFull(PatchedComponentHolder holder) {
             List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
             if (stacks == null || stacks.isEmpty() || stacks.size() < size())
@@ -214,9 +209,7 @@ public class QuiverTraits extends BundleLikeTraits {
             return "QuiverTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 
       @Override

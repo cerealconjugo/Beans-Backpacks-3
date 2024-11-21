@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.util;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.ender.EmptyEnderItem;
 import com.beansgalaxy.backpacks.components.ender.EnderItem;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
@@ -34,7 +34,7 @@ public enum ModItems {
       ;
 
       public static final UnaryOperator<CreativeModeTab.Builder> CREATIVE_TAB = builder -> builder
-                  .title(Component.translatable("itemGroup." + CommonClass.MOD_ID))
+                  .title(Component.translatable("itemGroup." + Constants.MOD_ID))
                   .icon(() -> ModItems.LEATHER_BACKPACK.get().getDefaultInstance())
                   .displayItems((params, output) -> {
                         for (ModItems value : ModItems.values()) {
@@ -55,7 +55,7 @@ public enum ModItems {
 
       ModItems(String id, String reference, UnaryOperator<Item.Properties> properties) {
             this.id = id;
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, reference);
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, reference);
             ReferenceTrait referenceTrait = new ReferenceTrait(location);
             Item.Properties properties1 = new Item.Properties().component(Traits.REFERENCE, referenceTrait);
             this.item = Services.PLATFORM.register(id, () -> new Item(properties.apply(properties1)));

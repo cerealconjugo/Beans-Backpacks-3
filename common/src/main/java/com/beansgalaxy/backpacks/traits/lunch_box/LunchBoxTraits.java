@@ -48,11 +48,6 @@ public class LunchBoxTraits extends BundleLikeTraits {
       }
 
       @Override
-      public LunchBoxTraits toReference(ResourceLocation location) {
-            return new LunchBoxTraits(location, sound(), size());
-      }
-
-      @Override
       public boolean isEmpty(PatchedComponentHolder holder) {
             if (!super.isEmpty(holder))
                   return false;
@@ -151,9 +146,7 @@ public class LunchBoxTraits extends BundleLikeTraits {
             return "LunchBoxTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 
       @Override

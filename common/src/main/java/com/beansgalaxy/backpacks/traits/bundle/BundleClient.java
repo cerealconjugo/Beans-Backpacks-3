@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.traits.bundle;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.network.serverbound.SyncSelectedSlot;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
@@ -51,7 +51,7 @@ public class BundleClient implements IClientTraits<BundleLikeTraits> {
                         int selectedSlotSafe = selectedSlot == 0 ? 0 : selectedSlot - 1;
                         List<ItemStack> stacks = holder.get(ITraitData.ITEM_STACKS);
                         ItemStack selected = stacks.get(selectedSlotSafe);
-                        title = CommonClass.getName(selected);
+                        title = Constants.getName(selected);
                   }
 
                   TraitTooltip<?> tooltip = new TraitTooltip<>(trait, itemStack, holder, title);

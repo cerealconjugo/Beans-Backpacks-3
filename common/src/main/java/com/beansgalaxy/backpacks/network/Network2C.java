@@ -1,9 +1,6 @@
 package com.beansgalaxy.backpacks.network;
 
-import com.beansgalaxy.backpacks.network.clientbound.ConfigureReferences;
-import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
-import com.beansgalaxy.backpacks.network.clientbound.SendEnderEntry;
-import com.beansgalaxy.backpacks.network.clientbound.SendEnderTraits;
+import com.beansgalaxy.backpacks.network.clientbound.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -17,6 +14,7 @@ public enum Network2C {
       ENDER_TRAIT_2C(SendEnderTraits.class, SendEnderTraits.ID, SendEnderTraits::encode, SendEnderTraits::new, SendEnderTraits::handle),
       ENDER_ENTRY_2C(SendEnderEntry.class, SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::decode, SendEnderEntry::handle),
       CONFIG_REFERENCES_2C(ConfigureReferences.class, ConfigureReferences.ID, ConfigureReferences::encode, ConfigureReferences::new, ConfigureReferences::handle),
+      WEAPON_SLOT_2C(SendWeaponSlot.class, SendWeaponSlot.ID, SendWeaponSlot::encode, SendWeaponSlot::new, SendWeaponSlot::handle),
       ;
 
       public final DynamicLoaderPacket<? super RegistryFriendlyByteBuf, ?> packet;

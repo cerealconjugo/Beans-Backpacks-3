@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -58,9 +59,13 @@ public abstract class ItemStackMixin {
 
       @Inject(method = "getTooltipLines", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 3, target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
       private void backpackAdvancedLines(Item.TooltipContext pTooltipContext, Player pPlayer, TooltipFlag pTooltipFlag, CallbackInfoReturnable<List<Component>> cir, List<Component> list) {
-            Traits.runIfPresent(instance, traits -> {
-                  traits.client().appendAdvancedLines(traits, list);
-            });
+            ReferenceTrait referenceTrait = instance.get(Traits.REFERENCE);
+            if (referenceTrait == null) {
+                  return;
+            }
+
+            ResourceLocation location = referenceTrait.location();
+            list.add(Component.translatable("tooltip.beansbackpacks.advanced.reference", location.toString()).withStyle(ChatFormatting.DARK_GRAY).withStyle(ChatFormatting.ITALIC));
       }
 
       @Inject(method = "addAttributeTooltips", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlotGroup;Ljava/util/function/BiConsumer;)V"))

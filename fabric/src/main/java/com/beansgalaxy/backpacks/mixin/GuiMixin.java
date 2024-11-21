@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.beansgalaxy.backpacks.CommonClient;
 
 @Mixin(Gui.class)
 public class GuiMixin {
@@ -24,5 +25,6 @@ public class GuiMixin {
                         trait.client().renderEntityOverlay(minecraft, backpack, trait, drawContext, tickCounter);
                   });
             }
+            CommonClient.renderShorthandGui(minecraft, drawContext, tickCounter);
       }
 }

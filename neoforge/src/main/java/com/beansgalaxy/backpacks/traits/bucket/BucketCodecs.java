@@ -1,7 +1,6 @@
 package com.beansgalaxy.backpacks.traits.bucket;
 
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -21,7 +20,7 @@ public class BucketCodecs implements ITraitCodec<BucketTraits> {
                                     : DataResult.error(() -> "The provided field \"size\" must be smaller than 26,523; Provided=" + size, 26522)
                               ).forGetter(BucketTraits::size),
                               ModSound.MAP_CODEC.forGetter(BucketTraits::sound)
-                  ).apply(in, (size, sound) -> new BucketTraits(null, sound, size))
+                  ).apply(in, (size, sound) -> new BucketTraits(sound, size))
       );
 
       @Override
@@ -32,7 +31,6 @@ public class BucketCodecs implements ITraitCodec<BucketTraits> {
       StreamCodec<RegistryFriendlyByteBuf, BucketTraits> STREAM_CODEC = new StreamCodec<>() {
             @Override
             public void encode(RegistryFriendlyByteBuf buf, BucketTraits traits) {
-                  GenericTraits.encodeLocation(buf, traits);
                   ModSound.STREAM_CODEC.encode(buf, traits.sound());
                   buf.writeInt(traits.size());
             }
@@ -40,7 +38,6 @@ public class BucketCodecs implements ITraitCodec<BucketTraits> {
             @Override
             public BucketTraits decode(RegistryFriendlyByteBuf buf) {
                   return new BucketTraits(
-                              GenericTraits.decodeLocation(buf),
                               ModSound.STREAM_CODEC.decode(buf),
                               buf.readInt()
                   );

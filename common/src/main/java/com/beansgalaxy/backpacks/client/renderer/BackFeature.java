@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipmentModel;
 import com.beansgalaxy.backpacks.platform.Services;
+import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -21,6 +22,8 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> implements BackpackRender {
@@ -123,6 +126,28 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                         pose.popPose();
                   });
             });
+
+            Shorthand shorthand = Shorthand.get(player);
+            int selectedWeapon = shorthand.getSelectedWeapon();
+            ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
+            Inventory inventory = player.getInventory();
+            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
+
+            ItemStack mainHandItem = player.getMainHandItem();
+            boolean mainHand = selectedWeapon != selected;
+            if (mainHand && !stack.isEmpty()) {
+                  this.getParentModel().body.translateAndRotate(pose);
+                  pose.translate(-1/16f, player.isCrouching() ? 5/16f : 4/16f, 5/32f);
+                  if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
+                        pose.translate(0.0F, 1/16f, 1 / 16f);
+
+                  pose.mulPose(Axis.ZN.rotationDegrees(90));
+                  float scale = 0.999f;
+                  pose.scale(scale, scale, scale);
+
+                  BakedModel model = itemRenderer.getModel(stack, player.level(), player, player.getId());
+                  itemRenderer().render(stack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, model);
+            }
       }
 
 }

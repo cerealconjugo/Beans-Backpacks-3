@@ -5,8 +5,6 @@ import com.beansgalaxy.backpacks.traits.IEntityTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,39 +17,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
-
 public abstract class GenericTraits {
-      private final ResourceLocation location;
       private final ModSound sound;
 
-      public GenericTraits(ResourceLocation location, ModSound sound) {
-            this.location = location;
+      public GenericTraits(ModSound sound) {
             this.sound = sound;
-      }
-
-      public static void encodeLocation(RegistryFriendlyByteBuf buf, GenericTraits fields) {
-            fields.location().ifPresentOrElse(location -> {
-                  buf.writeBoolean(true);
-                  ResourceLocation.STREAM_CODEC.encode(buf, location);
-            }, () -> buf.writeBoolean(false));
-      }
-
-      @Nullable
-      public static ResourceLocation decodeLocation(RegistryFriendlyByteBuf buf) {
-            if (buf.readBoolean())
-                  return ResourceLocation.STREAM_CODEC.decode(buf);
-
-            return null;
-      }
-
-      abstract public <T extends GenericTraits> T toReference(ResourceLocation location);
-
-      public Optional<ResourceLocation> location() {
-            return Optional.ofNullable(location);
       }
 
       public ModSound sound() {

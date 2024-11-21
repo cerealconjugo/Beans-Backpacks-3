@@ -41,7 +41,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
       public final SlotSelection selection = new SlotSelection();
 
       public BundleLikeTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
-            super(location, sound);
+            super(sound);
             this.size = size;
             this.selection.addAll(selection);
       }
@@ -521,12 +521,12 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             if (this == o) return true;
             if (!(o instanceof BundleLikeTraits that)) return false;
             if (!super.equals(o)) return false;
-            return size == that.size && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
+            return size == that.size && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(location(), sound(), size);
+            return Objects.hash(sound(), size);
       }
 
       @Override

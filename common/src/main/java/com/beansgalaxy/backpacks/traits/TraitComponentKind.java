@@ -61,7 +61,7 @@ public class TraitComponentKind<T extends GenericTraits> implements DataComponen
             int i = TraitComponentKind.TRAITS.size();
             TraitComponentKind<T> componentType = new TraitComponentKind<>(i, name, codecs);
             TRAITS.add(componentType);
-            Services.PLATFORM.registerComponents(name, componentType);
+            Services.PLATFORM.register(name, componentType);
             return componentType;
       }
 

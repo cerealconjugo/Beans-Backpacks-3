@@ -8,7 +8,6 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
@@ -26,8 +25,8 @@ public class BatteryTraits extends GenericTraits {
       private final int size;
       private final int speed;
 
-      public BatteryTraits(ResourceLocation location, ModSound sound, int size, int speed) {
-            super(location, sound);
+      public BatteryTraits(ModSound sound, int size, int speed) {
+            super(sound);
             this.size = size;
             this.speed = speed;
       }
@@ -55,11 +54,6 @@ public class BatteryTraits extends GenericTraits {
       @Override
       public TraitComponentKind<? extends GenericTraits> kind() {
             return Traits.BATTERY;
-      }
-
-      @Override
-      public BatteryTraits toReference(ResourceLocation location) {
-            return new BatteryTraits(location, sound(), size, speed);
       }
 
       public int size() {
@@ -128,8 +122,8 @@ public class BatteryTraits extends GenericTraits {
             if (this == o) return true;
             if (!(o instanceof BatteryTraits that)) return false;
             if (!super.equals(o)) return false;
-            return size == that.size && speed == that.speed
-                        && Objects.equals(location(), that.location())
+            return size == that.size
+                        && speed == that.speed
                         && sound() == that.sound();
       }
 
@@ -144,9 +138,6 @@ public class BatteryTraits extends GenericTraits {
                         "size=" + size +
                         ", speed=" + speed +
                         ", sound=" + sound() +
-                        location().map(location ->
-                              ", location=" + location + '}')
-                              .orElse("}"
-                        );
+                        '}';
       }
 }

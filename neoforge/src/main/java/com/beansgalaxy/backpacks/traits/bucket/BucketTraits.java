@@ -7,7 +7,6 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -16,15 +15,14 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 public class BucketTraits extends GenericTraits {
       public static final String NAME = "bucket";
       private final int size;
 
-      public BucketTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound);
+      public BucketTraits(ModSound sound, int size) {
+            super(sound);
             this.size = size;
       }
 
@@ -41,11 +39,6 @@ public class BucketTraits extends GenericTraits {
       @Override
       public BucketEntity entity() {
             return BucketEntity.INSTANCE;
-      }
-
-      @Override
-      public BucketTraits toReference(ResourceLocation location) {
-            return new BucketTraits(location, sound(), size);
       }
 
       public int size() {

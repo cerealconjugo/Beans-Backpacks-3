@@ -7,6 +7,7 @@ import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -14,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 
 import java.util.function.Supplier;
@@ -52,25 +54,27 @@ public interface IPlatformHelper {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
 
-    Supplier<Item> register(String id, Supplier<Item> item);
+    Supplier<Item> register(String name, Supplier<Item> item);
+
+    <T> DataComponentType<T> register(String name, DataComponentType<T> type);
+
+    <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> type);
+
+    SoundEvent register(String name, SoundEvent event);
+
+    Holder<Attribute> register (String name, Attribute attribute);
 
     void send(Network2C network, Packet2C packet2C, ServerPlayer to);
 
     void send(Network2C network, Packet2C packet2C, MinecraftServer server);
+
+    void send(Network2C network, Packet2C packet2C, MinecraftServer server, ServerPlayer player);
 
     void send(Network2S network, Packet2S packet2S);
 
     <T extends GenericTraits> TraitComponentKind<T> registerBucket();
 
     <T extends GenericTraits> TraitComponentKind<T> registerBattery();
-
-    <T> DataComponentType<T> registerComponents(String name, DataComponentType<T> type);
-
-    <T extends Entity> Supplier<EntityType<T>> registerEntity(String name, EntityType.Builder<T> type);
-
-    SoundEvent registerSound(String location, SoundEvent event);
-
-    String getModelVariant();
 
     ModelResourceLocation getModelVariant(ResourceLocation location);
 }

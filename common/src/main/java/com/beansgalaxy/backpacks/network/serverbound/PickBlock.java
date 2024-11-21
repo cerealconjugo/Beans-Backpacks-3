@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class PickBlock implements Packet2S {
-      public static final Type<PickBlock> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":pick_block_s"));
+      public static final Type<PickBlock> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":pick_block_s"));
       private final int index;
       private final EquipmentSlot equipmentSlot;
 

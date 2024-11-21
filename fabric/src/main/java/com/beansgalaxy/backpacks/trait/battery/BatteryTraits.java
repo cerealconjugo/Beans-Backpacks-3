@@ -9,7 +9,6 @@ import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +17,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.EnergyStorageUtil;
@@ -31,8 +29,8 @@ public class BatteryTraits extends GenericTraits {
       private final long capacity;
       private final long speed;
 
-      public BatteryTraits(@Nullable ResourceLocation location, ModSound sound, long capacity, long speed) {
-            super(location, sound);
+      public BatteryTraits(ModSound sound, long capacity, long speed) {
+            super(sound);
             this.capacity = capacity;
             this.speed = speed;
       }
@@ -50,11 +48,6 @@ public class BatteryTraits extends GenericTraits {
       @Override
       public BatteryEntity entity() {
             return BatteryEntity.INSTANCE;
-      }
-
-      @Override
-      public BatteryTraits toReference(ResourceLocation location) {
-            return new BatteryTraits(location, sound(), capacity, speed);
       }
 
       public long size() {
@@ -143,12 +136,12 @@ public class BatteryTraits extends GenericTraits {
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof BatteryTraits that)) return false;
-            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
+            return size() == that.size() && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(size(), sound(), location());
+            return Objects.hash(size(), sound());
       }
 
       @Override
@@ -156,8 +149,6 @@ public class BatteryTraits extends GenericTraits {
             return "BatteryTraits{" +
                         "size=" + size() +
                         "sound=" + sound() +
-                        location().map(
-                                                location -> "location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 }

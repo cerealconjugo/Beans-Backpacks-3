@@ -66,11 +66,6 @@ public class AlchemyTraits extends BundleLikeTraits {
       }
 
       @Override
-      public AlchemyTraits toReference(ResourceLocation location) {
-            return new AlchemyTraits(location, sound(), size());
-      }
-
-      @Override
       public boolean canItemFit(PatchedComponentHolder holder, ItemStack inserted) {
             Item item = inserted.getItem();
             boolean isPotion = item instanceof PotionItem || Items.HONEY_BOTTLE.equals(item) || Items.MILK_BUCKET.equals(item);
@@ -244,9 +239,7 @@ public class AlchemyTraits extends BundleLikeTraits {
             return "AlchemyTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 
       @Override

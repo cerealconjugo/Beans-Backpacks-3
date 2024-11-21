@@ -41,7 +41,7 @@ public class BulkTraits extends ItemStorageTraits {
       private final int size;
 
       public BulkTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound);
+            super(sound);
             this.size = size;
       }
 
@@ -53,11 +53,6 @@ public class BulkTraits extends ItemStorageTraits {
       @Override
       public BulkEntity entity() {
             return BulkEntity.INSTANCE;
-      }
-
-      @Override
-      public BulkTraits toReference(ResourceLocation location) {
-            return new BulkTraits(location, sound(), size);
       }
 
       @Override
@@ -170,9 +165,7 @@ public class BulkTraits extends ItemStorageTraits {
       public static final StreamCodec<RegistryFriendlyByteBuf, BulkTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
             buf.writeInt(traits.size());
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
-            GenericTraits.encodeLocation(buf, traits);
-      }, buf -> new BulkTraits(
-                  GenericTraits.decodeLocation(buf),
+      }, buf -> new BulkTraits(null,
                   ModSound.STREAM_CODEC.decode(buf),
                   buf.readInt()
       ));
@@ -457,12 +450,12 @@ public class BulkTraits extends ItemStorageTraits {
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof BulkTraits that)) return false;
-            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location());
+            return size() == that.size() && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(size(), sound(), location());
+            return Objects.hash(size(), sound());
       }
 
       @Override
@@ -470,8 +463,6 @@ public class BulkTraits extends ItemStorageTraits {
             return "BulkTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 }

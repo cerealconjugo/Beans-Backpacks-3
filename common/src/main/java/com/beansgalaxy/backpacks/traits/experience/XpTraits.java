@@ -6,7 +6,6 @@ import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.SlotAccess;
@@ -16,7 +15,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
@@ -26,8 +24,8 @@ public class XpTraits extends GenericTraits {
       private final int size;
       public final int points;
 
-      public XpTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound);
+      public XpTraits(ModSound sound, int size) {
+            super(sound);
             this.size = size;
             this.points = XpTraits.pointsFromLevels(size);
       }
@@ -45,11 +43,6 @@ public class XpTraits extends GenericTraits {
       @Override
       public XpEntity entity() {
             return XpEntity.INSTANCE;
-      }
-
-      @Override
-      public XpTraits toReference(ResourceLocation location) {
-            return new XpTraits(location, sound(), size);
       }
 
       public int size() {
@@ -148,12 +141,13 @@ public class XpTraits extends GenericTraits {
       public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof XpTraits that)) return false;
-            return size() == that.size() && Objects.equals(sound(), that.sound()) && Objects.equals(location(), that.location()) ;
+            return size() == that.size()
+                        && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(size(), sound(), location());
+            return Objects.hash(size(), sound());
       }
 
       @Override
@@ -161,8 +155,6 @@ public class XpTraits extends GenericTraits {
             return "XpTraits{" +
                         "size=" + size() +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 }

@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.components.ender;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.mojang.serialization.Codec;
@@ -82,7 +82,7 @@ public class EmptyEnderItem extends Item {
 
       public record UnboundEnderTraits(ResourceLocation location) {
             UnboundEnderTraits(String location) {
-                  this(ResourceLocation.fromNamespaceAndPath(CommonClass.MOD_ID, location));
+                  this(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, location));
             }
       }
 }

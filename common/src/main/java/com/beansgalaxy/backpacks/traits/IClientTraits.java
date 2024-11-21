@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.traits;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,12 +34,6 @@ public interface IClientTraits<T extends GenericTraits> {
       void appendTooltipLines(T traits, List<Component> lines);
 
       void appendEquipmentLines(T traits, Consumer<Component> pTooltipAdder);
-
-      default void appendAdvancedLines(T traits, List<Component> list) {
-            traits.location().ifPresent(location -> {
-                  list.add(Component.translatable("tooltip.beansbackpacks.advanced.reference", location).withStyle(ChatFormatting.DARK_GRAY).withStyle(ChatFormatting.ITALIC));
-            });
-      }
 
       @Nullable
       ClientTooltipComponent getTooltipComponent(T traits, ItemStack itemStack, PatchedComponentHolder holder, Component title);

@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks;
 
+import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.client.renderer.BackpackModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackRender;
 import com.beansgalaxy.backpacks.client.renderer.EntityRender;
@@ -17,14 +18,11 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.*;
 
 import java.util.Map;
 
-@Mod(value = CommonClass.MOD_ID, dist = Dist.CLIENT)
+@Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
 public class NeoForgeClient {
 
       public NeoForgeClient(IEventBus eventBus) {
@@ -34,7 +32,7 @@ public class NeoForgeClient {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("searching"), CommonClient.ENDER_SEARCHING_PREDICATE);
       }
 
-      @EventBusSubscriber(modid = CommonClass.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+      @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
       public static class ModEvents {
 
             @SubscribeEvent
@@ -74,6 +72,14 @@ public class NeoForgeClient {
                         ModelResourceLocation model = ModelResourceLocation.standalone(location);
                         event.register(model);
                   }
+            }
+
+            @SubscribeEvent
+            public static void registerKeys(RegisterKeyMappingsEvent event) {
+                  event.register(KeyPress.INSTANCE.ACTION_KEY);
+                  event.register(KeyPress.INSTANCE.MENUS_KEY);
+                  event.register(KeyPress.INSTANCE.WEAPON_KEY);
+                  event.register(KeyPress.INSTANCE.UTILITY_KEY);
             }
       }
 

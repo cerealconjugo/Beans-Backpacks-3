@@ -1,6 +1,8 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.screen.BackSlot;
+import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.storage.ShorthandSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -22,5 +24,13 @@ public abstract class InventoryMenuMixin extends RecipeBookMenu<CraftingInput, C
       @Inject(method = "<init>", at = @At("RETURN"))
       private void createBackSlot(Inventory inv, boolean active, Player owner, CallbackInfo ci) {
             addSlot(new BackSlot(inv, 41));
+
+            Shorthand shorthand = Shorthand.get(owner);
+
+            for (int i = 0; i < 9; i++)
+                  this.addSlot(new ShorthandSlot.ToolSlot(shorthand, i));
+
+            for (int i = 0; i < 9; i++)
+                  this.addSlot(new ShorthandSlot.WeaponSlot(shorthand, i));
       }
 }

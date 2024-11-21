@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
@@ -97,7 +97,7 @@ public class TinyChestClick implements Packet2S {
             chestTraits.tinySubMenuClick(holder, index, clickType, carriedAccess, sender);
       }
 
-      public static Type<TinyChestClick> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":tiny_sub_chest_click_s"));
+      public static Type<TinyChestClick> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":tiny_sub_chest_click_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

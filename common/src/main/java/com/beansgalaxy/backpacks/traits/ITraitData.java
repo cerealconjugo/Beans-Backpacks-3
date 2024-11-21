@@ -53,7 +53,7 @@ public abstract class ITraitData<T> {
 
       public static <T> TraitDataComponentType<T> register(String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, Function<PatchedComponentHolder, ITraitData<T>> getData) {
             TraitDataComponentType<T> type = new TraitDataComponentType<>(codec, streamCodec, getData);
-            Services.PLATFORM.registerComponents(name, type);
+            Services.PLATFORM.register(name, type);
             return type;
       }
 

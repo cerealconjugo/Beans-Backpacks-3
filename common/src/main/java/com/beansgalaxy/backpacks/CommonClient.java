@@ -3,17 +3,28 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
+import com.beansgalaxy.backpacks.shorthand.storage.ShortContainer;
+import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -76,8 +87,8 @@ public class CommonClient {
       };
 
       public static final ItemColor LEATHER_BACKPACK_ITEM_COLOR = (itemStack, layer) -> switch (layer) {
-            case 0, 2 -> componentTint(itemStack, CommonClass.DEFAULT_LEATHER_COLOR);
-            case 4 -> componentHighlight(itemStack, CommonClass.DEFAULT_LEATHER_COLOR);
+            case 0, 2 -> componentTint(itemStack, Constants.DEFAULT_LEATHER_COLOR);
+            case 4 -> componentHighlight(itemStack, Constants.DEFAULT_LEATHER_COLOR);
             default -> 0xFFFFFFFF;
       };
 
@@ -132,8 +143,155 @@ public class CommonClient {
             return Minecraft.getInstance().level;
       }
 
-      public static int getInt() {
-            return 200;
+// ===================================================================================================================== SHORTHAND CLIENT
+
+      private static final ResourceLocation SHORTHAND_TOOL_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_start.png");
+      private static final ResourceLocation SHORTHAND_TOOL_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_stop.png");
+      private static final ResourceLocation SHORTHAND_SWORD_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/sword_start.png");
+      private static final ResourceLocation SHORTHAND_SWORD_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/sword.png");
+      private static final ResourceLocation V_SWORD = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/sword.png");
+      private static final ResourceLocation V_TOOL = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/tool.png");
+      private static final ResourceLocation V_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/start.png");
+
+      public static float getHandHeight(float mainHandHeight) {
+            return 1f - mainHandHeight;
       }
 
+      public static void renderShorthandSlots(GuiGraphics graphics, int leftPos, int topPos, int imageWidth, int imageHeight, LocalPlayer player) {
+//            int x = leftPos + imageWidth - 11;
+//            int y = topPos + imageHeight;
+//            graphics.blit(V_START, x, y - 32, 10, 0, 0, 32, 32, 32, 32);
+//            graphics.blit(V_SWORD, x, y - 32, 10, 0, 0, 32, 32, 32, 32);
+//            for (int i = 0; i < shorthand.tools.getContainerSize(); i++)
+//                  graphics.blit(V_TOOL, x, (y) - 54 - (i * 18), 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+
+            Shorthand shorthand = Shorthand.get(player);
+            int hX = leftPos + imageWidth;
+            int hY = topPos + imageHeight - 10;
+            graphics.blit(SHORTHAND_SWORD_START, hX - 32, hY, 10, 0, 0, 32, 32, 32, 32);
+            for (int i = 0; i < shorthand.weapons.getContainerSize(); i++)
+                  graphics.blit(SHORTHAND_SWORD_STOP, hX - 32 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
+            graphics.blit(SHORTHAND_TOOL_START, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
+            for (int i = 0; i < shorthand.tools.getContainerSize(); i++)
+                  graphics.blit(SHORTHAND_TOOL_STOP, leftPos + (i * 18), hY, 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+      }
+
+      private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_single.png");
+      private static final ResourceLocation SHORTHAND_DOUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_double.png");
+      private static final ResourceLocation SHORTHAND_MANY_0 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_many_0.png");
+      private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_many_1.png");
+      private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_selection.png");
+
+      public static void renderShorthandGui(Minecraft minecraft, GuiGraphics gui, DeltaTracker tickCounter) {
+            if (minecraft.options.hideGui)
+                  return;
+
+            Window window = minecraft.getWindow();
+            int height = window.getGuiScaledHeight();
+            int width = window.getGuiScaledWidth();
+
+            LocalPlayer player = minecraft.player;
+            Shorthand shorthand = Shorthand.get(player);
+            ShortContainer weapons = shorthand.weapons;
+
+            Inventory inventory = player.getInventory();
+            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
+
+            if (weapons.getContainerSize() < 3) {
+                  ItemStack weapon = weapons.getItem(0);
+
+                  int x = width - 40;
+                  int y = height - 1 - 18;
+
+                  if (shorthand.getWeaponsSize() > 1) {
+                        ItemStack utility = weapon;
+                        weapon = weapons.getItem(1);
+
+                        gui.blit(SHORTHAND_DOUBLE, x - 7, y - 4, 0, 0, 44, 24, 44, 24);
+
+                        gui.renderItem(utility, x - 3, y, player.getId());
+                        gui.renderItemDecorations(minecraft.font, utility, x - 3, y);
+
+                        PoseStack pose = gui.pose();
+                        pose.pushPose();
+                        pose.translate(0, 0, 200);
+                        if (selected == 1)
+                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
+
+                        if (selected == 0)
+                              gui.blit(SHORTHAND_SELECT, x - 17, y - 4, 0, 0, 44, 24, 44, 24);
+                        pose.popPose();
+
+                  } else {
+                        gui.blit(SHORTHAND_SINGLE, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+
+                        if (selected == 0) {
+                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
+                        }
+                  }
+
+                  gui.renderItem(weapon, x + 17, y, player.getId());
+                  gui.renderItemDecorations(minecraft.font, weapon, x + 17, y);
+            } else {
+                  int x = width - 40;
+                  int y = height - 1 - 18;
+
+                  gui.blit(SHORTHAND_MANY_1, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+
+                  PoseStack pose = gui.pose();
+                  pose.pushPose();
+                  pose.translate(0, 0, 200);
+                  gui.blit(SHORTHAND_MANY_0, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+
+                  int selectedWeapon = shorthand.getSelectedWeapon();
+                  ItemStack stack = weapons.getItem(selectedWeapon);
+                  gui.renderItem(stack, x + 8, y, player.getId());
+                  gui.renderItemDecorations(minecraft.font, stack, x + 8, y);
+
+                  if (selectedWeapon == selected)
+                        gui.blit(SHORTHAND_SELECT, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+                  pose.popPose();
+
+                  int i = selectedWeapon;
+                  ItemStack next = ItemStack.EMPTY;
+                  do {
+                        i++;
+                        if (i >= weapons.getContainerSize())
+                              i = 0;
+
+                        if (i == selectedWeapon)
+                              break;
+
+                        next = weapons.getItem(i);
+                  } while (next.isEmpty());
+
+                  gui.renderItem(next, x - 4, y, player.getId());
+                  gui.renderItemDecorations(minecraft.font, next, x - 4, y);
+
+                  int j = selectedWeapon;
+                  ItemStack last = ItemStack.EMPTY;
+                  do {
+                        j--;
+                        if (j < 0)
+                              j = weapons.getContainerSize() - 1;
+
+                        if (j == selectedWeapon)
+                              break;
+
+                        last = weapons.getItem(j);
+                  } while (last.isEmpty());
+
+                  gui.renderItem(last, x + 20, y, player.getId());
+                  gui.renderItemDecorations(minecraft.font, last,  x + 20, y);
+            }
+      }
+
+      public static void handleSendWeaponSlot(int player, int selectedSlot, ItemStack stack) {
+            Minecraft minecraft = Minecraft.getInstance();
+            Entity entity = minecraft.level.getEntity(player);
+            if (entity instanceof Player otherPlayer) {
+                  Shorthand shorthand = Shorthand.get(otherPlayer);
+                  shorthand.updateSelectedWeapon(selectedSlot, stack);
+            }
+      }
 }

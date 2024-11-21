@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.platform.services.IPlatformHelper;
 
 import java.util.ServiceLoader;
@@ -14,7 +14,7 @@ public class Services {
         final T loadedService = ServiceLoader.load(clazz)
                 .findFirst()
                 .orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
-        CommonClass.LOG.debug("Loaded {} for service {}", loadedService, clazz);
+        Constants.LOG.debug("Loaded {} for service {}", loadedService, clazz);
         return loadedService;
     }
 }

@@ -1,7 +1,7 @@
 package com.beansgalaxy.backpacks.network.clientbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.CommonClient;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
@@ -76,7 +76,7 @@ public class SendEnderEntry<T extends GenericTraits> implements Packet2C {
             enderStorage.set(owner, location, kind, trait, map, name);
       }
 
-      public static Type<SendEnderEntry> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":send_ender_entry_c"));
+      public static Type<SendEnderEntry> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":send_ender_entry_c"));
 
       @Override
       public Type<SendEnderEntry> type() {

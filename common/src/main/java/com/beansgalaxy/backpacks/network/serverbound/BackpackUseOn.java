@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import java.util.Optional;
 
 public class BackpackUseOn implements Packet2S {
-      public static final Type<BackpackUseOn> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":place_backpack_s"));
+      public static final Type<BackpackUseOn> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":place_backpack_s"));
       private final BlockHitResult blockHitResult;
       private final EquipmentSlot equipmentSlot;
 

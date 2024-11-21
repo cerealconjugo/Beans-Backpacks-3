@@ -35,6 +35,8 @@ public class KeyPress {
       public static final String MENUS_KEY_IDENTIFIER = "key.beansbackpacks.inventory";
       public static final String ACTION_KEY_DESC = "key.beansbackpacks.desc.action";
       public static final String MENUS_KEY_DESC = "key.beansbackpacks.desc.inventory";
+      public static final String WEAPON_KEY_IDENTIFIER = "key.beansbackpacks.weapon";
+      public static final String UTILITY_KEY_IDENTIFIER = "key.beansbackpacks.utility";
 
       public final KeyMapping ACTION_KEY = new KeyMapping(
                   ACTION_KEY_IDENTIFIER,
@@ -44,6 +46,16 @@ public class KeyPress {
       public final KeyMapping MENUS_KEY = new KeyMapping(
                   MENUS_KEY_IDENTIFIER,
                   GLFW.GLFW_KEY_UNKNOWN,
+                  KEY_CATEGORY);
+
+      public final KeyMapping WEAPON_KEY = new KeyMapping(
+                  WEAPON_KEY_IDENTIFIER,
+                  GLFW.GLFW_KEY_GRAVE_ACCENT,
+                  KEY_CATEGORY);
+
+      public final KeyMapping UTILITY_KEY = new KeyMapping(
+                  UTILITY_KEY_IDENTIFIER,
+                  GLFW.GLFW_KEY_0,
                   KEY_CATEGORY);
 
       public void tick(Minecraft minecraft, LocalPlayer player) {

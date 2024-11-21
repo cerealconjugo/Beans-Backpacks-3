@@ -32,13 +32,11 @@ public class AlchemyCodecs implements ITraitCodec<AlchemyTraits> {
       }
 
       public static final StreamCodec<RegistryFriendlyByteBuf, AlchemyTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
-            GenericTraits.encodeLocation(buf, traits);
             buf.writeInt(traits.size());
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
             SlotSelection.STREAM_CODEC.encode(buf, traits.selection);
       }, buf ->
-            new AlchemyTraits(
-                        GenericTraits.decodeLocation(buf),
+            new AlchemyTraits(null,
                         ModSound.STREAM_CODEC.decode(buf),
                         buf.readInt(),
                         SlotSelection.STREAM_CODEC.decode(buf)

@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.traits.common;
 
 import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
@@ -349,7 +350,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       @Override
       public Component getName() {
-            return CommonClass.getName(toStack());
+            return Constants.getName(toStack());
       }
 
       @Override

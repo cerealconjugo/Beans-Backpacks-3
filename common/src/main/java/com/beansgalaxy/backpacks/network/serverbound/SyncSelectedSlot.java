@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
-import com.beansgalaxy.backpacks.CommonClass;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -84,7 +84,7 @@ public class SyncSelectedSlot implements Packet2S {
             traits.setSelectedSlot(holder, sender, selectedSlot);
       }
 
-      public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(CommonClass.MOD_ID + ":sync_selected_slot_s"));
+      public static Type<SyncSelectedSlot> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":sync_selected_slot_s"));
 
       @Override
       public Type<? extends CustomPacketPayload> type() {

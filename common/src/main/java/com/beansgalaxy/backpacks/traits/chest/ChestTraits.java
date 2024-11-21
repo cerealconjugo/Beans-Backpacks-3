@@ -47,7 +47,7 @@ public class ChestTraits extends ItemStorageTraits {
       public final int columns;
 
       public ChestTraits(@Nullable ResourceLocation location, ModSound sound, int rows, int columns) {
-            super(location, sound);
+            super(sound);
             this.rows = rows;
             this.columns = columns;
       }
@@ -81,11 +81,6 @@ public class ChestTraits extends ItemStorageTraits {
       @Override
       public ChestEntity entity() {
             return ChestEntity.INSTANCE;
-      }
-
-      @Override
-      public ChestTraits toReference(ResourceLocation location) {
-            return new ChestTraits(location, sound(), rows, columns);
       }
 
       public int size() {
@@ -578,12 +573,14 @@ public class ChestTraits extends ItemStorageTraits {
             if (this == o) return true;
             if (!(o instanceof ChestTraits that)) return false;
             if (!super.equals(o)) return false;
-            return rows == that.rows && columns == that.columns && Objects.equals(location(), that.location()) && Objects.equals(sound(), that.sound());
+            return rows == that.rows
+                        && columns == that.columns
+                        && Objects.equals(sound(), that.sound());
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(location(), sound(), rows, columns);
+            return Objects.hash(sound(), rows, columns);
       }
 
       @Override
@@ -592,8 +589,6 @@ public class ChestTraits extends ItemStorageTraits {
                         "rows=" + rows +
                         ", columns=" + columns +
                         ", sound=" + sound() +
-                        location().map(
-                                    location -> ", location=" + location + '}')
-                                    .orElse("}");
+                        '}';
       }
 }

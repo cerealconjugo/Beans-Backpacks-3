@@ -12,7 +12,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -27,7 +26,7 @@ public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, Mu
       public static final TraitComponentKind<NonTrait> KIND = new TraitComponentKind<>(-1, NAME, INSTANCE);
 
       private NonTrait() {
-            super(null, null);
+            super(null);
       }
 
       public static <T> boolean is(T trait) {
@@ -37,11 +36,6 @@ public class NonTrait extends GenericTraits implements ITraitCodec<NonTrait>, Mu
       @Override
       public TraitComponentKind<NonTrait> kind() {
             return KIND;
-      }
-
-      @Override
-      public NonTrait toReference(ResourceLocation location) {
-            return this;
       }
 
       @Override
