@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
+import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.storage.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -11,6 +12,7 @@ import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -174,13 +176,16 @@ public class CommonClient {
             graphics.blit(SHORTHAND_TOOL_START, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
             for (int i = 0; i < shorthand.tools.getContainerSize(); i++)
                   graphics.blit(SHORTHAND_TOOL_STOP, leftPos + (i * 18), hY, 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+
+            final ResourceLocation BACK_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/back_slot.png");
+            graphics.blit(BACK_SLOT, leftPos + BackSlot.X - 1, topPos + BackSlot.Y - 1, 10, 0, 0, 18, 18, 18, 18);
       }
 
-      private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_single.png");
-      private static final ResourceLocation SHORTHAND_DOUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_double.png");
-      private static final ResourceLocation SHORTHAND_MANY_0 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_many_0.png");
-      private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_many_1.png");
-      private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/weapon_slot_selection.png");
+      private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_single");
+      private static final ResourceLocation SHORTHAND_DOUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_double");
+      private static final ResourceLocation SHORTHAND_MANY_0 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_many_0");
+      private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_many_1");
+      private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_selection");
 
       public static void renderShorthandGui(Minecraft minecraft, GuiGraphics gui, DeltaTracker tickCounter) {
             if (minecraft.options.hideGui)
@@ -197,17 +202,20 @@ public class CommonClient {
             Inventory inventory = player.getInventory();
             int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
 
-            if (weapons.getContainerSize() < 3) {
+            RenderSystem.enableBlend();
+            int weaponsSize = weapons.getContainerSize();
+            if (weaponsSize < 3) {
                   ItemStack weapon = weapons.getItem(0);
 
                   int x = width - 40;
                   int y = height - 1 - 18;
 
-                  if (shorthand.getWeaponsSize() > 1) {
+                  if (weaponsSize > 1) {
                         ItemStack utility = weapon;
                         weapon = weapons.getItem(1);
 
-                        gui.blit(SHORTHAND_DOUBLE, x - 7, y - 4, 0, 0, 44, 24, 44, 24);
+                        gui.blitSprite(SHORTHAND_DOUBLE, x - 7, y - 4, 44, 24);
+//                        gui.blit(SHORTHAND_DOUBLE, x - 7, y - 4, 0, 0, 44, 24, 44, 24);
 
                         gui.renderItem(utility, x - 3, y, player.getId());
                         gui.renderItemDecorations(minecraft.font, utility, x - 3, y);
@@ -216,17 +224,22 @@ public class CommonClient {
                         pose.pushPose();
                         pose.translate(0, 0, 200);
                         if (selected == 1)
-                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
+                              gui.blitSprite(SHORTHAND_SELECT, x + 3, y - 4, 44, 24);
+//                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
 
                         if (selected == 0)
-                              gui.blit(SHORTHAND_SELECT, x - 17, y - 4, 0, 0, 44, 24, 44, 24);
+                              gui.blitSprite(SHORTHAND_SELECT, x - 17, y - 4, 44, 24);
+//                              gui.blit(SHORTHAND_SELECT, x - 17, y - 4, 0, 0, 44, 24, 44, 24);
+
                         pose.popPose();
 
                   } else {
-                        gui.blit(SHORTHAND_SINGLE, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+                        gui.blitSprite(SHORTHAND_SINGLE, x - 6, y - 4, 44, 24);
+//                        gui.blit(SHORTHAND_SINGLE, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
 
                         if (selected == 0) {
-                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
+                              gui.blitSprite(SHORTHAND_SELECT, x + 3, y - 4, 44, 24);
+//                              gui.blit(SHORTHAND_SELECT, x + 3, y - 4, 0, 0, 44, 24, 44, 24);
                         }
                   }
 
@@ -236,27 +249,27 @@ public class CommonClient {
                   int x = width - 40;
                   int y = height - 1 - 18;
 
-                  gui.blit(SHORTHAND_MANY_1, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+                  gui.blitSprite(SHORTHAND_MANY_1, x - 6, y - 4, 44, 24);
+//                  gui.blit(SHORTHAND_MANY_1, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
 
-                  PoseStack pose = gui.pose();
-                  pose.pushPose();
-                  pose.translate(0, 0, 200);
-                  gui.blit(SHORTHAND_MANY_0, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
+                  gui.blitSprite(SHORTHAND_MANY_0, x - 6, y - 4, 44, 24);
+//                  gui.blit(SHORTHAND_MANY_0, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
 
                   int selectedWeapon = shorthand.getSelectedWeapon();
                   ItemStack stack = weapons.getItem(selectedWeapon);
                   gui.renderItem(stack, x + 8, y, player.getId());
                   gui.renderItemDecorations(minecraft.font, stack, x + 8, y);
 
-                  if (selectedWeapon == selected)
-                        gui.blit(SHORTHAND_SELECT, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
-                  pose.popPose();
+                  boolean isSelected = selectedWeapon == selected;
+                  if (isSelected)
+                        gui.blitSprite(SHORTHAND_SELECT, x - 6, y - 4, 44, 24);
+//                        gui.blit(SHORTHAND_SELECT, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
 
                   int i = selectedWeapon;
                   ItemStack next = ItemStack.EMPTY;
                   do {
                         i++;
-                        if (i >= weapons.getContainerSize())
+                        if (i >= weaponsSize)
                               i = 0;
 
                         if (i == selectedWeapon)
@@ -265,15 +278,17 @@ public class CommonClient {
                         next = weapons.getItem(i);
                   } while (next.isEmpty());
 
+                  gui.enableScissor(x - 7, y - 3, x + (isSelected ? 4 : 6), y + 19);
                   gui.renderItem(next, x - 4, y, player.getId());
                   gui.renderItemDecorations(minecraft.font, next, x - 4, y);
+                  gui.disableScissor();
 
                   int j = selectedWeapon;
                   ItemStack last = ItemStack.EMPTY;
                   do {
                         j--;
                         if (j < 0)
-                              j = weapons.getContainerSize() - 1;
+                              j = weaponsSize - 1;
 
                         if (j == selectedWeapon)
                               break;
@@ -281,9 +296,12 @@ public class CommonClient {
                         last = weapons.getItem(j);
                   } while (last.isEmpty());
 
+                  gui.enableScissor(x + (isSelected ? 28 : 26), y - 3, x + 39, y + 19);
                   gui.renderItem(last, x + 20, y, player.getId());
                   gui.renderItemDecorations(minecraft.font, last,  x + 20, y);
+                  gui.disableScissor();
             }
+            RenderSystem.disableBlend();
       }
 
       public static void handleSendWeaponSlot(int player, int selectedSlot, ItemStack stack) {

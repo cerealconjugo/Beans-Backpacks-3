@@ -70,7 +70,7 @@ public class Shorthand {
             int toolsSize = tools.getContainerSize();
             int slot = inventory.selected - itemsSize;
             int weaponSlot = slot - toolsSize;
-            int weaponsSize = weapons.size();
+            int weaponsSize = weapons.getContainerSize();
 
             int selectedSlot;
             if (weaponsSize > 2) {
@@ -120,7 +120,7 @@ public class Shorthand {
             int toolsSize = tools.getContainerSize();
             int slot = inventory.selected - itemsSize;
             int weaponSlot = slot - toolsSize;
-            int weaponsSize = weapons.size();
+            int weaponsSize = weapons.getContainerSize();
 
             int selectedSlot;
             if (weaponsSize > 2) {
@@ -195,10 +195,16 @@ public class Shorthand {
       }
 
       public int getQuickestSlot(BlockState blockState) {
+            ItemStack itemInHand = owner.getMainHandItem();
+            Inventory inv = owner.getInventory();
+            boolean shorthandSelected = inv.selected >= inv.items.size();
+            if (!shorthandSelected && ShorthandSlot.isTool(itemInHand)) {
+                  return -1;
+            }
+
             int slot = -1;
             int canadate = -1;
-            Inventory inv = owner.getInventory();
-            ItemStack mainHandItem = inv.items.get(inv.selected >= inv.items.size() ? heldSelected : inv.selected);
+            ItemStack mainHandItem = inv.items.get(shorthandSelected ? heldSelected : inv.selected);
             float topSpeed = mainHandItem.getItem().getDestroySpeed(mainHandItem, blockState);
 
             boolean requiresToolForDrops = blockState.requiresCorrectToolForDrops();
