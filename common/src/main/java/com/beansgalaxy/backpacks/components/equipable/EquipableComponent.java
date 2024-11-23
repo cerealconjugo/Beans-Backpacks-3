@@ -4,12 +4,15 @@ import com.beansgalaxy.backpacks.access.EquipmentSlotAccess;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.util.OptionalEitherMapCodec;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import com.mojang.serialization.Codec;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -25,11 +28,15 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel model, boolean traitRemovable, @Nullable Holder<SoundEvent> sound) {
+public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel customModel, @Nullable ResourceLocation backpackTexture, boolean traitRemovable, @Nullable Holder<SoundEvent> sound) {
       public static final String NAME = "equipable";
 
-      private EquipableComponent(EquipmentGroups slots, Optional<EquipmentModel> model, boolean traitRemovable, Optional<Holder<SoundEvent>> soundEvent) {
-            this(slots, model.orElse(null), traitRemovable, soundEvent.orElse(null));
+      private EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel model, boolean traitRemovable, Optional<Holder<SoundEvent>> soundEvent) {
+            this(slots, model, null, traitRemovable, soundEvent.orElse(null));
+      }
+
+      private EquipableComponent(EquipmentGroups slots, ResourceLocation texture, boolean traitRemovable, Optional<Holder<SoundEvent>> soundEvent) {
+            this(slots, null, texture, traitRemovable, soundEvent.orElse(null));
       }
 
       public static Optional<EquipableComponent> get(PatchedComponentHolder backpack) {
@@ -99,7 +106,6 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
                               return;
                         }
                   }
-
                   if (slot != null) {
                         ItemStack equipped = player.getItemBySlot(slot);
                         player.setItemSlot(slot, backpack);
@@ -123,17 +129,48 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
       }
 
       public Optional<EquipmentModel> getModel() {
-            return Optional.ofNullable(model);
+            return Optional.ofNullable(customModel);
       }
+
+      public static final OptionalEitherMapCodec<EquipmentModel, ResourceLocation> DISPLAY =
+                  new OptionalEitherMapCodec<>(
+                              "equipment_model", EquipmentModel.CODEC,
+                              "backpack_texture", ResourceLocation.CODEC
+                  );
 
       public static final Codec<EquipableComponent> CODEC = RecordCodecBuilder.create(in ->
                   in.group(
                               EquipmentGroups.CODEC.fieldOf("slots").forGetter(EquipableComponent::slots),
-                              EquipmentModel.CODEC.optionalFieldOf("model").forGetter(EquipableComponent::getModel),
+                              DISPLAY.forGetter(equipable -> {
+                                    if (equipable.backpackTexture != null)
+                                          return Optional.of(Either.right(equipable.backpackTexture));
+
+                                    if (equipable.customModel != null)
+                                          return Optional.of(Either.left(equipable.customModel));
+
+                                    return Optional.empty();
+                              }),
                               Codec.BOOL.optionalFieldOf("trait_removable", false).forGetter(EquipableComponent::traitRemovable),
                               SoundEvent.CODEC.optionalFieldOf("sound_event").forGetter(EquipableComponent::getSound)
-                  ).apply(in, EquipableComponent::new)
+                  ).apply(in, (slots, custom_model, trait_removable, sound_event) -> {
+                        if (custom_model.isEmpty())
+                              return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                        Either<EquipmentModel, ResourceLocation> either = custom_model.get();
+                        Optional<ResourceLocation> right = either.right();
+                        if (right.isPresent())
+                              return new EquipableComponent(slots, null, right.get(), trait_removable, sound_event.orElse(null));
+
+                        Optional<EquipmentModel> left = either.left();
+                        if (left.isPresent())
+                              return new EquipableComponent(slots, left.get(), null, trait_removable, sound_event.orElse(null));
+
+                        return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                  })
       );
+
+      private Optional<ResourceLocation> getTexture() {
+            return Optional.ofNullable(backpackTexture);
+      }
 
       public Optional<Holder<SoundEvent>> getSound() {
             return Optional.ofNullable(sound);
@@ -146,11 +183,17 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
                   EquipmentGroups.STREAM_CODEC.encode(buf, component.slots);
                   buf.writeBoolean(component.traitRemovable);
 
-                  EquipmentModel model = component.model;
+                  EquipmentModel model = component.customModel;
                   boolean hasModel = model != null;
                   buf.writeBoolean(hasModel);
                   if (hasModel)
                         EquipmentModel.STREAM_CODEC.encode(buf, model);
+
+                  ResourceLocation texture = component.backpackTexture;
+                  boolean hasTexture = texture != null;
+                  buf.writeBoolean(hasTexture);
+                  if (hasTexture)
+                        buf.writeResourceLocation(texture);
 
                   Holder<SoundEvent> sound = component.sound;
                   boolean hasSound = sound != null;
@@ -169,12 +212,17 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
                               ? EquipmentModel.STREAM_CODEC.decode(buf)
                               : null;
 
+                  boolean hasTexture = buf.readBoolean();
+                  ResourceLocation texture = hasTexture
+                              ? buf.readResourceLocation()
+                              : null;
+
                   boolean hasSound = buf.readBoolean();
                   Holder<SoundEvent> sound = hasSound
                               ? SoundEvent.STREAM_CODEC.decode(buf)
                               : null;
 
-                  return new EquipableComponent(slotGroup, model, traitRemovable, sound);
+                  return new EquipableComponent(slotGroup, model, texture, traitRemovable, sound);
             }
       };
 }

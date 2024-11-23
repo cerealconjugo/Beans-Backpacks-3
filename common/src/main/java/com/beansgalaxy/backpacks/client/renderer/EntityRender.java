@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.client.renderer;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -8,6 +9,7 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -15,9 +17,13 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +68,46 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
 
             // ============================================ BACKPACK RENDER ============================================
 
-            renderBackpack(backpack, yaw, pose, source, light);
+            ItemStack stack = backpack.getEntityData().get(BackpackEntity.ITEM_STACK);
+
+            pose.pushPose();
+            pose.mulPose(Axis.YN.rotationDegrees(yaw + 180));
+
+            PlaceableComponent placeable = backpack.getPlaceable();
+            ResourceLocation model = placeable.customModel();
+            ResourceLocation texture = placeable.backpackTexture();
+            if (model != null) {
+                  pose.mulPose(Axis.XP.rotationDegrees(180));
+                  pose.translate(0, -10/16f, -4/16f);
+
+                  renderBackpack(pose, source, light, model, stack, null, ((ClientLevel) backpack.level()), backpack.getId());
+            }
+            else if (texture != null) {
+                  pose.pushPose();
+                  pose.mulPose(Axis.XP.rotationDegrees(180));
+                  pose.translate(0, -10/16f, -4/16f);
+
+                  if (backpack.lastDelta > tick)
+                        backpack.updateOpen();
+
+                  float headPitch = Mth.lerp(tick, backpack.lastPitch, backpack.headPitch) * 0.25f;
+                  model().setOpenAngle(headPitch);
+                  backpack.lastDelta = tick;
+
+                  renderTexture(pose, source, light, texture, stack);
+                  pose.popPose();
+            }
+            else {
+                  pose.translate(0, 1/4f, 0);
+                  pose.scale(0.5f, 0.5f, 0.5f);
+                  itemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, pose, source, backpack.level(), backpack.getId());
+
+                  pose.popPose();
+                  return;
+            }
+
+            pose.popPose();
+
             renderNameAndHitbox(pose, source, backpack, yaw, light);
 
             // ============================================= DESTROY DECAL =============================================
@@ -72,7 +117,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
 //                  int breakStage = Math.min(Mth.ceil(backpack.breakAmount / 3f), 7);
 //                  ResourceLocation location = ResourceLocation.parse(Constants.MOD_ID + ":textures/entity/destroy_stage/" + breakStage + ".png");
 //                  VertexConsumer crumble = source.getBuffer(RenderType.crumbling(location));
-//                  model.renderToBuffer(pose, crumble, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+//                  customModel.renderToBuffer(pose, crumble, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 //                  pose.popPose();
 //            }
 

@@ -50,12 +50,7 @@ public record EquipmentModel(HashMap<Attachment, ResourceLocation> attachments, 
             );
       }
 
-      public static final Codec<EquipmentModel> CODEC = Codec.withAlternative(ENTRY_CODEC.xmap(model -> new EquipmentModel(model, false), EquipmentModel::attachments),
-                  Codec.BOOL.xmap(
-                              bool -> new EquipmentModel(new HashMap<>(), true),
-                              equipmentModel -> equipmentModel.isBuiltInLeatherModel
-                  )
-      );
+      public static final Codec<EquipmentModel> CODEC = ENTRY_CODEC.xmap(model -> new EquipmentModel(model, false), EquipmentModel::attachments);
 
       public static final StreamCodec<RegistryFriendlyByteBuf, EquipmentModel> STREAM_CODEC = new StreamCodec<>() {
 

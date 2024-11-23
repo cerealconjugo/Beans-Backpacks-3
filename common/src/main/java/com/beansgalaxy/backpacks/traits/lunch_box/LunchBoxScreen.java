@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.traits.lunch_box;
 
+import com.beansgalaxy.backpacks.network.serverbound.TinyMenuInteract;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
@@ -22,6 +23,7 @@ public class LunchBoxScreen extends BundleScreen {
             LunchBoxScreen screen = new LunchBoxScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            TinyMenuInteract.send(backpack.getId(), true);
       }
 
       protected LunchBoxScreen(BackpackEntity backpack, BundleLikeTraits traits) {

@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.traits.chest.screen;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.network.serverbound.TinyChestClick;
+import com.beansgalaxy.backpacks.network.serverbound.TinyMenuInteract;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;

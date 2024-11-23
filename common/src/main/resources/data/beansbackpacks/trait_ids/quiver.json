@@ -6,7 +6,7 @@
   "equipable": {
     "slots": "body",
     "trait_removable": true,
-    "model": {
+    "equipment_model": {
       "back": "beansbackpacks:backpack/quiver"
     }
   }

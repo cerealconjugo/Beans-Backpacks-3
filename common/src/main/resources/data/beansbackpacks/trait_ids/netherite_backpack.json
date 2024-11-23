@@ -4,12 +4,10 @@
   },
   "equipable": {
     "slots": "body",
-    "model": {
-      "back": "beansbackpacks:backpack/netherite"
-    },
+    "backpack_texture": "beansbackpacks:netherite",
     "sound_event": "beansbackpacks:metal_equip"
   },
   "placeable": {
-    "model": "beansbackpacks:backpack/netherite"
+    "backpack_texture": "beansbackpacks:netherite"
   }
 }

@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.chest.screen;
 
 import com.beansgalaxy.backpacks.network.serverbound.TinyHotbarClick;
 import com.beansgalaxy.backpacks.network.serverbound.TinyMenuClick;
+import com.beansgalaxy.backpacks.network.serverbound.TinyMenuInteract;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
@@ -19,11 +20,18 @@ public class EntityChestScreen extends TinyChestScreen {
             EntityChestScreen screen = new EntityChestScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            TinyMenuInteract.send(backpack.getId(), true);
       }
 
       public EntityChestScreen(BackpackEntity backpack, ChestTraits traits) {
             super(traits);
             this.backpack = backpack;
+      }
+
+      @Override
+      public void onClose() {
+            super.onClose();
+            TinyMenuInteract.send(backpack.getId(), true);
       }
 
       @Override

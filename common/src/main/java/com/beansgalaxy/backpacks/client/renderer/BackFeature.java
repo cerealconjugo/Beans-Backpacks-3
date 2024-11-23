@@ -1,26 +1,24 @@
 package com.beansgalaxy.backpacks.client.renderer;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipmentModel;
-import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -60,11 +58,10 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                         return;
 
                   ItemStack itemStack = player.getItemBySlot(slot);
-                  EquipmentModel model = equipable.model();
-                  if (model == null)
-                        return;
+                  ResourceLocation texture = equipable.backpackTexture();
+                  EquipmentModel model = equipable.customModel();
 
-                  if (model.isBuiltInLeatherModel()) {
+                  if (texture != null) {
                         pose.pushPose();
                         this.getParentModel().body.translateAndRotate(pose);
 
@@ -72,82 +69,68 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                         if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
                               pose.translate(0.0F, -1 / 16f, 1 / 16f);
 
-                        builtInLeatherModel(pose, pBufferSource, pCombinedLight, itemStack);
+                        renderTexture(pose, pBufferSource, pCombinedLight, texture, itemStack);
                         pose.popPose();
-                        return;
                   }
-
-                  model.attachments().forEach((attachment, location) -> {
-                        pose.pushPose();
-                        switch (attachment) {
-                              case HEAD -> {
-                                    this.getParentModel().head.translateAndRotate(pose);
-                                    pose.translate(0, -12/16f, 0);
-                              }
-                              case BODY -> {
-                                    this.getParentModel().body.translateAndRotate(pose);
-                                    if (EquipmentSlot.BODY == slot && player.isCrouching())
-                                          pose.translate(0.0F, 1 / 16f, 0);
-                              }
-                              case BACK -> {
-                                    this.getParentModel().body.translateAndRotate(pose);
-                                    if (player.isCrouching())
-                                          pose.translate(0.0F, 1 / 16f, 0);
-                                    if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
-                                          pose.translate(0.0F, -1 / 16f, 1 / 16f);
-                              }
-                              case L_ARM -> {
-                                    this.getParentModel().leftArm.translateAndRotate(pose);
-                                    pose.translate(1/16f, -2/16f, 0);
-                              }
-                              case R_ARM -> {
-                                    this.getParentModel().rightArm.translateAndRotate(pose);
-                                    pose.translate(-1/16f, -2/16f, 0);
-                              }
-                              case L_LEG -> this.getParentModel().leftLeg.translateAndRotate(pose);
-                              case R_LEG -> this.getParentModel().rightLeg.translateAndRotate(pose);
-                        }
-
-                        pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
-                        pose.mulPose(Axis.YP.rotationDegrees(180.0F));
-                        pose.translate(-8 / 16f, -12 / 16f, -8 / 16f - 0.001f);
-
-                        ModelManager modelmanager = this.itemRenderer().getItemModelShaper().getModelManager();
-                        ModelResourceLocation modelLocation = Services.PLATFORM.getModelVariant(location);
-                        BakedModel bakedModel = modelmanager.getModel(modelLocation);
-                        BakedModel backpackModel = bakedModel.getOverrides().resolve(bakedModel, itemStack, (ClientLevel) player.level(), player, player.getId());
-
-                        if (backpackModel != null) {
-                              VertexConsumer buffer = pBufferSource.getBuffer(Sheets.cutoutBlockSheet());
-                              this.blockRenderer().getModelRenderer().renderModel(pose.last(), buffer, null, backpackModel, 1.0F, 1.0F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
-//                        this.itemRenderer.render(itemStack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, backpackModel);
-                        }
-
-                        pose.popPose();
-                  });
+                  else if (model != null)
+                        renderModel(pose, pBufferSource, pCombinedLight, player, slot, model, itemStack);
             });
 
             Shorthand shorthand = Shorthand.get(player);
             int selectedWeapon = shorthand.getSelectedWeapon();
-            ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
             Inventory inventory = player.getInventory();
-            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
 
-            ItemStack mainHandItem = player.getMainHandItem();
+            ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
+            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
             boolean mainHand = selectedWeapon != selected;
+
             if (mainHand && !stack.isEmpty()) {
                   this.getParentModel().body.translateAndRotate(pose);
-                  pose.translate(-1/16f, player.isCrouching() ? 5/16f : 4/16f, 5/32f);
+                  pose.translate(0, player.isCrouching() ? 6/16f : 5/16f, 5/32f);
                   if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
                         pose.translate(0.0F, 1/16f, 1 / 16f);
 
                   pose.mulPose(Axis.ZN.rotationDegrees(90));
-                  float scale = 0.999f;
-                  pose.scale(scale, scale, scale);
+                  pose.translate(0.001, -0.001, 0);
 
                   BakedModel model = itemRenderer.getModel(stack, player.level(), player, player.getId());
                   itemRenderer().render(stack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, model);
             }
+      }
+
+      private void renderModel(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, EquipmentSlot slot, EquipmentModel model, ItemStack itemStack) {
+            model.attachments().forEach((attachment, location) -> {
+                  pose.pushPose();
+                  switch (attachment) {
+                        case HEAD -> {
+                              this.getParentModel().head.translateAndRotate(pose);
+                              pose.translate(0, -12/16f, 0);
+                        }
+                        case BODY ->
+                              this.getParentModel().body.translateAndRotate(pose);
+                        case BACK -> {
+                              this.getParentModel().body.translateAndRotate(pose);
+                              if (player.isCrouching())
+                                    pose.translate(0.0F, 1 / 16f, 0);
+                              if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
+                                    pose.translate(0.0F, -1 / 16f, 1 / 16f);
+                        }
+                        case L_ARM -> {
+                              this.getParentModel().leftArm.translateAndRotate(pose);
+                              pose.translate(1/16f, -2/16f, 0);
+                        }
+                        case R_ARM -> {
+                              this.getParentModel().rightArm.translateAndRotate(pose);
+                              pose.translate(-1/16f, -2/16f, 0);
+                        }
+                        case L_LEG -> this.getParentModel().leftLeg.translateAndRotate(pose);
+                        case R_LEG -> this.getParentModel().rightLeg.translateAndRotate(pose);
+                  }
+
+                  renderBackpack(pose, pBufferSource, pCombinedLight, location, itemStack, player, player.clientLevel, player.getId());
+
+                  pose.popPose();
+            });
       }
 
 }

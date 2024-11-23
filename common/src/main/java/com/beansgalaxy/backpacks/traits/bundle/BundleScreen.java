@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.bundle;
 
 import com.beansgalaxy.backpacks.network.serverbound.TinyHotbarClick;
 import com.beansgalaxy.backpacks.network.serverbound.TinyMenuClick;
+import com.beansgalaxy.backpacks.network.serverbound.TinyMenuInteract;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.screen.TinyTraitScreen;
 import com.beansgalaxy.backpacks.traits.ITraitData;
@@ -35,6 +36,7 @@ public class BundleScreen extends TinyTraitScreen {
             BundleScreen screen = new BundleScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            TinyMenuInteract.send(backpack.getId(), true);
       }
 
       protected BundleScreen(BackpackEntity backpack, BundleLikeTraits traits) {
@@ -56,6 +58,12 @@ public class BundleScreen extends TinyTraitScreen {
             leftPos = scaledWidth / 2;
             setTopPos(scaledHeight / 2);
             initHotBarSlots();
+      }
+
+      @Override
+      public void onClose() {
+            super.onClose();
+            TinyMenuInteract.send(backpack.getId(), false);
       }
 
       @Override
@@ -108,7 +116,7 @@ public class BundleScreen extends TinyTraitScreen {
             }
 
             clearSlots();
-            int left = leftPos + 11 - 28;
+            int left = leftPos + 11 - 18;
             int top = getTopPos() - 17;
             int width = columns * 18;
             int i = hasSpace ? -1 : 0;

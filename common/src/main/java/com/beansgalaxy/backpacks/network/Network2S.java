@@ -18,6 +18,7 @@ public enum Network2S {
       TINY_SUB_CHEST_2S(TinyChestClick.class, TinyChestClick.ID, TinyChestClick::encode, TinyChestClick::new, TinyChestClick::handle),
       TINY_MENU_2S(TinyMenuClick.class, TinyMenuClick.ID, TinyMenuClick::encode, TinyMenuClick::new, TinyMenuClick::handle),
       TINY_HOTBAR_2S(TinyHotbarClick.class, TinyHotbarClick.ID, TinyHotbarClick::encode, TinyHotbarClick::new, TinyHotbarClick::handle),
+      TINY_INTERACT_2S(TinyMenuInteract.class, TinyMenuInteract.ID, TinyMenuInteract::encode, TinyMenuInteract::new, TinyMenuInteract::handle),
       SYNC_SELECTED_SLOT_2S(SyncSelectedSlot.class, SyncSelectedSlot.ID, SyncSelectedSlot::encode, SyncSelectedSlot::new, SyncSelectedSlot::handle);
 
       public final DynamicLoaderPacket<? super RegistryFriendlyByteBuf, ?> packet;

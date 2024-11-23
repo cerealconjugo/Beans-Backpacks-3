@@ -100,11 +100,12 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> type) {
-        return () -> Registry.register(
+        EntityType<T> registered = Registry.register(
                     BuiltInRegistries.ENTITY_TYPE,
                     ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
                     type.build(name)
         );
+        return () -> registered;
     }
 
     @Override

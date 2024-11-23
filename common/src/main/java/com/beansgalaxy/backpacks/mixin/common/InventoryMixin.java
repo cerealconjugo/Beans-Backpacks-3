@@ -180,11 +180,5 @@ public abstract class InventoryMixin implements BackData {
       @Inject(method = "replaceWith", at = @At("TAIL"))
       private void backpackReplaceWith(Inventory that, CallbackInfo ci) {
             getShorthand().replaceWith(Shorthand.get(that));
-
-            System.out.println("TEST!!");
-            System.out.println("TEST!!");
-            System.out.println("TEST!!");
-            System.out.println("TEST!!");
-            System.out.println("TEST!!");
       }
 }

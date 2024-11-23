@@ -51,10 +51,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 public class BackpackEntity extends Entity implements PatchedComponentHolder {
+      public static final EntityDataAccessor<Integer> VIEWING = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.INT);
       public static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.ITEM_STACK);
       public static final EntityDataAccessor<Direction> DIRECTION = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.DIRECTION);
       public static final EntityDataAccessor<PlaceableComponent> PLACEABLE = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
@@ -66,7 +68,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
             @Override
             public PlaceableComponent copy(PlaceableComponent placeableComponent) {
-                  return new PlaceableComponent(placeableComponent.modelLocation(), placeableComponent.sound());
+                  return new PlaceableComponent(placeableComponent.customModel(), placeableComponent.backpackTexture(), placeableComponent.sound());
             }
       });
 
@@ -287,8 +289,9 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       protected void defineSynchedData(SynchedEntityData.Builder builder) {
             builder.define(ITEM_STACK, ModItems.IRON_BACKPACK.get().getDefaultInstance());
 //            builder.define(TRAIT, NonTrait.INSTANCE);
-            builder.define(PLACEABLE, new PlaceableComponent(ModSound.HARD));
+            builder.define(PLACEABLE, new PlaceableComponent(null, null, ModSound.HARD));
             builder.define(DIRECTION, Direction.UP);
+            builder.define(VIEWING, 0);
       }
 
       @Override
@@ -567,5 +570,60 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             entityData.set(BackpackEntity.ITEM_STACK, stack, true);
             BlockPos pPos = blockPosition();
             level().updateNeighbourForOutputSignal(pPos, Blocks.AIR);
+      }
+
+      private final HashSet<Player> viewers = new HashSet<>();
+      public void onOpen(Player player) {
+            viewers.add(player);
+            int size = viewers.size();
+            entityData.set(VIEWING, size);
+            if (size == 1)
+                  getPlaceable().sound().at(this, ModSound.Type.OPEN);
+      }
+
+      public void onClose(Player player) {
+            viewers.remove(player);
+            int size = viewers.size();
+            entityData.set(VIEWING, size);
+            if (size == 0)
+                  getPlaceable().sound().at(this, ModSound.Type.CLOSE);
+      }
+
+      public int getViewing() {
+            return entityData.get(VIEWING);
+      }
+
+      public float headPitch = 0;
+      public float lastPitch = 0;
+      public float velocity = 0;
+      public float lastDelta = 0;
+
+      boolean isOpen() {
+            return getViewing() > 0;
+      }
+
+      public void updateOpen() {
+            float impulse = 22f;
+            float resonance = 9f;
+            float height = 18f;
+            float closing = 20f;
+            velocity = isOpen()
+                        ? headPitch == 0
+                        ? impulse
+                        : (velocity + (lastPitch * resonance + height))
+                        : velocity > 0
+                        ? 0
+                        : (velocity - 0.1f) * closing;
+
+            float resistance = 0.3f;
+            velocity *= resistance;
+            float newPitch = headPitch - velocity * 0.1f;
+
+            if (newPitch > 0)
+                  newPitch = 0;
+
+            //newPitch = -3f; // HOLDS TOP OPEN FOR TEXTURING
+            lastPitch = headPitch;
+            headPitch = newPitch;
       }
 }

@@ -4,12 +4,10 @@
   },
   "equipable": {
     "slots": "body",
-    "model": {
-      "back": "beansbackpacks:backpack/gold"
-    },
+    "backpack_texture": "beansbackpacks:gold",
     "sound_event": "beansbackpacks:metal_equip"
   },
   "placeable": {
-    "model": "beansbackpacks:backpack/gold"
+    "backpack_texture": "beansbackpacks:gold"
   }
 }
