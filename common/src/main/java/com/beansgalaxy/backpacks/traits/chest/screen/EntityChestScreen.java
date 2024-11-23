@@ -31,7 +31,7 @@ public class EntityChestScreen extends TinyChestScreen {
       @Override
       public void onClose() {
             super.onClose();
-            TinyMenuInteract.send(backpack.getId(), true);
+            TinyMenuInteract.send(backpack.getId(), false);
       }
 
       @Override

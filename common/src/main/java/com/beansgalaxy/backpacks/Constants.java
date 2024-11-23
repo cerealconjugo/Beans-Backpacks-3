@@ -5,7 +5,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,5 +40,11 @@ public class Constants {
               }
 
               return name;
+      }
+
+      public static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Block block, ClipContext.Fluid fluid) {
+            Vec3 $$3 = player.getEyePosition();
+            Vec3 $$4 = $$3.add(player.calculateViewVector(player.getXRot(), player.getYRot()).scale(player.blockInteractionRange()));
+            return level.clip(new ClipContext($$3, $$4, block, fluid, player));
       }
 }

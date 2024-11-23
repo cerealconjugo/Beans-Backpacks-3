@@ -43,20 +43,28 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.event.MenuKeyListener;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 public class BackpackEntity extends Entity implements PatchedComponentHolder {
-      public static final EntityDataAccessor<Integer> VIEWING = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.INT);
+      public static final EntityDataAccessor<Boolean> IS_OPEN = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.BOOLEAN);
       public static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.ITEM_STACK);
       public static final EntityDataAccessor<Direction> DIRECTION = SynchedEntityData.defineId(BackpackEntity.class, EntityDataSerializers.DIRECTION);
       public static final EntityDataAccessor<PlaceableComponent> PLACEABLE = SynchedEntityData.defineId(BackpackEntity.class, new EntityDataSerializer<>() {
@@ -108,8 +116,21 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                   Optional<GenericTraits> traits)
       {
             Level level = ctx.getLevel();
-            Direction clickedFace = ctx.getClickedFace();
-            Vec3 clickLocation = ctx.getClickLocation();
+            BlockPos blockPos = ctx.getClickedPos();
+            Player player = ctx.getPlayer();
+
+            Direction clickedFace;
+            Vec3 clickLocation;
+            if (level.getBlockState(blockPos).getCollisionShape(level, blockPos).isEmpty()) {
+                  BlockHitResult hitResult = Constants.getPlayerPOVHitResult(level, player, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE);
+                  clickedFace = hitResult.getDirection();
+                  clickLocation = hitResult.getLocation();
+            }
+            else {
+                  clickedFace = ctx.getClickedFace();
+                  clickLocation = ctx.getClickLocation();
+            }
+
             float rotation = ctx.getRotation();
 
             float yRot;
@@ -119,7 +140,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                         yRot = clickedFace.toYRot();
                         pos = new Vec3(
                                     clickLocation.x + clickedFace.getAxisDirection().getStep() * (2 / 16f),
-                                    roundForY(clickLocation.y, ctx.getPlayer().getEyeY()) - 6/16.0,
+                                    roundForY(clickLocation.y, player.getEyeY()) - 6/16.0,
                                     roundToScale(clickLocation.z, 2)
                         );
                   }
@@ -127,22 +148,22 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                         yRot = clickedFace.toYRot();
                         pos = new Vec3(
                                     roundToScale(clickLocation.x, 2),
-                                    roundForY(clickLocation.y, ctx.getPlayer().getEyeY()) - 6/16.0,
+                                    roundForY(clickLocation.y, player.getEyeY()) - 6/16.0,
                                     clickLocation.z + clickedFace.getAxisDirection().getStep() * (2 / 16f)
                         );
                   }
                   default -> {
                         pos = new Vec3(
-                                    clickLocation.x,
+                                    Mth.lerp(0.85, player.getX(), clickLocation.x),
                                     clickLocation.y,
-                                    clickLocation.z
+                                    Mth.lerp(0.85, player.getZ(), clickLocation.z)
                         );
                         yRot = rotation + 180;
                   }
             }
 
             AABB aabb = BackpackEntity.newBoundingBox(clickedFace, pos);
-            if (!level.noCollision(aabb))
+            if (!level.noCollision(player, aabb))
                   return null;
 
             BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY.get(), level);
@@ -152,9 +173,11 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
             backpackEntity.entityData.set(PLACEABLE, placeable);
 
-            MutableTraits mute = traits.map(trait -> trait.mutable(backpackEntity)).orElse(NonTrait.INSTANCE);
-            mute.onPlace(backpackEntity, ctx.getPlayer(), backpackStack);
+            MutableTraits mute = traits.map(trait ->
+                        trait.mutable(backpackEntity)
+            ).orElse(NonTrait.INSTANCE);
 
+            mute.onPlace(backpackEntity, player, backpackStack);
             backpackEntity.entityData.set(ITEM_STACK, backpackStack.copyWithCount(1));
 
             if (level instanceof ServerLevel) {
@@ -291,7 +314,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 //            builder.define(TRAIT, NonTrait.INSTANCE);
             builder.define(PLACEABLE, new PlaceableComponent(null, null, ModSound.HARD));
             builder.define(DIRECTION, Direction.UP);
-            builder.define(VIEWING, 0);
+            builder.define(IS_OPEN, false);
       }
 
       @Override
@@ -576,21 +599,23 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public void onOpen(Player player) {
             viewers.add(player);
             int size = viewers.size();
-            entityData.set(VIEWING, size);
-            if (size == 1)
-                  getPlaceable().sound().at(this, ModSound.Type.OPEN);
+            if (size == 1) {
+                  entityData.set(IS_OPEN, true);
+                  getTraits().map(GenericTraits::sound).ifPresent(sound ->
+                              sound.at(this, ModSound.Type.OPEN)
+                  );
+            }
       }
 
       public void onClose(Player player) {
             viewers.remove(player);
             int size = viewers.size();
-            entityData.set(VIEWING, size);
-            if (size == 0)
-                  getPlaceable().sound().at(this, ModSound.Type.CLOSE);
-      }
-
-      public int getViewing() {
-            return entityData.get(VIEWING);
+            if (size == 0) {
+                  entityData.set(IS_OPEN, false);
+                  getTraits().map(GenericTraits::sound).ifPresent(sound ->
+                              sound.at(this, ModSound.Type.CLOSE)
+                  );
+            }
       }
 
       public float headPitch = 0;
@@ -599,7 +624,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public float lastDelta = 0;
 
       boolean isOpen() {
-            return getViewing() > 0;
+            return entityData.get(IS_OPEN);
       }
 
       public void updateOpen() {
@@ -607,13 +632,20 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             float resonance = 9f;
             float height = 18f;
             float closing = 20f;
-            velocity = isOpen()
-                        ? headPitch == 0
-                        ? impulse
-                        : (velocity + (lastPitch * resonance + height))
-                        : velocity > 0
-                        ? 0
-                        : (velocity - 0.1f) * closing;
+
+            if (isOpen()) {
+                  if (headPitch == 0)
+                        velocity = impulse;
+                  else
+                        velocity = velocity + (lastPitch * resonance + height);
+            }
+            else if (velocity > 0) {
+                  if (headPitch == 0)
+                        velocity = (velocity * 0.5f) - 0.2f;
+                  else
+                        velocity = 0;
+            } else
+                  velocity = (velocity - 0.1f) * closing;
 
             float resistance = 0.3f;
             velocity *= resistance;

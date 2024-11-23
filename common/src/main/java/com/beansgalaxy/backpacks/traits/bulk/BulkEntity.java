@@ -70,9 +70,9 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
       public void onDamage(BackpackEntity backpack, BulkTraits traits, boolean silent, ModSound sound) {
             BulkMutable mutable = traits.mutable(backpack);
             ItemStack stack = mutable.removeItem(0);
+            Level level = backpack.level();
             if (!stack.isEmpty()) {
                   backpack.wobble(10);
-                  Level level = backpack.level();
                   if (!level.isClientSide) {
                         Direction direction = backpack.getDirection();
                         Vector3f step;
@@ -85,6 +85,8 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
                         itemEntity.setDeltaMovement(0, 0.15, 0);
                         itemEntity.setDefaultPickUpDelay();
                         level.addFreshEntity(itemEntity);
+                  } else {
+                        backpack.velocity = 75;
                   }
                   mutable.push();
                   if (!backpack.isSilent()) {
@@ -93,6 +95,9 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
                   return;
             } else if (backpack.wobble > 0) {
                   backpack.wobble(10);
+                  if (level.isClientSide) {
+                        backpack.velocity = 75;
+                  }
                   if (!silent) {
                         float pitch = backpack.getRandom().nextFloat() * 0.3f;
                         sound.at(backpack, ModSound.Type.HIT, 1f, pitch + 0.9f);

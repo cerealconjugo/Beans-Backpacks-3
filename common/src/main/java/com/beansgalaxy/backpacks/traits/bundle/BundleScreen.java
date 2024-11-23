@@ -55,7 +55,7 @@ public class BundleScreen extends TinyTraitScreen {
             Window window = minecraft.getWindow();
             int scaledHeight = window.getGuiScaledHeight();
             int scaledWidth = window.getGuiScaledWidth();
-            leftPos = scaledWidth / 2;
+            leftPos = scaledWidth / 2 + 3;
             setTopPos(scaledHeight / 2);
             initHotBarSlots();
       }
@@ -116,7 +116,7 @@ public class BundleScreen extends TinyTraitScreen {
             }
 
             clearSlots();
-            int left = leftPos + 11 - 18;
+            int left = leftPos - 7;
             int top = getTopPos() - 17;
             int width = columns * 18;
             int i = hasSpace ? -1 : 0;
@@ -186,7 +186,7 @@ public class BundleScreen extends TinyTraitScreen {
                         if (hovered) {
                               List<Component> tooltipFromItem = Screen.getTooltipFromItem(minecraft, stack);
                               Component name = tooltipFromItem.getFirst();
-                              int left = leftPos + 5 + 5 - 28;
+                              int left = leftPos - 8;
                               int top = getTopPos() - 18;
                               gui.drawString(minecraft.font, name, left + 1, top - 9, 0xFFFFFFFF);
                               gui.fill(x - 8, y - 8, x + 8, y + 8, 100, 0x88FFFFFF);

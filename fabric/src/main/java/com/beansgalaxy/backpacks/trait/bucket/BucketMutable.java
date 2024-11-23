@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.trait.bucket;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.FabricMain;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
@@ -40,7 +41,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,7 +89,7 @@ public class BucketMutable extends SingleFluidStorage implements MutableTraits {
       }
 
       protected boolean tryPlace(Level level, Player player, ItemStack backpack) {
-            BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
+            BlockHitResult hitResult = Constants.getPlayerPOVHitResult(level, player, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE);
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() != HitResult.Type.BLOCK) {
                   return false;
             }
@@ -118,7 +118,7 @@ public class BucketMutable extends SingleFluidStorage implements MutableTraits {
       }
 
       protected boolean tryPickup(Level level, Player player, ItemStack backpack) {
-            BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+            BlockHitResult hitResult = Constants.getPlayerPOVHitResult(level, player, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY);
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() != HitResult.Type.BLOCK) {
                   return false;
             }
@@ -254,12 +254,6 @@ public class BucketMutable extends SingleFluidStorage implements MutableTraits {
                         }
                   }
             }
-      }
-
-      private static BlockHitResult getPlayerPOVHitResult(Level $$0, Player $$1, ClipContext.Fluid $$2) {
-            Vec3 $$3 = $$1.getEyePosition();
-            Vec3 $$4 = $$3.add($$1.calculateViewVector($$1.getXRot(), $$1.getYRot()).scale($$1.blockInteractionRange()));
-            return $$0.clip(new ClipContext($$3, $$4, net.minecraft.world.level.ClipContext.Block.OUTLINE, $$2, $$1));
       }
 
       public boolean transferFrom(Storage<FluidVariant> storage, Consumer<FluidVariant> success) {
