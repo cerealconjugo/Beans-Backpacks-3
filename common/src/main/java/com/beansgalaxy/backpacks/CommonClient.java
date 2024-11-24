@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
+import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.storage.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
@@ -36,6 +37,8 @@ import org.apache.commons.lang3.math.Fraction;
 import java.util.Optional;
 
 public class CommonClient {
+
+      public static final ClientConfig CLIENT_CONFIG = new ClientConfig();
 
       public static void init() {
 

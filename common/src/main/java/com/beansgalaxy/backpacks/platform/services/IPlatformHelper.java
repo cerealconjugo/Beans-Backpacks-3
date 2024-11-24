@@ -18,6 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -77,4 +78,6 @@ public interface IPlatformHelper {
     <T extends GenericTraits> TraitComponentKind<T> registerBattery();
 
     ModelResourceLocation getModelVariant(ResourceLocation location);
+
+    Path getConfigPath();
 }

@@ -78,5 +78,11 @@
   "key.beansbackpacks.inventory": "Quick Menu Click",
   "key.beansbackpacks.desc.inventory": "Leave unbound to pair this action with the key for %d.",
   "key.beansbackpacks.utility": "Shorthand Slot 2 (Previous)",
-  "key.beansbackpacks.shorthand": "Shorthand Slot 1 (Next)"
+  "key.beansbackpacks.shorthand": "Shorthand Slot 1 (Next)",
+
+  "screen.beansbackpacks.config.title-common": "Common",
+  "screen.beansbackpacks.config.title-client": "Client",
+  "screen.beansbackpacks.config.main.save_and_exit": "Save & Exit",
+  "screen.beansbackpacks.config.main.reset_all": "Reset All",
+  "screen.beansbackpacks.config.main.undo_all": "Undo All"
 }

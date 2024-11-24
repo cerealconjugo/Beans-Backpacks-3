@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.data;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.data.config.CommonConfig;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 public class ServerSave extends SavedData {
+      public static final CommonConfig CONFIG = new CommonConfig();
       public final EnderStorage enderStorage = new EnderStorage();
 
       @Override
@@ -21,6 +23,7 @@ public class ServerSave extends SavedData {
 
       private static ServerSave load(CompoundTag tag, HolderLookup.Provider provider) {
             ServerSave save = new ServerSave();
+            CONFIG.read();
             save.enderStorage.load(tag);
             return save;
       }

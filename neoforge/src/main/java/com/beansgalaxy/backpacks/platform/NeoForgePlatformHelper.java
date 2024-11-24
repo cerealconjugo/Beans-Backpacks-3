@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.platform;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.NeoForgeClient;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -11,11 +12,14 @@ import com.beansgalaxy.backpacks.traits.battery.BatteryCodecs;
 import com.beansgalaxy.backpacks.traits.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.traits.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.traits.bucket.BucketTraits;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.atlas.sources.PalettedPermutations;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Main;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -25,9 +29,16 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.moddiscovery.locators.NeoForgeDevProvider;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.NeoForgeConfig;
+import net.neoforged.neoforge.common.NeoForgeEventHandler;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
@@ -114,6 +125,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public ModelResourceLocation getModelVariant(ResourceLocation location) {
         return ModelResourceLocation.standalone(location);
+    }
+
+    @Override
+    public Path getConfigPath() {
+        return FMLPaths.CONFIGDIR.get();
     }
 
     @Override

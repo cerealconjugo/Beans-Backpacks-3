@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
@@ -129,5 +130,10 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public ModelResourceLocation getModelVariant(ResourceLocation location) {
         return new ModelResourceLocation(location, "fabric_resource");
+    }
+
+    @Override
+    public Path getConfigPath() {
+        return FabricLoader.getInstance().getConfigDir();
     }
 }

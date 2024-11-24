@@ -41,6 +41,8 @@ public class FabricClient implements ClientModInitializer {
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
             EntityRendererRegistry.register(CommonClass.BACKPACK_ENTITY.get(), EntityRender::new);
+
+            CommonClient.CLIENT_CONFIG.read();
       }
 
 }
