@@ -95,14 +95,7 @@ public class EnderItem extends Item {
       @Override
       public void inventoryTick(ItemStack ender, Level level, Entity entity, int slot, boolean selected) {
             getEnderTrait(ender).ifPresent(enderTraits -> {
-                  if (!enderTraits.isLoaded())
-                        enderTraits.reload(level);
-
                   enderTraits.getTrait(level).inventoryTick(enderTraits, level, entity, slot, selected);
-
-                  if (entity instanceof ServerPlayer serverPlayer) {
-                        enderTraits.addListener(serverPlayer);
-                  }
             });
       }
 

@@ -5,9 +5,11 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockBehaviourMixin",
+    "ItemsMixin",
     "ItemStackMixin"
   ],
   "client": [
+    "CreativeInventoryMixin",
     "GuiMixin",
     "MinecraftMixin"
   ],

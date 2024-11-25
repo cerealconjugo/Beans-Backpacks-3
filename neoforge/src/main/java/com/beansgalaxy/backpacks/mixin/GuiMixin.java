@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin;
 
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -24,5 +25,6 @@ public class GuiMixin {
                         trait.client().renderEntityOverlay(minecraft, backpack, trait, drawContext, tickCounter);
                   });
             }
+            CommonClient.renderShorthandGui(minecraft, drawContext, tickCounter);
       }
 }

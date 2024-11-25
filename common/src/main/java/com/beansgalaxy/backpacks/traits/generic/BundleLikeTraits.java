@@ -128,6 +128,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             getSlotSelection(holder).setSelectedSlot(player, selectedSlot);
       }
 
+      @Override
       public void limitSelectedSlot(PatchedComponentHolder holder, int slot, int size) {
             getSlotSelection(holder).limit(slot, size);
       }
@@ -214,14 +215,27 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
                               return;
 
                         int selectedSlot = getSelectedSlotSafe(backpack, player);
-                        ItemStack stack = ClickAction.SECONDARY.equals(click)
-                                    ? mutable.splitItem(selectedSlot)
-                                    : mutable.removeItem(selectedSlot);
+                        boolean isSecondary = ClickAction.SECONDARY.equals(click);
+                        ItemStack stack;
+                        if (isSecondary) {
+                              List<ItemStack> stacks = mutable.getItemStacks();
+                              ItemStack itemStack = stacks.get(selectedSlot);
+                              stack = itemStack.split(Mth.ceil(itemStack.getCount() / 2f));
+
+                              if (selectedSlot < stacks.size()) {
+                                    if (itemStack.isEmpty())
+                                          stacks.remove(slot);
+                                    else
+                                          selectedSlot += 1;
+                              }
+                        }
+                        else {
+                              stack = mutable.removeItem(selectedSlot);
+                        }
 
                         if (stack != null) {
                               access.set(stack);
                               sound().atClient(player, ModSound.Type.REMOVE);
-                              int size = mutable.stacks.get().size();
                               limitSelectedSlot(backpack, selectedSlot, size);
                         }
                   } else {
@@ -487,7 +501,8 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             if (stacks == null)
                   return;
 
-            for (int j = 0; j < stacks.size(); j++) {
+            int size = stacks.size();
+            for (int j = 0; j < size; j++) {
                   ItemStack backpackStack = stacks.get(j);
                   if (ItemStack.isSameItem(itemStack, backpackStack)) {
                         slot = j;
@@ -500,6 +515,8 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             PickBlock.send(slot, equipmentSlot);
             sound().atClient(player, ModSound.Type.REMOVE);
             ci.cancel();
+
+            limitSelectedSlot(PatchedComponentHolder.of(backpack), slot, size);
       }
 
       @Override

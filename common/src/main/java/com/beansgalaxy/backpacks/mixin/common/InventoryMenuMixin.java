@@ -1,8 +1,8 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.screen.BackSlot;
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
-import com.beansgalaxy.backpacks.shorthand.storage.ShorthandSlot;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.ShorthandSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;

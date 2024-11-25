@@ -19,20 +19,6 @@
       "slot": "legs",
       "id": "copper_leggings_armor",
       "operation": "add_value"
-    },
-    {
-      "type": "beansbackpacks:player.tool_belt",
-      "amount": 1,
-      "slot": "legs",
-      "id": "copper_leggings_tools",
-      "operation": "add_value"
-    },
-    {
-      "type": "beansbackpacks:player.shorthand",
-      "amount": 2,
-      "slot": "legs",
-      "id": "copper_leggings_shorthand",
-      "operation": "add_value"
     }
   ]
 }

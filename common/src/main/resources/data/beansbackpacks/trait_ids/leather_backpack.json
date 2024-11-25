@@ -1,5 +1,5 @@
 {
-  "bulk": {
+  "bundle": {
     "size": 5,
     "sound": "soft"
   },
@@ -10,14 +10,5 @@
   },
   "placeable": {
     "backpack_texture": "beansbackpacks:leather"
-  },
-  "modifiers": [
-    {
-      "type": "beansbackpacks:player.shorthand",
-      "amount": 1,
-      "slot": "body",
-      "id": "leather_testing",
-      "operation": "add_value"
-    }
-  ]
+  }
 }

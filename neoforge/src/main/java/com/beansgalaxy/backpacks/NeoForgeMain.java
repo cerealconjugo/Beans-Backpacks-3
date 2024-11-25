@@ -2,11 +2,12 @@ package com.beansgalaxy.backpacks;
 
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
+import com.beansgalaxy.backpacks.network.clientbound.ConfigureConfig;
 import com.beansgalaxy.backpacks.network.clientbound.ConfigureReferences;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
 import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.platform.NeoForgePlatformHelper;
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.ModItems;
@@ -14,6 +15,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -21,7 +23,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -88,15 +89,21 @@ public class NeoForgeMain {
         @SubscribeEvent
         public static void syncDataPacks(final OnDatapackSyncEvent event) {
             event.getRelevantPlayers().forEach(ConfigureReferences::send);
+            ServerPlayer player = event.getPlayer();
+            if (player != null)
+                ConfigureConfig.send(player);
         }
 
         @SubscribeEvent
         public static void blockInteractEvent(final PlayerInteractEvent.RightClickBlock event) {
             Player player = event.getEntity();
             Inventory inventory = player.getInventory();
-            if (inventory.selected >= inventory.items.size()) {
+            int slot = inventory.selected - inventory.items.size();
+            if (slot > 0) {
                 Shorthand shorthand = Shorthand.get(player);
-                shorthand.resetSelected(inventory);
+                int weaponSelection = slot - shorthand.tools.getContainerSize();
+                if (weaponSelection < 0)
+                    shorthand.resetSelected(inventory);
             }
         }
     }

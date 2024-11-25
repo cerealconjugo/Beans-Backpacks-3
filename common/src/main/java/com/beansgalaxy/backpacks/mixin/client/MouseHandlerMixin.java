@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.player.LocalPlayer;

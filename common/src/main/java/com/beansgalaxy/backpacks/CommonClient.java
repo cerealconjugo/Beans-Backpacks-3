@@ -5,8 +5,8 @@ import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.screen.BackSlot;
-import com.beansgalaxy.backpacks.shorthand.storage.ShortContainer;
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.ShortContainer;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
@@ -150,13 +150,11 @@ public class CommonClient {
 
 // ===================================================================================================================== SHORTHAND CLIENT
 
-      private static final ResourceLocation SHORTHAND_TOOL_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_start.png");
-      private static final ResourceLocation SHORTHAND_TOOL_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_stop.png");
-      private static final ResourceLocation SHORTHAND_SWORD_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/sword_start.png");
-      private static final ResourceLocation SHORTHAND_SWORD_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/sword.png");
-      private static final ResourceLocation V_SWORD = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/sword.png");
-      private static final ResourceLocation V_TOOL = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/tool.png");
-      private static final ResourceLocation V_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/vert/start.png");
+      private static final ResourceLocation TOOL_BELT_SLOTS_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_belt_start.png");
+      private static final ResourceLocation TOOL_BELT_SLOTS_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_belt_stop.png");
+      private static final ResourceLocation SHORTHAND_SLOTS_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand_start.png");
+      private static final ResourceLocation SHORTHAND_SLOTS_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand_stop.png");
+      private static final ResourceLocation BACK_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/back_slot.png");
 
       public static float getHandHeight(float mainHandHeight) {
             return 1f - mainHandHeight;
@@ -173,22 +171,27 @@ public class CommonClient {
             Shorthand shorthand = Shorthand.get(player);
             int hX = leftPos + imageWidth;
             int hY = topPos + imageHeight - 10;
-            graphics.blit(SHORTHAND_SWORD_START, hX - 32, hY, 10, 0, 0, 32, 32, 32, 32);
-            for (int i = 0; i < shorthand.weapons.getContainerSize(); i++)
-                  graphics.blit(SHORTHAND_SWORD_STOP, hX - 32 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
-            graphics.blit(SHORTHAND_TOOL_START, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
-            for (int i = 0; i < shorthand.tools.getContainerSize(); i++)
-                  graphics.blit(SHORTHAND_TOOL_STOP, leftPos + (i * 18), hY, 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+            int weaponsContainerSize = shorthand.weapons.getContainerSize();
+            if (weaponsContainerSize != 0) {
+                  graphics.blit(SHORTHAND_SLOTS_START, hX - 32, hY, 10, 0, 0, 32, 32, 32, 32);
+                  for (int i = 0; i < weaponsContainerSize; i++)
+                        graphics.blit(SHORTHAND_SLOTS_STOP, hX - 32 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
+            }
+            int toolsContainerSize = shorthand.tools.getContainerSize();
+            if (toolsContainerSize != 0) {
+                  graphics.blit(TOOL_BELT_SLOTS_START, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
+                  for (int i = 0; i < toolsContainerSize; i++)
+                        graphics.blit(TOOL_BELT_SLOTS_STOP, leftPos + (i * 18), hY, 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+            }
 
-            final ResourceLocation BACK_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/back_slot.png");
             graphics.blit(BACK_SLOT, leftPos + BackSlot.X - 1, topPos + BackSlot.Y - 1, 10, 0, 0, 18, 18, 18, 18);
       }
 
-      private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_single");
-      private static final ResourceLocation SHORTHAND_DOUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_double");
-      private static final ResourceLocation SHORTHAND_MANY_0 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_many_0");
-      private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_many_1");
-      private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"weapon_slot_selection");
+      private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_single");
+      private static final ResourceLocation SHORTHAND_DOUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_double");
+      private static final ResourceLocation SHORTHAND_MANY_0 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_many_0");
+      private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_many_1");
+      private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_selection");
 
       public static void renderShorthandGui(Minecraft minecraft, GuiGraphics gui, DeltaTracker tickCounter) {
             if (minecraft.options.hideGui)

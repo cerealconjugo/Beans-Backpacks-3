@@ -4,7 +4,7 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.data.EnderStorage;
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -60,7 +60,7 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
                         return;
                   }
 
-                  shorthand.advanceWeapon(inventory);
+                  shorthand.selectWeapon(inventory, true);
             }
             while (keyPress.UTILITY_KEY.consumeClick()) {
                   Shorthand shorthand = Shorthand.get(player);
@@ -71,7 +71,7 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
                         return;
                   }
 
-                  shorthand.reduceWeapon(inventory);
+                  shorthand.selectWeapon(inventory, false);
             }
       }
 

@@ -1,12 +1,15 @@
-package com.beansgalaxy.backpacks.shorthand.storage;
+package com.beansgalaxy.backpacks.shorthand;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -30,17 +33,21 @@ public abstract class ShortContainer implements Container {
       public abstract int size();
 
       public int getMaxSlot() {
+            if (stacks.isEmpty()) {
+                  return 0;
+            }
+
             OptionalInt max = stacks.int2ObjectEntrySet().stream().mapToInt(entry ->
                         entry.getValue().isEmpty()
                                     ? 0 : entry.getIntKey()
             ).max();
-            return max.orElse(0);
+            return max.orElse(0) + 1;
       }
 
       @Override
       public int getContainerSize() {
             int maxSlot = getMaxSlot();
-            return Math.max(size(), maxSlot + 1);
+            return Math.max(size(), maxSlot);
       }
 
       @Override
@@ -72,8 +79,7 @@ public abstract class ShortContainer implements Container {
       public void setItem(int slot, ItemStack stack) {
             if (stack.isEmpty())
                   stacks.remove(slot);
-
-            stacks.put(slot, stack);
+            else stacks.put(slot, stack);
       }
 
       @Override
@@ -115,4 +121,13 @@ public abstract class ShortContainer implements Container {
             }
       }
 
+      public void dropAll(Inventory inventory) {
+            ObjectIterator<Int2ObjectMap.Entry<ItemStack>> iterator = stacks.int2ObjectEntrySet().iterator();
+            while (iterator.hasNext()) {
+                  ItemStack itemstack = iterator.next().getValue();
+                  if (!itemstack.isEmpty())
+                        inventory.player.drop(itemstack, true, false);
+                  iterator.remove();
+            }
+      }
 }

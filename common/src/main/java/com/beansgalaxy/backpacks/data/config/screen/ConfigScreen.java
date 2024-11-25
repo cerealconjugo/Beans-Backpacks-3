@@ -111,7 +111,8 @@ public class ConfigScreen extends Screen {
             super.render(gui, x, y, delta);
             MutableComponent title = Component.literal(Constants.MOD_NAME).withStyle(ChatFormatting.BOLD);
             gui.drawCenteredString(font, title, minecraft.getWindow().getGuiScaledWidth() / 2, 6, 0xFFCCDDFF);
-            currentPage.render(gui, x, y, delta);
+            if (currentPage != null)
+                  currentPage.render(gui, x, y, delta);
       }
 
 

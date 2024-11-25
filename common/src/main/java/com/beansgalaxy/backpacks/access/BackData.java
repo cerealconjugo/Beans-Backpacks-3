@@ -1,6 +1,6 @@
 package com.beansgalaxy.backpacks.access;
 
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

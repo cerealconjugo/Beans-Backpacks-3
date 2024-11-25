@@ -14,6 +14,7 @@ public enum Network2C {
       ENDER_TRAIT_2C(SendEnderTraits.class, SendEnderTraits.ID, SendEnderTraits::encode, SendEnderTraits::new, SendEnderTraits::handle),
       ENDER_ENTRY_2C(SendEnderEntry.class, SendEnderEntry.ID, SendEnderEntry::encode, SendEnderEntry::decode, SendEnderEntry::handle),
       CONFIG_REFERENCES_2C(ConfigureReferences.class, ConfigureReferences.ID, ConfigureReferences::encode, ConfigureReferences::new, ConfigureReferences::handle),
+      CONFIG_COMMON_2C(ConfigureConfig.class, ConfigureConfig.ID, ConfigureConfig::encode, ConfigureConfig::new, ConfigureConfig::handle),
       WEAPON_SLOT_2C(SendWeaponSlot.class, SendWeaponSlot.ID, SendWeaponSlot::encode, SendWeaponSlot::new, SendWeaponSlot::handle),
       ;
 

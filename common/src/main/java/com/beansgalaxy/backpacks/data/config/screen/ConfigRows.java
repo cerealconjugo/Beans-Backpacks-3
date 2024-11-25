@@ -28,11 +28,12 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
       protected ConfigScreen screen;
 
       public ConfigRows(ConfigScreen screen, Minecraft minecraft, IConfig config) {
-            super(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight() * 2, 35, screen.height - 32);
+            super(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight() * 2, 35, 25);
             this.screen = screen;
             this.config = config;
 
-            for (ConfigLabel row : getRows()) {
+            List<ConfigLabel> rows = getRows();
+            for (ConfigLabel row : rows) {
                   addEntry(row);
             }
       }
@@ -317,7 +318,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
                         if (hoveredSearchItem != null) {
                               gui.pose().pushPose();
                               gui.pose().translate(0, 0, 300);
-                              gui.drawString(minecraft.font, Component.literal("✔"), x - hoveredSearchItem.x * 8 - 9, y - 2 + hoveredSearchItem.y * 8, 0xFF77EE77);
+                              gui.drawString(minecraft.font, "o", x - hoveredSearchItem.x * 8 - 9, y - 2 + hoveredSearchItem.y * 8, 0xFF77EE77);
                               gui.pose().popPose();
                         }
                   }
@@ -358,7 +359,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
                   if (hoveredStoredItem != null) {
                         gui.pose().pushPose();
                         gui.pose().translate(0, 0, 300);
-                        gui.drawString(minecraft.font, Component.literal("✘"), x1 + 1 + hoveredStoredItem.x * 8, y - 2 + hoveredStoredItem.y * 8, 0xFFFFAAAA);
+                        gui.drawString(minecraft.font, "x", x1 + 1 + hoveredStoredItem.x * 8, y - 2 + hoveredStoredItem.y * 8, 0xFFFFAAAA);
                         gui.pose().popPose();
                   }
             }
@@ -560,7 +561,4 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
                   return List.of(keyBox, intButton, add, expand);
             }
       }
-
-
-
 }

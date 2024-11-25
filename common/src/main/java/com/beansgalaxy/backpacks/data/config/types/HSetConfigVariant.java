@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class HSetConfigVariant<ENTRY> extends ConfigVariant<HashSet<ENTRY>> {
       private final Function<ENTRY, String> encode;
@@ -101,6 +102,11 @@ public class HSetConfigVariant<ENTRY> extends ConfigVariant<HashSet<ENTRY>> {
 
             public Builder<E> defauString(String defau) {
                   this.defauString = defau;
+                  return this;
+            }
+
+            public Builder<E> defauString(Supplier<String> defau) {
+                  this.defauString = defau.get();
                   return this;
             }
 

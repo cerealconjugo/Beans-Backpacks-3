@@ -4,7 +4,6 @@ import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
@@ -110,17 +109,6 @@ public class MutableBundleLike<T extends BundleLikeTraits> implements MutableIte
 
       public ItemStack removeItem(ItemStack other, Player player) {
             return removeItem(0);
-      }
-
-      public ItemStack splitItem(int slot) {
-            List<ItemStack> stacks = getItemStacks();
-            ItemStack stack = stacks.get(slot);
-            ItemStack split = stack.split(Mth.ceil(stack.getCount() / 2f));
-
-            if (stack.isEmpty() && slot < stacks.size())
-                  stacks.remove(slot);
-
-            return split;
       }
 
       public int getSelectedSlot(Player player) {

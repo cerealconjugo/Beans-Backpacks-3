@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.generic;
 
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.ModSound;
@@ -105,7 +106,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
       public abstract void clientPickBlock(EquipmentSlot equipmentSlot, boolean instantBuild, Inventory inventory, ItemStack itemStack, Player player, CallbackInfo ci);
 
-      public void serverPickBlock(ItemStack backpack, int index, ServerPlayer sender) {
+      public void serverPickBlock(PatchedComponentHolder holder, int index, ServerPlayer sender) {
             Inventory inventory = sender.getInventory();
 
             int freeSlot = inventory.getFreeSlot();
@@ -118,11 +119,14 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
             ItemStack selectedStack = inventory.getItem(inventory.selected);
 
-            MutableItemStorage mutable = mutable(PatchedComponentHolder.of(backpack));
+            MutableItemStorage mutable = mutable(holder);
             ItemStack take = mutable.removeItem(index);
             inventory.setItem(inventory.selected, take);
             mutable.push();
-            sound().at(sender, ModSound.Type.REMOVE);
+
+            List<ItemStack> finalStacks = holder.get(ITraitData.ITEM_STACKS);
+            int size = finalStacks == null ? 0 : finalStacks.size();
+            limitSelectedSlot(holder, index, size);
 
             int overflowSlot = -1;
             if (!selectedStack.isEmpty())
@@ -138,6 +142,9 @@ public abstract class ItemStorageTraits extends GenericTraits {
 
             if (overflowSlot > -1)
                   sender.connection.send(new ClientboundContainerSetSlotPacket(-2, 0, overflowSlot, inventory.getItem(overflowSlot)));
+      }
+
+      public void limitSelectedSlot(PatchedComponentHolder holder, int slot, int size) {
       }
 
       public boolean overflowFromInventory(EquipmentSlot equipmentSlot, Player player, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {

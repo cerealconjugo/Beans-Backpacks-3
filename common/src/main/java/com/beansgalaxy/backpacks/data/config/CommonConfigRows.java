@@ -13,8 +13,13 @@ public class CommonConfigRows extends ConfigRows {
 
       @Override
       public List<ConfigLabel> getRows() {
-            return List.of(
+            CommonConfig config = (CommonConfig) this.config;
 
+            return List.of(
+                        new IntConfigRow(config.tool_belt_size),
+                        new IntConfigRow(config.shorthand_size),
+                        new ItemListConfigRow(config.tool_belt_additions),
+                        new ItemListConfigRow(config.shorthand_additions)
             );
       }
 }

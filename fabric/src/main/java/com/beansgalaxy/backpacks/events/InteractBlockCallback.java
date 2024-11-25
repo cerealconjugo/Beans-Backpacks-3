@@ -1,7 +1,7 @@
 package com.beansgalaxy.backpacks.events;
 
 
-import com.beansgalaxy.backpacks.shorthand.storage.Shorthand;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -14,9 +14,12 @@ public class InteractBlockCallback implements UseBlockCallback {
       @Override
       public InteractionResult interact(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
             Inventory inventory = player.getInventory();
-            if (inventory.selected >= inventory.items.size()) {
+            int slot = inventory.selected - inventory.items.size();
+            if (slot > 0) {
                   Shorthand shorthand = Shorthand.get(player);
-                  shorthand.resetSelected(inventory);
+                  int weaponSelection = slot - shorthand.tools.getContainerSize();
+                  if (weaponSelection < 0)
+                        shorthand.resetSelected(inventory);
             }
 
             return InteractionResult.PASS;
