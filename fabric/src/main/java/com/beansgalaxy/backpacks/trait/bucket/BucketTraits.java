@@ -33,6 +33,7 @@ import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class BucketTraits extends GenericTraits {
       public static final String NAME = "bucket";
@@ -100,30 +101,44 @@ public class BucketTraits extends GenericTraits {
             BlockState state = level.getBlockState(pos);
             Direction direction = ctx.getClickedFace();
 
-            Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, state, null, direction);
-            if (storage == null)
-                  return;
-
             BucketMutable mutable = mutable(holder);
-            boolean success = !isEmpty(holder) && mutable.transferTo(storage, resource -> {
-                  SoundEvent sound = FluidVariantAttributes.getEmptySound(resource);
-                  player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
-                  cir.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide()));
-                  mutable.push();
-            });
-
-            if (!success) {
-                  success = mutable.transferFrom(storage, resource -> {
+            Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, state, null, direction);
+            if (storage != null) {
+                  Consumer<FluidVariant> fullBucketConsumer = resource -> {
                         SoundEvent sound = FluidVariantAttributes.getFillSound(resource);
-                        player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
+                        player.level()
+                              .playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
                         cir.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide()));
                         mutable.push();
-                  });
+                  };
+
+                  boolean success = !isEmpty(holder) && !player.isDiscrete() && mutable.transferFrom(storage, fullBucketConsumer);
+
+                  if (!success) {
+                        success = mutable.transferTo(storage, resource -> {
+                              SoundEvent sound = FluidVariantAttributes.getEmptySound(resource);
+                              player.level().playSound(player, player.getX(), player.getEyeY(), player.getZ(), sound, SoundSource.PLAYERS, 1, 1);
+                              cir.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide()));
+                              mutable.push();
+                        });
+                  }
+
+                  if (!success) {
+                        success = mutable.transferFrom(storage, fullBucketConsumer);
+                  }
+
+                  if (success)
+                        return;
             }
 
-            if (!success) {
-                  super.useOn(ctx, holder, cir);
+            ItemStack backpack = ctx.getItemInHand();
+            if (!player.isDiscrete() && mutable.tryPickup(level, player, backpack)) {
+                  player.awardStat(Stats.ITEM_USED.get(backpack.getItem()));
+                  cir.setReturnValue(InteractionResult.SUCCESS);
+                  mutable.push();
             }
+            else super.useOn(ctx, holder, cir);
+
       }
 
       @Override
@@ -131,18 +146,11 @@ public class BucketTraits extends GenericTraits {
             ItemStack backpack = player.getItemInHand(hand);
             BucketMutable mutable = mutable(holder);
 
-            if (player.isDiscrete()
-                        ? mutable.tryPlace(level, player, backpack) || mutable.tryPickup(level, player, backpack)
-                        : mutable.tryPickup(level, player, backpack) || mutable.tryPlace(level, player, backpack)
-            ) {
+            if (mutable.tryPlace(level, player, backpack)) {
                   player.awardStat(Stats.ITEM_USED.get(backpack.getItem()));
                   cir.setReturnValue(InteractionResultHolder.sidedSuccess(backpack, level.isClientSide()));
                   mutable.push();
-                  return;
             }
-
-            cir.setReturnValue(InteractionResultHolder.fail(backpack));
-
       }
 
       @Override

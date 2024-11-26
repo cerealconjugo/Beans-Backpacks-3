@@ -590,6 +590,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                               traits.entity().onPickup(this, traits, player));
 
                   tryInsertInventory(player);
+                  getPlaceable().sound().at(this, ModSound.Type.EQUIP);
                   this.killAndUpdate(false);
                   return InteractionResult.SUCCESS;
             }
@@ -608,6 +609,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
             ItemStack stack = this.toStack();
             player.setItemSlot(EquipmentSlot.BODY, stack);
+            getPlaceable().sound().at(this, ModSound.Type.EQUIP);
             this.killAndUpdate(false);
             return InteractionResult.SUCCESS;
       }

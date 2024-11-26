@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.traits.ITraitData;
@@ -45,17 +46,6 @@ public class ItemMixin {
                   traits.useOn(ctx, holder, cir);
                   if (cir.isCancelled()) {
                         return;
-                  }
-            }
-
-            Optional<PlaceableComponent> optionalPl = PlaceableComponent.get(backpack);
-            if (optionalPl.isPresent()) {
-                  PlaceableComponent placeable = optionalPl.get();
-                  BackpackEntity entity = BackpackEntity.create(ctx, backpack, placeable, optionalTr);
-                  if (entity != null) {
-                        ModSound sound = entity.getPlaceable().sound();
-                        sound.at(entity, ModSound.Type.PLACE);
-                        cir.setReturnValue(InteractionResult.SUCCESS);
                   }
             }
       }

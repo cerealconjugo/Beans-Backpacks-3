@@ -37,8 +37,10 @@ public class NeoForgeClient {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("eating"), CommonClient.EATING_TRAIT_ITEM_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("searching"), CommonClient.ENDER_SEARCHING_PREDICATE);
             container.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, screen) ->
-                        new ConfigScreen(screen, new CommonConfig(), new ClientConfig())
+                        new ConfigScreen(screen, new CommonConfig(), CommonClient.CLIENT_CONFIG)
             );
+
+            CommonClient.init();
       }
 
       @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)

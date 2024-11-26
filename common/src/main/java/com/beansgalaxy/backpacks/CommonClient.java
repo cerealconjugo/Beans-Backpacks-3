@@ -5,6 +5,7 @@ import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
+import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
 import com.beansgalaxy.backpacks.network.serverbound.InstantKeyPress;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
@@ -35,6 +36,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -223,10 +225,13 @@ public class CommonClient {
 
             RenderSystem.enableBlend();
             int weaponsSize = weapons.getContainerSize();
+
+            HumanoidArm mainArm = player.getMainArm();
+            ShorthandHUD hud = CLIENT_CONFIG.shorthand_hud_location.get();
+            int x = getShorthandHudX(mainArm, hud, width, weaponsSize);
             if (weaponsSize < 3) {
                   ItemStack weapon = weapons.getItem(0);
 
-                  int x = width - 40;
                   int y = height - 1 - 18;
 
                   if (weaponsSize > 1) {
@@ -265,7 +270,6 @@ public class CommonClient {
                   gui.renderItem(weapon, x + 17, y, player.getId());
                   gui.renderItemDecorations(minecraft.font, weapon, x + 17, y);
             } else {
-                  int x = width - 40;
                   int y = height - 1 - 18;
 
                   gui.blitSprite(SHORTHAND_MANY_1, x - 6, y - 4, 44, 24);
@@ -321,6 +325,21 @@ public class CommonClient {
                   gui.disableScissor();
             }
             RenderSystem.disableBlend();
+      }
+
+      private static int getShorthandHudX(HumanoidArm mainArm, ShorthandHUD hud, int width, int weaponsSize) {
+            if (HumanoidArm.LEFT.equals(mainArm)) {
+                  if (ShorthandHUD.FAR_CORNER.equals(hud))
+                        return weaponsSize > 1 ? 8 : -12;
+                  else
+                        return width / 2 + (weaponsSize > 2 ? -136 : -134);
+            }
+            else {
+                  if (ShorthandHUD.FAR_CORNER.equals(hud))
+                        return width + (weaponsSize > 2 ? -40 : -38);
+                  else
+                        return width / 2 + (weaponsSize > 1 ? 104 : 84);
+            }
       }
 
       public static void handleSendWeaponSlot(int player, int selectedSlot, ItemStack stack) {

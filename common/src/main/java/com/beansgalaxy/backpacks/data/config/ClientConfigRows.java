@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.data.config;
 
 import com.beansgalaxy.backpacks.data.config.screen.ConfigRows;
 import com.beansgalaxy.backpacks.data.config.screen.ConfigScreen;
+import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
@@ -15,8 +16,9 @@ public class ClientConfigRows extends ConfigRows {
 
       @Override
       public List<ConfigLabel> getRows() {
+            ClientConfig config = (ClientConfig) this.config;
             return List.of(
-
+                        new EnumConfigRow<>(config.shorthand_hud_location, ShorthandHUD.values())
             );
       }
 
