@@ -14,6 +14,7 @@ import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -34,12 +35,14 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -48,8 +51,10 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -123,7 +128,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             Vec3 clickLocation;
             if (level.getBlockState(blockPos).getCollisionShape(level, blockPos).isEmpty()) {
                   BlockHitResult hitResult = Constants.getPlayerPOVHitResult(level, player, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE);
-                  clickedFace = hitResult.getDirection();
+                  clickedFace = HitResult.Type.MISS.equals(hitResult.getType()) ? Direction.UP : hitResult.getDirection();
                   clickLocation = hitResult.getLocation();
             }
             else {
@@ -163,8 +168,40 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             }
 
             AABB aabb = BackpackEntity.newBoundingBox(clickedFace, pos);
-            if (!level.noCollision(player, aabb))
-                  return null;
+            if (!level.noCollision(player, aabb.deflate(0.01))) {
+                  switch (clickedFace) {
+                        case WEST, EAST -> { // X
+                              yRot = clickedFace.toYRot();
+                              pos = new Vec3(
+                                          clickLocation.x + clickedFace.getAxisDirection().getStep() * (2 / 16f),
+                                          blockPos.getY() + 4/16f,
+                                          blockPos.getZ() + 0.5
+                              );
+                        }
+                        case NORTH, SOUTH -> { // Z
+                              yRot = clickedFace.toYRot();
+                              pos = new Vec3(
+                                          blockPos.getX() + 0.5,
+                                          blockPos.getY() + 4/16f,
+                                          clickLocation.z + clickedFace.getAxisDirection().getStep() * (2 / 16f)
+                              );
+                        }
+                        default -> {
+                              Vec3 center = blockPos.getBottomCenter();
+                              pos = new Vec3(
+                                          center.x,
+                                          clickLocation.y,
+                                          center.z
+                              );
+                              yRot = rotation + 180;
+                        }
+                  }
+
+                  aabb = BackpackEntity.newBoundingBox(clickedFace, pos);
+                  if (!level.noCollision(player, aabb)) {
+                        return null;
+                  }
+            }
 
             BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY.get(), level);
             backpackEntity.setPos(pos);
@@ -229,9 +266,9 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             int block = (int) position;
             double v = Math.abs(position - block);
             if (v < 0.3)
-                  return block + (i * 0.25);
+                  return block;
             else if (v > 0.7)
-                  return block + (i * 0.75);
+                  return block + (i);
             else
                   return block + (i * 0.5);
       }
@@ -251,6 +288,11 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             });
       }
 
+      @Override
+      public boolean isPushedByFluid() {
+            return false;
+      }
+
       private void wobble() {
             if (wobble > 0)
                   wobble--;
@@ -263,12 +305,17 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             if (!this.isNoGravity()) {
                   if (this.isInWater()) {
                         inWaterGravity();
-                  } else if (this.isInLava()) {
+                  }
+                  else if (this.isInLava()) {
                         if (this.isEyeInFluid(FluidTags.LAVA) && getDeltaMovement().y < 0.1) {
                               this.setDeltaMovement(this.getDeltaMovement().add(0D, 0.02D, 0D));
                         }
                         this.setDeltaMovement(this.getDeltaMovement().scale(0.6D));
-                  } else {
+                  }
+                  else if (onGround()) {
+                        this.setDeltaMovement(this.getDeltaMovement().scale(0.2D));
+                  }
+                  else {
                         this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.03D, 0.0D));
                         this.setDeltaMovement(this.getDeltaMovement().scale(0.98D));
                   }
@@ -529,42 +576,64 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       public InteractionResult interact(Player player, InteractionHand hand) {
             BackData backData = BackData.get(player);
             if (backData.isActionKeyDown()) {
-                  Optional<EquipableComponent> optional = EquipableComponent.get(this);
-                  if (optional.isEmpty()) {
-                        ItemStack handStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
-                        getTraits().ifPresent(traits ->
-                                    traits.entity().onPickup(this, traits, player));
-
-                        ItemStack stack = toStack();
-                        if (!handStack.isEmpty())
-                              player.getInventory().add(-1, stack);
-                        else
-                              player.setItemSlot(EquipmentSlot.MAINHAND, stack);
-
-                        killAndUpdate(false);
-                        return InteractionResult.SUCCESS;
-                  }
-
-                  EquipableComponent equipable = optional.get();
-                  EquipmentSlot[] values = EquipmentSlot.values();
-                  for (int i = values.length - 1; i > 0; i--) {
-                        EquipmentSlot slot = values[i];
-                        if (equipable.slots().test(slot)) {
-                              ItemStack stack = player.getItemBySlot(slot);
-                              if (stack.isEmpty()) {
-                                    getTraits().ifPresent(traits ->
-                                                traits.entity().onPickup(this, traits, player));
-
-                                    player.setItemSlot(slot, toStack());
-                                    killAndUpdate(false);
-                                    return InteractionResult.SUCCESS;
-                              }
-                        }
-                  }
-
-                  return InteractionResult.FAIL;
+                  InteractionResult tryEquip = tryEquip(player);
+                  if (!tryEquip.equals(InteractionResult.PASS))
+                        return tryEquip;
             }
             return useTraitInteraction(player, hand);
+      }
+
+      public InteractionResult tryEquip(Player player) {
+            Optional<EquipableComponent> optional = EquipableComponent.get(this);
+            if (optional.isEmpty()) {
+                  this.getTraits().ifPresent(traits ->
+                              traits.entity().onPickup(this, traits, player));
+
+                  tryInsertInventory(player);
+                  this.killAndUpdate(false);
+                  return InteractionResult.SUCCESS;
+            }
+
+            EquipableComponent equipable = optional.get();
+            if (!equipable.slots().test(EquipmentSlot.BODY))
+                  return InteractionResult.PASS;
+
+            ItemStack backSlot = player.getItemBySlot(EquipmentSlot.BODY);
+            if (!backSlot.isEmpty())
+                  return InteractionResult.FAIL;
+
+            this.getTraits().ifPresent(traits ->
+                        traits.entity().onPickup(this, traits, player)
+            );
+
+            ItemStack stack = this.toStack();
+            player.setItemSlot(EquipmentSlot.BODY, stack);
+            this.killAndUpdate(false);
+            return InteractionResult.SUCCESS;
+      }
+
+      private void tryInsertInventory(Player player) {
+            ItemStack stack = this.toStack();
+            ItemStack handStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
+            if (handStack.isEmpty()) {
+                  player.setItemSlot(EquipmentSlot.MAINHAND, stack);
+                  return;
+            }
+
+            Inventory inventory = player.getInventory();
+            NonNullList<ItemStack> items = inventory.items;
+
+            for (int i = 0; i < 9; i++) {
+                  ItemStack hotbarStack = items.get(0);
+                  if (hotbarStack.isEmpty()) {
+                        inventory.setItem(i, stack);
+                        inventory.selected = i;
+                        return;
+                  }
+            }
+
+            if (!inventory.add(-1, stack))
+                  this.spawnAtLocation(stack);
       }
 
       @Override

@@ -1,26 +1,35 @@
 package com.beansgalaxy.backpacks.client;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.network.serverbound.BackpackUse;
 import com.beansgalaxy.backpacks.network.serverbound.BackpackUseOn;
+import com.beansgalaxy.backpacks.network.serverbound.InstantKeyPress;
 import com.beansgalaxy.backpacks.network.serverbound.SyncHotkey;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.chest.screen.MenuChestScreen;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.*;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -31,10 +40,16 @@ public class KeyPress {
       public static final KeyPress INSTANCE = new KeyPress();
 
       public static final String KEY_CATEGORY = "key.beansbackpacks.category";
+
       public static final String ACTION_KEY_IDENTIFIER = "key.beansbackpacks.action";
       public static final String MENUS_KEY_IDENTIFIER = "key.beansbackpacks.inventory";
+      public static final String INSTANT_KEY_IDENTIFIER = "key.beansbackpacks.instant";
       public static final String ACTION_KEY_DESC = "key.beansbackpacks.desc.action";
       public static final String MENUS_KEY_DESC = "key.beansbackpacks.desc.inventory";
+      public static final String INSTANT_KEY_DESC = "key.beansbackpacks.desc.instant";
+      public static final String ACTION_KEY_DISABLED = "key.beansbackpacks.action_disabled";
+      public static final String ACTION_KEY_DISABLED_DESC = "key.beansbackpacks.desc.action_disabled";
+
       public static final String SHORTHAND_KEY_IDENTIFIER = "key.beansbackpacks.shorthand";
       public static final String UTILITY_KEY_IDENTIFIER = "key.beansbackpacks.utility";
 
@@ -45,6 +60,11 @@ public class KeyPress {
 
       public final KeyMapping MENUS_KEY = new KeyMapping(
                   MENUS_KEY_IDENTIFIER,
+                  GLFW.GLFW_KEY_UNKNOWN,
+                  KEY_CATEGORY);
+
+      public final KeyMapping INSTANT_KEY = new KeyMapping(
+                  INSTANT_KEY_IDENTIFIER,
                   GLFW.GLFW_KEY_UNKNOWN,
                   KEY_CATEGORY);
 
@@ -60,6 +80,7 @@ public class KeyPress {
 
       public void tick(Minecraft minecraft, LocalPlayer player) {
             isPressed actionKey = KeyPress.isPressed(minecraft, KeyPress.getActionKeyBind());
+            boolean actionKeyPressed = actionKey.pressed() && INSTANT_KEY.isUnbound();
             isPressed menusKey = KeyPress.isPressed(minecraft, KeyPress.getMenusKeyBind());
             int tinyChestSlot = minecraft.screen instanceof MenuChestScreen screen ? screen.slotIndex() : -1;
             boolean menuKeyPressed = tinyChestSlot == -1 && menusKey.pressed();
@@ -69,13 +90,13 @@ public class KeyPress {
 
             BackData backData = BackData.get(player);
 
-            if (actionKey.pressed() == backData.isActionKeyDown() && menuKeyPressed == backData.isMenuKeyDown() && tinyChestSlot == backData.getTinySlot())
+            if (actionKeyPressed == backData.isActionKeyDown() && menuKeyPressed == backData.isMenuKeyDown() && tinyChestSlot == backData.getTinySlot())
                   return;
 
-            backData.setActionKey(actionKey.pressed());
+            backData.setActionKey(actionKeyPressed);
             backData.setMenuKey(menuKeyPressed);
             backData.setTinySlot(tinyChestSlot);
-            SyncHotkey.send(actionKey.pressed(), menuKeyPressed, tinyChestSlot);
+            SyncHotkey.send(actionKeyPressed, menuKeyPressed, tinyChestSlot);
 
 //            boolean instantPlace = Constants.CLIENT_CONFIG.instant_place.get();
 //            if (actionKey.pressed() && (instantPlace || actionKey.onMouse()) && minecraft.screen == null) {
@@ -104,35 +125,59 @@ public class KeyPress {
       }
 
       public boolean consumeActionUseOn(Minecraft instance, BlockHitResult hitResult) {
-            if (!instance.level.getWorldBorder().isWithinBounds(hitResult.getBlockPos()))
+            BlockPos blockPos = hitResult.getBlockPos();
+            if (!instance.level.getWorldBorder().isWithinBounds(blockPos))
                   return false;
 
             LocalPlayer player = instance.player;
             boolean cancel = player.isSprinting() || player.isSwimming();
             if (cancel && INSTANCE.ACTION_KEY.isUnbound())
                   storeCoyoteClick(instance);
-            else {
-                  return placeBackpack(instance.player, hitResult);
+            else if (placeBackpack(player, hitResult))
+                  return true;
+
+            double pBlockInteractionRange = player.blockInteractionRange();
+            double d0 = Math.max(pBlockInteractionRange, player.entityInteractionRange());
+            double d1 = Mth.square(d0);
+            float pPartialTick = 1F;
+
+            Vec3 vec3 = player.getEyePosition(pPartialTick);
+            Vec3 vec31 = player.getViewVector(pPartialTick);
+            Vec3 vec32 = vec3.add(vec31.x * d0, vec31.y * d0, vec31.z * d0);
+            AABB aabb = player.getBoundingBox().expandTowards(vec31.scale(d0)).inflate(1.0, 1.0, 1.0);
+            EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(
+                        player, vec3, vec32, aabb, p_234237_ -> !p_234237_.isSpectator() && p_234237_.isPickable(), d1
+            );
+
+            if (entityhitresult == null || HitResult.Type.MISS.equals(entityhitresult.getType()))
+                  return false;
+
+            Vec3 vec33 = entityhitresult.getLocation();
+            if (!vec33.closerThan(vec33, pBlockInteractionRange))
+                  return false;
+
+            Entity entity = entityhitresult.getEntity();
+            if (entity instanceof BackpackEntity backpack) {
+                  InteractionResult tryEquip = backpack.tryEquip(player);
+                  if (tryEquip.consumesAction())
+                        InstantKeyPress.send(entity.getId());
+                  return true;
             }
 
             return false;
       }
 
 
-      private static boolean placeBackpack(Player player, BlockHitResult hitResult) {
-            AtomicReference<EquipmentSlot> equipmentSlot = new AtomicReference<>(null);
+      public static boolean placeBackpack(Player player, BlockHitResult hitResult) {
+            EquipmentSlot equipmentSlot;
+            if (BackpackUseOn.placeBackpack(player, hitResult, EquipmentSlot.MAINHAND))
+                  equipmentSlot = EquipmentSlot.MAINHAND;
+            else if (BackpackUseOn.placeBackpack(player, hitResult, EquipmentSlot.BODY))
+                  equipmentSlot = EquipmentSlot.BODY;
+            else return false;
 
-            EquipableComponent.runIfPresent(player, (equipable, slot) -> {
-                  if (BackpackUseOn.placeBackpack(player, hitResult, slot))
-                        equipmentSlot.set(slot);
-            });
-
-            if (equipmentSlot.get() != null) {
-                  BackpackUseOn.send(hitResult, equipmentSlot.get());
-                  return true;
-            }
-
-            return false;
+            BackpackUseOn.send(hitResult, equipmentSlot);
+            return true;
       }
 
       private void storeCoyoteClick(Minecraft instance) {
@@ -141,9 +186,6 @@ public class KeyPress {
 
       public static KeyMapping getDefaultKeyBind() {
             Minecraft instance = Minecraft.getInstance();
-//            if (Constants.CLIENT_CONFIG.sneak_default.get())
-//                  return instance.options.keyShift;
-
             return instance.options.keySprint;
       }
 
@@ -201,6 +243,5 @@ public class KeyPress {
             return new isPressed(isMouseKey, isPressed);
       }
 
-      public record isPressed(boolean onMouse, boolean pressed) {
-      }
+      public record isPressed(boolean onMouse, boolean pressed) {}
 }

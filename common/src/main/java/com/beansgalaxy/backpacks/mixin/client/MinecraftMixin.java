@@ -1,15 +1,15 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.data.EnderStorage;
-import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,6 +27,7 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
 
       @Shadow protected abstract boolean shouldRun(Runnable pRunnable);
 
+      @Shadow @Nullable public HitResult hitResult;
       @Unique public final EnderStorage beans_Backpacks_2$enderStorage = new EnderStorage();
 
       @Override
@@ -50,29 +51,6 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
 
       @Inject(method = "handleKeybinds", at = @At("TAIL"))
       private void handleBackpackKeybinds(CallbackInfo ci) {
-            KeyPress keyPress = KeyPress.INSTANCE;
-            while (keyPress.SHORTHAND_KEY.consumeClick()) {
-                  Shorthand shorthand = Shorthand.get(player);
-                  Inventory inventory = player.getInventory();
-                  if (keyPress.UTILITY_KEY.isDown()) {
-                        keyPress.UTILITY_KEY.consumeClick();
-                        shorthand.resetSelected(inventory);
-                        return;
-                  }
-
-                  shorthand.selectWeapon(inventory, true);
-            }
-            while (keyPress.UTILITY_KEY.consumeClick()) {
-                  Shorthand shorthand = Shorthand.get(player);
-                  Inventory inventory = player.getInventory();
-                  if (keyPress.SHORTHAND_KEY.isDown()) {
-                        keyPress.UTILITY_KEY.consumeClick();
-                        shorthand.resetSelected(inventory);
-                        return;
-                  }
-
-                  shorthand.selectWeapon(inventory, false);
-            }
+            CommonClient.handleKeyBinds(player, hitResult);
       }
-
 }

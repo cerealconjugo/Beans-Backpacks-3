@@ -1,8 +1,7 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
-import com.beansgalaxy.backpacks.client.KeyPress;
+import com.beansgalaxy.backpacks.CommonClient;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
@@ -14,19 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = KeyBindsList.KeyEntry.class)
 public class KeyBindEntriesMixin {
-      @Shadow
-      @Final
-      private Button changeButton;
+      @Shadow @Final private Button changeButton;
       @Shadow @Final private Component name;
 
       @Inject(method = "refreshEntry", at = @At(value = "INVOKE", ordinal = 1, shift = At.Shift.AFTER,
                   target = "Lnet/minecraft/client/gui/components/Button;setTooltip(Lnet/minecraft/client/gui/components/Tooltip;)V"))
       private void changeBackpackKeyHover(CallbackInfo ci) {
-            if (name.equals(Component.translatable(KeyPress.ACTION_KEY_IDENTIFIER))) {
-                  String key = "key.sprint";// Constants.CLIENT_CONFIG.sneak_default.get() ? "key.sneak" : "key.sprint";
-                  this.changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.ACTION_KEY_DESC, Component.translatable(key))));
-            } else if (name.equals(Component.translatable(KeyPress.MENUS_KEY_IDENTIFIER))) {
-                  this.changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.MENUS_KEY_DESC, Component.translatable("key.beansbackpacks.action"))));
-            }
+            CommonClient.modifyBackpackKeyDisplay(name, this.changeButton);
       }
+
 }

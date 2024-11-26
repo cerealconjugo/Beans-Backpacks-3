@@ -1,13 +1,16 @@
 package com.beansgalaxy.backpacks;
 
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
+import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
+import com.beansgalaxy.backpacks.network.serverbound.InstantKeyPress;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -15,16 +18,22 @@ import com.beansgalaxy.backpacks.util.Tint;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +41,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -316,6 +329,79 @@ public class CommonClient {
             if (entity instanceof Player otherPlayer) {
                   Shorthand shorthand = Shorthand.get(otherPlayer);
                   shorthand.updateSelectedWeapon(selectedSlot, stack);
+            }
+      }
+
+      public static void modifyBackpackKeyDisplay(Component name, Button changeButton) {
+            KeyPress keyPress = KeyPress.INSTANCE;
+            if (name.equals(Component.translatable(KeyPress.ACTION_KEY_IDENTIFIER))) {
+                  if (keyPress.INSTANT_KEY.isUnbound()) {
+                        MutableComponent translatable = Component.translatable("key.sprint");
+                        changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.ACTION_KEY_DESC, translatable.plainCopy())));
+                        if (keyPress.ACTION_KEY.isUnbound())
+                              changeButton.setMessage(translatable.withStyle(ChatFormatting.ITALIC));
+                  } else {
+                        MutableComponent action = Component.translatable(KeyPress.ACTION_KEY_IDENTIFIER);
+                        MutableComponent instant = Component.translatable(KeyPress.INSTANT_KEY_IDENTIFIER);
+                        changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.ACTION_KEY_DISABLED_DESC, action, instant)));
+                        MutableComponent disabledMessage = Component.translatable(KeyPress.ACTION_KEY_DISABLED);
+                        changeButton.setMessage(disabledMessage.withStyle(ChatFormatting.ITALIC, ChatFormatting.RED));
+                  }
+                  return;
+            }
+            if (name.equals(Component.translatable(KeyPress.MENUS_KEY_IDENTIFIER))) {
+                  MutableComponent translatable = Component.translatable(KeyPress.ACTION_KEY_IDENTIFIER);
+                  changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.MENUS_KEY_DESC, translatable)));
+                  if (keyPress.MENUS_KEY.isUnbound()) {
+                        String boundKey = KeyPress.getMenusKeyBind().getName();
+                        changeButton.setMessage(Component.translatable(boundKey).withStyle(ChatFormatting.ITALIC));
+                  }
+                  return;
+            }
+            if (name.equals(Component.translatable(KeyPress.INSTANT_KEY_IDENTIFIER))) {
+                  MutableComponent translatable = Component.translatable(KeyPress.ACTION_KEY_IDENTIFIER);
+                  changeButton.setTooltip(Tooltip.create(Component.translatable(KeyPress.INSTANT_KEY_DESC, translatable)));
+                  return;
+            }
+      }
+
+      public static void handleKeyBinds(Player player, @Nullable HitResult hitResult) {
+            KeyPress keyPress = KeyPress.INSTANCE;
+            while (keyPress.SHORTHAND_KEY.consumeClick()) {
+                  Shorthand shorthand = Shorthand.get(player);
+                  Inventory inventory = player.getInventory();
+                  if (keyPress.UTILITY_KEY.isDown()) {
+                        keyPress.UTILITY_KEY.consumeClick();
+                        shorthand.resetSelected(inventory);
+                        continue;
+                  }
+
+                  shorthand.selectWeapon(inventory, true);
+            }
+            while (keyPress.UTILITY_KEY.consumeClick()) {
+                  Shorthand shorthand = Shorthand.get(player);
+                  Inventory inventory = player.getInventory();
+                  if (keyPress.SHORTHAND_KEY.isDown()) {
+                        keyPress.UTILITY_KEY.consumeClick();
+                        shorthand.resetSelected(inventory);
+                        continue;
+                  }
+
+                  shorthand.selectWeapon(inventory, false);
+            }
+            while (keyPress.INSTANT_KEY.consumeClick()) {
+                  if (hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof BackpackEntity entity) {
+                        InteractionResult result = entity.tryEquip(player);
+                        if (!InteractionResult.PASS.equals(result)) {
+                              InstantKeyPress.send(entity.getId());
+                              continue;
+                        }
+                  }
+
+                  if (hitResult instanceof BlockHitResult blockHitResult) {
+                        if (KeyPress.placeBackpack(player, blockHitResult))
+                              continue;
+                  }
             }
       }
 }

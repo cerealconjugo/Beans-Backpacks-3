@@ -19,7 +19,9 @@ public enum Network2S {
       TINY_MENU_2S(TinyMenuClick.class, TinyMenuClick.ID, TinyMenuClick::encode, TinyMenuClick::new, TinyMenuClick::handle),
       TINY_HOTBAR_2S(TinyHotbarClick.class, TinyHotbarClick.ID, TinyHotbarClick::encode, TinyHotbarClick::new, TinyHotbarClick::handle),
       TINY_INTERACT_2S(TinyMenuInteract.class, TinyMenuInteract.ID, TinyMenuInteract::encode, TinyMenuInteract::new, TinyMenuInteract::handle),
-      SYNC_SELECTED_SLOT_2S(SyncSelectedSlot.class, SyncSelectedSlot.ID, SyncSelectedSlot::encode, SyncSelectedSlot::new, SyncSelectedSlot::handle);
+      SYNC_SELECTED_SLOT_2S(SyncSelectedSlot.class, SyncSelectedSlot.ID, SyncSelectedSlot::encode, SyncSelectedSlot::new, SyncSelectedSlot::handle),
+      INSTANT_KEY_2S(InstantKeyPress.class, InstantKeyPress.ID, InstantKeyPress::encode, InstantKeyPress::new, InstantKeyPress::handle),
+      ;
 
       public final DynamicLoaderPacket<? super RegistryFriendlyByteBuf, ?> packet;
       <T extends Packet2S> Network2S(Class<T> clazz, CustomPacketPayload.Type<T> id, BiConsumer<T, RegistryFriendlyByteBuf> encoder, Function<RegistryFriendlyByteBuf, T> decoder, BiConsumer<T, ServerPlayer> handle) {

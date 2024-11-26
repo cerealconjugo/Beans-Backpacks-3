@@ -73,12 +73,17 @@
   "attribute.name.player.shorthand": "Shorthand",
 
   "key.beansbackpacks.category": "Beans' Backpacks",
-  "key.beansbackpacks.action": "Place/Pickup",
-  "key.beansbackpacks.desc.action": "Leave unbound to pair this action with the key for %d.",
+  "key.beansbackpacks.action": "Place & Pickup",
+  "key.beansbackpacks.desc.action": "Leave unbound to pair this action with the key for %d",
   "key.beansbackpacks.inventory": "Quick Menu Click",
-  "key.beansbackpacks.desc.inventory": "Leave unbound to pair this action with the key for %d.",
+  "key.beansbackpacks.desc.inventory": "Leave unbound to pair this action with the key for %d",
   "key.beansbackpacks.utility": "Shorthand Slot 2 (Previous)",
   "key.beansbackpacks.shorthand": "Shorthand Slot 1 (Next)",
+  "key.beansbackpacks.instant": "Instant Place-Pickup",
+  "key.beansbackpacks.desc.instant": "Place & pickup Backpacks instantly without right-click; Binding this key disables the %d key",
+  "key.beansbackpacks.action_disabled": "Disabled",
+  "key.beansbackpacks.desc.action_disabled": "%d has been disabled because %d is bound",
+
 
   "screen.beansbackpacks.config.title-common": "Common",
   "screen.beansbackpacks.config.title-client": "Client",

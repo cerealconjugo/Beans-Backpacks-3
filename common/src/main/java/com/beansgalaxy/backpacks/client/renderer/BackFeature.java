@@ -85,7 +85,7 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                   this.getParentModel().body.translateAndRotate(pose);
                   pose.translate(0, player.isCrouching() ? 6/16f : 5/16f, 5/32f);
                   if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
-                        pose.translate(0.0F, 1/16f, 1 / 16f);
+                        pose.translate(0.0F, -1/16f, 1 / 16f);
 
                   pose.mulPose(Axis.ZN.rotationDegrees(90));
                   pose.translate(0.001, -0.001, 0);

@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.util.Tint;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -59,11 +60,14 @@ public interface BackpackRender {
                   );
 
                   TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(Sheets.ARMOR_TRIMS_SHEET);
-                  VertexConsumer trimVC = pBufferSource.getBuffer(RenderType.entityCutout(Sheets.ARMOR_TRIMS_SHEET));
+                  VertexConsumer trimVC = pBufferSource.getBuffer(RenderType.entityDecal(Sheets.ARMOR_TRIMS_SHEET));
                   VertexConsumer wrapped = atlas.getSprite(trimTexture).wrap(trimVC);
 
                   model().renderBody(pose, wrapped, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
-                  model().renderButton(pose, wrapped, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+
+                  VertexConsumer buttonVertex = pBufferSource.getBuffer(RenderType.entityCutout(Sheets.ARMOR_TRIMS_SHEET));
+                  VertexConsumer buttonWrap = atlas.getSprite(trimTexture).wrap(buttonVertex);
+                  model().renderButton(pose, buttonWrap, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
             } else {
                   model().renderButton(pose, outer, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
             }
@@ -83,7 +87,7 @@ public interface BackpackRender {
             Tint.HSL hsl = tint.HSL();
             double lum = hsl.getLum();
             hsl.setLum((Math.cbrt(lum + 0.2) + lum) / 2).rotate(5).setSat(Math.sqrt((hsl.getSat() + brightness) / 2));
-            int highColor = hsl.pushToNew().getRGBA();
+            int highColor = hsl.rgb();
 
             ResourceLocation detail = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/backpack/leather/detail.png");
             VertexConsumer detailVC = pBufferSource.getBuffer(RenderType.entityTranslucentCull(detail));
@@ -92,6 +96,7 @@ public interface BackpackRender {
             VertexConsumer buttonVC = pBufferSource.getBuffer(RenderType.entityCutout(detail));
             model().renderButton(pose, buttonVC, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
             model().renderMask(pose, buttonVC, pCombinedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+
       }
 
       default void renderBackpack(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, ResourceLocation location, ItemStack itemStack, @Nullable LivingEntity entity, ClientLevel level, int seed) {
