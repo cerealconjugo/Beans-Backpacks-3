@@ -29,6 +29,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -43,6 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -215,24 +217,27 @@ public class CommonClient {
             Window window = minecraft.getWindow();
             int height = window.getGuiScaledHeight();
             int width = window.getGuiScaledWidth();
+            int y = height - 1 - 18;
 
             LocalPlayer player = minecraft.player;
             Shorthand shorthand = Shorthand.get(player);
             ShortContainer weapons = shorthand.weapons;
 
             Inventory inventory = player.getInventory();
-            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
-
-            RenderSystem.enableBlend();
-            int weaponsSize = weapons.getContainerSize();
+            int slot = inventory.selected - inventory.items.size();
+            int toolsSize = shorthand.tools.getContainerSize();
+            int selected = slot - toolsSize;
 
             HumanoidArm mainArm = player.getMainArm();
             ShorthandHUD hud = CLIENT_CONFIG.shorthand_hud_location.get();
-            int x = getShorthandHudX(mainArm, hud, width, weaponsSize);
+
+            renderToolBelt(minecraft, gui, selected, slot, player, shorthand, mainArm, hud, width, y);
+
+            RenderSystem.enableBlend();
+            int weaponsSize = weapons.getContainerSize();
+            int x = getShorthandHudX(mainArm, width, weaponsSize, ShorthandHUD.FAR_CORNER.equals(hud));
             if (weaponsSize < 3) {
                   ItemStack weapon = weapons.getItem(0);
-
-                  int y = height - 1 - 18;
 
                   if (weaponsSize > 1) {
                         ItemStack utility = weapon;
@@ -270,8 +275,6 @@ public class CommonClient {
                   gui.renderItem(weapon, x + 17, y, player.getId());
                   gui.renderItemDecorations(minecraft.font, weapon, x + 17, y);
             } else {
-                  int y = height - 1 - 18;
-
                   gui.blitSprite(SHORTHAND_MANY_1, x - 6, y - 4, 44, 24);
 //                  gui.blit(SHORTHAND_MANY_1, x - 6, y - 4, 0, 0, 44, 24, 44, 24);
 
@@ -327,15 +330,55 @@ public class CommonClient {
             RenderSystem.disableBlend();
       }
 
-      private static int getShorthandHudX(HumanoidArm mainArm, ShorthandHUD hud, int width, int weaponsSize) {
+      private static void renderToolBelt(Minecraft minecraft, GuiGraphics gui, int selected, int slot, LocalPlayer player, Shorthand shorthand, HumanoidArm mainArm, ShorthandHUD hud, int width, int y) {
+            int toolBeltSlot = -1;
+            boolean toolBeltSelected = false;
+            if (selected < 0 && slot > -1) {
+                  toolBeltSlot = slot;
+                  toolBeltSelected = true;
+            }
+            else {
+                  HitResult hitResult = minecraft.hitResult;
+                  if (HitResult.Type.BLOCK.equals(hitResult.getType())) {
+                        BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+                        Level level = player.level();
+                        BlockPos blockPos = blockHitResult.getBlockPos();
+                        BlockState blockState = level.getBlockState(blockPos);
+                        float destroySpeed = blockState.getDestroySpeed(level, blockPos);
+                        if (destroySpeed >= 0.1f)
+                              toolBeltSlot = shorthand.getQuickestSlot(blockState);
+                  }
+            }
+
+            if (toolBeltSlot == -1)
+                  return;
+
+            RenderSystem.enableBlend();
+
+            ItemStack tool = shorthand.tools.getItem(toolBeltSlot);
+            int x = getToolBeltHudX(mainArm, hud, width);
+            gui.blitSprite(SHORTHAND_SINGLE, x - 6, y - 4, 44, 24);
+            gui.renderItem(tool, x + 17, y, player.getId());
+            gui.renderItemDecorations(minecraft.font, tool, x + 17, y);
+
+            if (toolBeltSelected)
+                  gui.blitSprite(SHORTHAND_SELECT, x + 3, y - 4, 44, 24);
+
+            RenderSystem.disableBlend();
+      }
+
+      private static int getToolBeltHudX(HumanoidArm mainArm, ShorthandHUD hud, int width) {
+            return getShorthandHudX(mainArm, width, 1, !ShorthandHUD.FAR_CORNER.equals(hud));
+      }
+      private static int getShorthandHudX(HumanoidArm mainArm, int width, int weaponsSize, boolean hudIsFarCorner) {
             if (HumanoidArm.LEFT.equals(mainArm)) {
-                  if (ShorthandHUD.FAR_CORNER.equals(hud))
+                  if (hudIsFarCorner)
                         return weaponsSize > 1 ? 8 : -12;
                   else
                         return width / 2 + (weaponsSize > 2 ? -136 : -134);
             }
             else {
-                  if (ShorthandHUD.FAR_CORNER.equals(hud))
+                  if (hudIsFarCorner)
                         return width + (weaponsSize > 2 ? -40 : -38);
                   else
                         return width / 2 + (weaponsSize > 1 ? 104 : 84);

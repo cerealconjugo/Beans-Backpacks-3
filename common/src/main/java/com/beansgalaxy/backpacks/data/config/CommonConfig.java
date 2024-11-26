@@ -17,6 +17,7 @@ public class CommonConfig implements IConfig {
       public IntConfigVariant shorthand_size;
       public HSetConfigVariant<Item> tool_belt_additions;
       public HSetConfigVariant<Item> shorthand_additions;
+      public BoolConfigVariant tool_belt_break_items;
 
       private final ConfigLine[] LINES = new ConfigLine[] {
                   tool_belt_size = new IntConfigVariant("tool_belt_size", 2, 0, 8),
@@ -26,7 +27,8 @@ public class CommonConfig implements IConfig {
                               .build("tool_belt_additions"),
                   shorthand_additions = HSetConfigVariant.Builder.create(Constants::itemShortString, in -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(in)))
                               .isValid(in -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(in)))
-                              .build("shorthand_additions")
+                              .build("shorthand_additions"),
+                  tool_belt_break_items = new BoolConfigVariant("tool_belt_break_items", false, "Will the Tool Belt continue to use a tool until it breaks")
       };
 
       @Override

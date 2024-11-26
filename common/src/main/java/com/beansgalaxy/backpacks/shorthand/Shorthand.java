@@ -175,9 +175,17 @@ public class Shorthand {
             ItemStack mainHandItem = inv.items.get(shorthandSelected ? heldSelected : inv.selected);
             float topSpeed = mainHandItem.getItem().getDestroySpeed(mainHandItem, blockState);
 
+            boolean saveItemsIfBroken = !ServerSave.CONFIG.tool_belt_break_items.get();
             boolean requiresToolForDrops = blockState.requiresCorrectToolForDrops();
             for (int i = 0; i < tools.getContainerSize(); i++) {
                   ItemStack tool = tools.getItem(i);
+
+                  if (saveItemsIfBroken) {
+                        int remainingUses = tool.getMaxDamage() - tool.getDamageValue();
+                        if (remainingUses < 2)
+                              continue;
+                  }
+
                   float destroySpeed = tool.getItem().getDestroySpeed(tool, blockState);
                   if (destroySpeed > topSpeed) {
                         if (tool.getItem().isCorrectToolForDrops(tool, blockState)) {
