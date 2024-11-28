@@ -5,6 +5,7 @@ import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,14 +20,15 @@ import java.util.List;
 public class LunchBoxScreen extends BundleScreen {
       boolean hoverNonEdible = false;
 
-      public static void openScreen(BackpackEntity backpack, BundleLikeTraits traits) {
+      public static void openScreen(ViewableBackpack backpack, BundleLikeTraits traits) {
             LunchBoxScreen screen = new LunchBoxScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            backpack.onOpen(minecraft.player);
             TinyMenuInteract.send(backpack.getId(), true);
       }
 
-      protected LunchBoxScreen(BackpackEntity backpack, BundleLikeTraits traits) {
+      protected LunchBoxScreen(ViewableBackpack backpack, BundleLikeTraits traits) {
             super(backpack, traits);
       }
 

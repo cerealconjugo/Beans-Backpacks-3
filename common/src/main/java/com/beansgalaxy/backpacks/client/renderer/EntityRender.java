@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -63,7 +64,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
             if (backpack.isRemoved())
                   return;
 
-            double breakTime = backpack.wobble;
+            double breakTime = backpack.viewable.wobble;
             yaw += (float) ((breakTime * 0.80f) * Math.sin(breakTime / Math.PI * 3));
 
             // ============================================ BACKPACK RENDER ============================================
@@ -87,12 +88,13 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
                   pose.mulPose(Axis.XP.rotationDegrees(180));
                   pose.translate(0, -10/16f, -4/16f);
 
-                  if (backpack.lastDelta > tick)
-                        backpack.updateOpen();
+                  ViewableBackpack viewable = backpack.viewable;
+                  if (viewable.lastDelta > tick)
+                        viewable.updateOpen();
 
-                  float headPitch = Mth.lerp(tick, backpack.lastPitch, backpack.headPitch) * 0.25f;
+                  float headPitch = Mth.lerp(tick, viewable.lastPitch, viewable.headPitch) * 0.25f;
                   model().setOpenAngle(headPitch);
-                  backpack.lastDelta = tick;
+                  viewable.lastDelta = tick;
 
                   renderTexture(pose, source, light, texture, stack);
                   pose.popPose();
@@ -174,7 +176,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
 
                   pose.mulPose(Axis.YN.rotationDegrees(yaw));
                   VertexConsumer vertices = mbs.getBuffer(RenderType.lines());
-                  LevelRenderer.renderLineBox(pose, vertices, box, 0, 0, 0, 0.5f);
+                  LevelRenderer.renderLineBox(pose, vertices, box, 0, 0, 0, 0.4f);
                   pose.popPose();
             }
       }

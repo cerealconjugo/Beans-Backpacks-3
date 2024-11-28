@@ -13,6 +13,7 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
+
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
@@ -21,10 +22,10 @@ dependencies {
     }
 
     modRuntimeOnly "maven.modrinth:energized-power:1.21-2.12.1-fabric"
-    modRuntimeOnly "maven.modrinth:isometric-renders:0.4.7+1.21"
-    modRuntimeOnly "io.wispforest:worldmesher:0.4.6+1.21"
-    modRuntimeOnly "io.wispforest:exo:0.1.5+1.19"
-    modRuntimeOnly "io.wispforest:owo-lib:0.12.15+1.21"
+//    modRuntimeOnly "maven.modrinth:isometric-renders:0.4.7+1.21"
+//    modRuntimeOnly "io.wispforest:worldmesher:0.4.6+1.21"
+//    modRuntimeOnly "io.wispforest:exo:0.1.5+1.19"
+//    modRuntimeOnly "io.wispforest:owo-lib:0.12.15+1.21"
 }
 
 loom {

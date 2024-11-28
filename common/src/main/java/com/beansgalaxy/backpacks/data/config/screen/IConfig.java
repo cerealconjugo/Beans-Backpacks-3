@@ -5,7 +5,6 @@ import com.beansgalaxy.backpacks.data.config.types.ConfigLine;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,8 +78,6 @@ public interface IConfig {
                   e.printStackTrace();
             }
       }
-
-      ConfigRows toRows(ConfigScreen configScreen, Minecraft minecraft);
 
       /* ============================= Item Whitelist Helpers ============================ */
 

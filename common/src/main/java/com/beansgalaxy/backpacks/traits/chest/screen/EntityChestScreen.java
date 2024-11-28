@@ -7,23 +7,26 @@ import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.chest.ChestTraits;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 
 public class EntityChestScreen extends TinyChestScreen {
-      private final BackpackEntity backpack;
+      private final ViewableBackpack backpack;
 
-      public static void openScreen(BackpackEntity backpack, ChestTraits traits) {
+      public static void openScreen(ViewableBackpack backpack, ChestTraits traits) {
             EntityChestScreen screen = new EntityChestScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            backpack.onOpen(minecraft.player);
             TinyMenuInteract.send(backpack.getId(), true);
       }
 
-      public EntityChestScreen(BackpackEntity backpack, ChestTraits traits) {
+      public EntityChestScreen(ViewableBackpack backpack, ChestTraits traits) {
             super(traits);
             this.backpack = backpack;
       }
@@ -38,6 +41,13 @@ public class EntityChestScreen extends TinyChestScreen {
       protected void init() {
             super.init();
             initHotBarSlots();
+      }
+
+      @Override public void render(GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
+            if (backpack.shouldClose())
+                  onClose();
+
+            super.render(gui, pMouseX, pMouseY, pPartialTick);
       }
 
       @Override

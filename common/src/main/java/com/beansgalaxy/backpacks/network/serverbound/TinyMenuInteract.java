@@ -1,8 +1,10 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -42,9 +44,16 @@ public class TinyMenuInteract implements Packet2S {
             Entity entity = sender.level().getEntity(this.entity);
             if (entity instanceof BackpackEntity backpack) {
                   if (isOpen)
-                        backpack.onOpen(sender);
+                        backpack.viewable.onOpen(sender);
                   else
-                        backpack.onClose(sender);
+                        backpack.viewable.onClose(sender);
+            }
+            else if (entity instanceof Player player) {
+                  ViewableBackpack viewable = ViewableBackpack.get(player);
+                  if (isOpen)
+                        viewable.onOpen(sender);
+                  else
+                        viewable.onClose(sender);
             }
       }
 

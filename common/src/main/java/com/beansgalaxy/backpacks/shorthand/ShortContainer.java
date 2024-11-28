@@ -104,13 +104,17 @@ public abstract class ShortContainer implements Container {
                         return;
 
                   RegistryOps<Tag> serializationContext = access.createSerializationContext(NbtOps.INSTANCE);
-                  container.put(String.valueOf(slot), ItemStack.CODEC.encodeStart(serializationContext, tool).getOrThrow());
+                  ItemStack.CODEC.encodeStart(serializationContext, tool).ifSuccess(stackTag ->
+                              container.put(String.valueOf(slot), stackTag));
             });
 
             tag.put(name, container);
       }
 
       public void load(CompoundTag tag, RegistryAccess access) {
+            if (!tag.contains(name))
+                  return;
+
             CompoundTag shorthand = tag.getCompound(name);
             for (String allKey : shorthand.getAllKeys()) {
                   CompoundTag slot = shorthand.getCompound(allKey);

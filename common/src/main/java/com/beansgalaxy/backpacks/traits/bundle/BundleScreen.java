@@ -8,6 +8,7 @@ import com.beansgalaxy.backpacks.screen.TinyTraitScreen;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -29,17 +30,18 @@ import java.util.stream.Stream;
 
 public class BundleScreen extends TinyTraitScreen {
       protected final BundleLikeTraits traits;
-      protected final BackpackEntity backpack;
+      protected final ViewableBackpack backpack;
       protected BundleScreen.BundleTraitSlot lastSlot = null;
 
-      public static void openScreen(BackpackEntity backpack, BundleLikeTraits traits) {
+      public static void openScreen(ViewableBackpack backpack, BundleLikeTraits traits) {
             BundleScreen screen = new BundleScreen(backpack, traits);
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.setScreen(screen);
+            backpack.onOpen(minecraft.player);
             TinyMenuInteract.send(backpack.getId(), true);
       }
 
-      protected BundleScreen(BackpackEntity backpack, BundleLikeTraits traits) {
+      protected BundleScreen(ViewableBackpack backpack, BundleLikeTraits traits) {
             super(Component.literal("Bundle Trait Screen"));
             this.backpack = backpack;
             this.traits = traits;
@@ -68,6 +70,9 @@ public class BundleScreen extends TinyTraitScreen {
 
       @Override
       public void render(@NotNull GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
+            if (backpack.shouldClose())
+                  onClose();
+
             PoseStack pose = gui.pose();
             pose.pushPose();
 

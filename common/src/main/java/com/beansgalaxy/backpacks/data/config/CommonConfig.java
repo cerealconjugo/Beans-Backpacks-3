@@ -1,11 +1,8 @@
 package com.beansgalaxy.backpacks.data.config;
 
 import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.data.config.screen.ConfigRows;
-import com.beansgalaxy.backpacks.data.config.screen.ConfigScreen;
 import com.beansgalaxy.backpacks.data.config.screen.IConfig;
 import com.beansgalaxy.backpacks.data.config.types.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -41,8 +38,4 @@ public class CommonConfig implements IConfig {
             return List.of(LINES);
       }
 
-      @Override
-      public ConfigRows toRows(ConfigScreen configScreen, Minecraft minecraft) {
-            return new CommonConfigRows(configScreen, minecraft, this);
-      }
 }

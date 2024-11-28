@@ -14,7 +14,7 @@ public class ChestEntity implements IEntityTraits<ChestTraits> {
       @Override
       public InteractionResult interact(BackpackEntity backpackEntity, ChestTraits traits, Player player, InteractionHand hand) {
             if (player.level().isClientSide) {
-                  EntityChestScreen.openScreen(backpackEntity, traits);
+                  EntityChestScreen.openScreen(backpackEntity.viewable, traits);
             }
             return InteractionResult.SUCCESS;
       }

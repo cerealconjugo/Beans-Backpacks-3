@@ -85,4 +85,8 @@ public abstract class GenericTraits {
       public int getAnalogOutput(PatchedComponentHolder holder) {
             return 0;
       }
+
+      public void onPlayerInteract(Player owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+
+      }
 }

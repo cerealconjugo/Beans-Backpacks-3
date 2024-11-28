@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.client.renderer;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.components.equipable.EquipmentModel;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.PlayerModel;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -49,7 +51,7 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
       }
 
       @Override
-      public void render(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, float limbAngle, float limbDistance, float delta, float animationProgress, float playerHeadYaw, float playerHeadPitch) {
+      public void render(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, float limbAngle, float limbDistance, float tick, float animationProgress, float playerHeadYaw, float playerHeadPitch) {
             EquipableComponent.runIfPresent(player, (equipable, slot) -> {
                   if (!equipable.slots().test(slot))
                         return;
@@ -66,6 +68,14 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                         if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
                               pose.translate(0.0F, -1 / 16f, 1 / 16f);
 
+                        ViewableBackpack viewable = ViewableBackpack.get(player);
+                        if (viewable.lastDelta > tick)
+                              viewable.updateOpen();
+
+                        float headPitch = Mth.lerp(tick, viewable.lastPitch, viewable.headPitch) * 0.25f;
+                        model().setOpenAngle(headPitch);
+                        viewable.lastDelta = tick;
+
                         renderTexture(pose, pBufferSource, pCombinedLight, texture, itemStack);
                         pose.popPose();
                   }
@@ -75,13 +85,16 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
 
             Shorthand shorthand = Shorthand.get(player);
             int selectedWeapon = shorthand.getSelectedWeapon();
-            Inventory inventory = player.getInventory();
-
             ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
+            if (stack.isEmpty())
+                  return;
+
+            Inventory inventory = player.getInventory();
             int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
             boolean mainHand = selectedWeapon != selected;
 
             if (mainHand && !stack.isEmpty()) {
+                  pose.pushPose();
                   this.getParentModel().body.translateAndRotate(pose);
                   pose.translate(0, player.isCrouching() ? 6/16f : 5/16f, 5/32f);
                   if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
@@ -92,6 +105,7 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
 
                   BakedModel model = itemRenderer.getModel(stack, player.level(), player, player.getId());
                   itemRenderer().render(stack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, model);
+                  pose.popPose();
             }
       }
 

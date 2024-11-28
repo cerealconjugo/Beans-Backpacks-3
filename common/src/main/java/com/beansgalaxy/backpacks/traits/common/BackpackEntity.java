@@ -12,6 +12,7 @@ import com.beansgalaxy.backpacks.traits.generic.MutableTraits;
 import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -35,7 +36,6 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -50,21 +50,13 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.event.MenuKeyListener;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,7 +77,36 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             }
       });
 
-      public int wobble = 12;
+      public final ViewableBackpack viewable = new ViewableBackpack() {
+            @Override public void setOpen(boolean isOpen) {
+                  entityData.set(IS_OPEN, isOpen);
+            }
+
+            @Override public boolean isOpen() {
+                  return entityData.get(IS_OPEN);
+            }
+
+            @Override public void playSound(ModSound.Type type) {
+                  getTraits().ifPresent(traits -> traits.sound().at(BackpackEntity.this, type));
+            }
+
+            @Override public int getId() {
+                  return BackpackEntity.this.getId();
+            }
+
+            @Override protected PatchedComponentHolder holder() {
+                  return BackpackEntity.this;
+            }
+
+            @Override public ItemStack toStack() {
+                  return BackpackEntity.this.toStack();
+            }
+
+            @Override public boolean shouldClose() {
+                  return false;
+            }
+      };
+
       public int breakAmount = 0;
 
       public InteractionResult useTraitInteraction(Player player, InteractionHand hand) {
@@ -294,8 +315,8 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
       }
 
       private void wobble() {
-            if (wobble > 0)
-                  wobble--;
+            if (viewable.wobble > 0)
+                  viewable.wobble--;
             else breakAmount = 0;
       }
 
@@ -535,7 +556,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       public static final int BACKPACK_HEALTH = 24;
       public void wobble(int amount) {
-            wobble = Math.min(wobble + amount, BACKPACK_HEALTH);
+            viewable.wobble = Math.min(viewable.wobble + amount, BACKPACK_HEALTH);
             level().updateNeighbourForOutputSignal(blockPosition(), Blocks.AIR);
       }
 
@@ -666,67 +687,4 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             level().updateNeighbourForOutputSignal(pPos, Blocks.AIR);
       }
 
-      private final HashSet<Player> viewers = new HashSet<>();
-      public void onOpen(Player player) {
-            viewers.add(player);
-            int size = viewers.size();
-            if (size == 1) {
-                  entityData.set(IS_OPEN, true);
-                  getTraits().map(GenericTraits::sound).ifPresent(sound ->
-                              sound.at(this, ModSound.Type.OPEN)
-                  );
-            }
-      }
-
-      public void onClose(Player player) {
-            viewers.remove(player);
-            int size = viewers.size();
-            if (size == 0) {
-                  entityData.set(IS_OPEN, false);
-                  getTraits().map(GenericTraits::sound).ifPresent(sound ->
-                              sound.at(this, ModSound.Type.CLOSE)
-                  );
-            }
-      }
-
-      public float headPitch = 0;
-      public float lastPitch = 0;
-      public float velocity = 0;
-      public float lastDelta = 0;
-
-      boolean isOpen() {
-            return entityData.get(IS_OPEN);
-      }
-
-      public void updateOpen() {
-            float impulse = 22f;
-            float resonance = 9f;
-            float height = 18f;
-            float closing = 20f;
-
-            if (isOpen()) {
-                  if (headPitch == 0)
-                        velocity = impulse;
-                  else
-                        velocity = velocity + (lastPitch * resonance + height);
-            }
-            else if (velocity > 0) {
-                  if (headPitch == 0)
-                        velocity = (velocity * 0.5f) - 0.2f;
-                  else
-                        velocity = 0;
-            } else
-                  velocity = (velocity - 0.1f) * closing;
-
-            float resistance = 0.3f;
-            velocity *= resistance;
-            float newPitch = headPitch - velocity * 0.1f;
-
-            if (newPitch > 0)
-                  newPitch = 0;
-
-            //newPitch = -3f; // HOLDS TOP OPEN FOR TEXTURING
-            lastPitch = headPitch;
-            headPitch = newPitch;
-      }
 }

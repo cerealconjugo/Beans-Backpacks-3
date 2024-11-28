@@ -1,16 +1,23 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
+import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
@@ -31,7 +38,7 @@ public class TinyHotbarClick implements Packet2S {
             this.clickType = clickType;
       }
 
-      public static void send(BackpackEntity backpack, int index, TinyClickType clickType) {
+      public static void send(ViewableBackpack backpack, int index, TinyClickType clickType) {
             new TinyHotbarClick(backpack.getId(), index, clickType).send2S();
       }
 
@@ -54,6 +61,13 @@ public class TinyHotbarClick implements Packet2S {
                   Optional<GenericTraits> optional = backpack.getTraits();
                   if (optional.isPresent() && optional.get() instanceof ItemStorageTraits storageTraits) {
                         storageTraits.tinyHotbarClick(backpack, index, clickType, sender.inventoryMenu, sender);
+                  }
+            }
+            else if (entity instanceof Player player) {
+                  ItemStack backpack = player.getItemBySlot(EquipmentSlot.BODY);
+                  Optional<GenericTraits> optional = Traits.get(backpack);
+                  if (optional.isPresent() && optional.get() instanceof ItemStorageTraits storageTraits) {
+                        storageTraits.tinyHotbarClick(PatchedComponentHolder.of(backpack), index, clickType, sender.inventoryMenu, sender);
                   }
             }
       }

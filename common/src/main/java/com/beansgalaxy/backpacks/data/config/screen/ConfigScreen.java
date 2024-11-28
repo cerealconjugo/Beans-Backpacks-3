@@ -3,7 +3,7 @@ package com.beansgalaxy.backpacks.data.config.screen;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.Font;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.PlainTextButton;
@@ -13,18 +13,24 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class ConfigScreen extends Screen {
+      private final HashMap<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor;
       private final Screen lastScreen;
       private final IConfig[] pages;
       private ConfigRows[] rows;
       private ConfigRows currentPage;
 
-      public ConfigScreen(Screen lastScreen, IConfig... pages) {
+      public ConfigScreen(Screen lastScreen, HashMap<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor) {
             super(Component.empty());
+            this.pageConstructor = pageConstructor;
             this.lastScreen = lastScreen;
-            this.pages = pages;
+            this.pages = pageConstructor.keySet().toArray(new IConfig[0]);
             for (IConfig page : this.pages) {
                   page.read();
             }
@@ -43,7 +49,7 @@ public class ConfigScreen extends Screen {
             ArrayList<PageTab> tabs = new ArrayList<>();
             int totalWidth = -20;
             for (IConfig page : pages) {
-                  ConfigRows row = page.toRows(this, minecraft);
+                  ConfigRows row = pageConstructor.get(page).apply(this);
                   rows.add(row);
 
                   MutableComponent title = Component.translatable("screen.beansbackpacks.config.title" + row.config.getPath());

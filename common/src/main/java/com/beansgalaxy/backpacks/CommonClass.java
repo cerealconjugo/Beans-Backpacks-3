@@ -33,5 +33,4 @@ public class CommonClass {
         ITraitData.register();
         ModItems.register();
     }
-
 }

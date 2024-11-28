@@ -5,11 +5,16 @@ import com.beansgalaxy.backpacks.client.renderer.BackpackModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackRender;
 import com.beansgalaxy.backpacks.client.renderer.EntityRender;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
+import com.beansgalaxy.backpacks.data.config.ClientConfigRows;
 import com.beansgalaxy.backpacks.data.config.CommonConfig;
+import com.beansgalaxy.backpacks.data.config.CommonConfigRows;
+import com.beansgalaxy.backpacks.data.config.screen.ConfigRows;
 import com.beansgalaxy.backpacks.data.config.screen.ConfigScreen;
+import com.beansgalaxy.backpacks.data.config.screen.IConfig;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
+import com.google.common.collect.Maps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -25,8 +30,12 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
 public class NeoForgeClient {
@@ -36,9 +45,14 @@ public class NeoForgeClient {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("fullness"), CommonClient.FULLNESS_ITEM_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("eating"), CommonClient.EATING_TRAIT_ITEM_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("searching"), CommonClient.ENDER_SEARCHING_PREDICATE);
-            container.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, screen) ->
-                        new ConfigScreen(screen, new CommonConfig(), CommonClient.CLIENT_CONFIG)
-            );
+            container.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, screen) -> {
+                  HashMap<IConfig, Function<ConfigScreen, ConfigRows>> map = Maps.newHashMapWithExpectedSize(2);
+                  CommonConfig common = new CommonConfig();
+                  map.put(common, configScreen -> new CommonConfigRows(configScreen, minecraft, common));
+                  ClientConfig client = new ClientConfig();
+                  map.put(client, configScreen -> new ClientConfigRows(configScreen, minecraft, client));
+                  return new ConfigScreen(screen, map);
+            });
 
             CommonClient.init();
       }

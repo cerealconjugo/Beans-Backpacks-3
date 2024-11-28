@@ -1,16 +1,20 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.DataResult;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
@@ -91,38 +95,6 @@ public abstract class InventoryMixin implements BackData {
 
       public NonNullList<ItemStack> beans_Backpacks_3$getBody() {
             return beans_Backpacks_3$body;
-      }
-
-      @Inject(method = "save", at = @At("TAIL"))
-      public void writeBackSlot(ListTag tag, CallbackInfoReturnable<ListTag> cir) {
-            ItemStack backStack = beans_Backpacks_3$body.getFirst();
-            RegistryAccess access = player.registryAccess();
-            if (!backStack.isEmpty()) {
-                  CompoundTag compoundTag = new CompoundTag();
-                  Tag backSlot = backStack.save(access, new CompoundTag());
-                  compoundTag.put("BackSlot", backSlot);
-                  tag.add(compoundTag);
-            }
-            CompoundTag compoundTag = new CompoundTag();
-            CompoundTag save = getShorthand().save(compoundTag, access);
-            tag.add(save);
-      }
-
-      @Inject(method = "load", at = @At("TAIL"))
-      public void readMixin(ListTag tag, CallbackInfo info) {
-            RegistryAccess access = player.registryAccess();
-            for (int i = 0; i < tag.size(); ++i) {
-                  CompoundTag compoundTag = tag.getCompound(i);
-                  CompoundTag backSlot = compoundTag.getCompound("BackSlot");
-                  if (!backSlot.isEmpty()) {
-                        Optional<ItemStack> itemStack = ItemStack.parse(access, backSlot);
-                        itemStack.ifPresent(stack -> beans_Backpacks_3$body.set(0, stack));
-                  }
-                  if (compoundTag.contains("Shorthand")) {
-                        getShorthand().load(compoundTag, access);
-                  }
-            }
-
       }
 
       @Inject(method = "tick", at = @At("TAIL"))

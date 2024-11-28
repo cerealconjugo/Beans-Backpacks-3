@@ -86,17 +86,17 @@ public class BulkEntity implements IEntityTraits<BulkTraits> {
                         itemEntity.setDefaultPickUpDelay();
                         level.addFreshEntity(itemEntity);
                   } else {
-                        backpack.velocity = 75;
+                        backpack.viewable.velocity = 75;
                   }
                   mutable.push();
                   if (!backpack.isSilent()) {
                         traits.sound().at(backpack, ModSound.Type.REMOVE);
                   }
                   return;
-            } else if (backpack.wobble > 0) {
+            } else if (backpack.viewable.wobble > 0) {
                   backpack.wobble(10);
                   if (level.isClientSide) {
-                        backpack.velocity = 75;
+                        backpack.viewable.velocity = 75;
                   }
                   if (!silent) {
                         float pitch = backpack.getRandom().nextFloat() * 0.3f;
