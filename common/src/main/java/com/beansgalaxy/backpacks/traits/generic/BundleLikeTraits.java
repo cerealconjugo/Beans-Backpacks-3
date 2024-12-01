@@ -17,7 +17,6 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -41,12 +40,10 @@ import java.util.Optional;
 
 public abstract class BundleLikeTraits extends ItemStorageTraits {
       private final int size;
-      public final SlotSelection selection = new SlotSelection();
 
-      public BundleLikeTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
+      public BundleLikeTraits(ModSound sound, int size) {
             super(sound);
             this.size = size;
-            this.selection.addAll(selection);
       }
 
       public static Optional<BundleLikeTraits> get(DataComponentHolder stack) {

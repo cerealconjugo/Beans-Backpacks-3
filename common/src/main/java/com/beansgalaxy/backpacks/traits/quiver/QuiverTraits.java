@@ -15,7 +15,6 @@ import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,12 +32,8 @@ import java.util.Optional;
 public class QuiverTraits extends BundleLikeTraits {
       public static final String NAME = "quiver";
 
-      public QuiverTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound, size, new SlotSelection());
-      }
-
-      public QuiverTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
-            super(location, sound, size, selection);
+      public QuiverTraits(ModSound sound, int size) {
+            super(sound, size);
       }
 
       public static Optional<QuiverTraits> getQuiver(DataComponentHolder stack) {

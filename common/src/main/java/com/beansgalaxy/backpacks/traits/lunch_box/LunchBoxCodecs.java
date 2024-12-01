@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.traits.lunch_box;
 import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -23,7 +22,7 @@ public class LunchBoxCodecs implements ITraitCodec<LunchBoxTraits> {
                               : DataResult.error(() -> "The provided field \"size\" must be smaller than 256; Provided=" + size, 255)
                         ).forGetter(BundleLikeTraits::size),
                         ModSound.MAP_CODEC.forGetter(LunchBoxTraits::sound)
-            ).apply(in, (size, sound) -> new LunchBoxTraits(null, sound, size))
+            ).apply(in, (size, sound) -> new LunchBoxTraits(sound, size))
       );
 
       @Override
@@ -34,11 +33,9 @@ public class LunchBoxCodecs implements ITraitCodec<LunchBoxTraits> {
       public static final StreamCodec<RegistryFriendlyByteBuf, LunchBoxTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
             buf.writeInt(traits.size());
-            SlotSelection.STREAM_CODEC.encode(buf, traits.selection);
-      }, buf -> new LunchBoxTraits(null,
+      }, buf -> new LunchBoxTraits(
                   ModSound.STREAM_CODEC.decode(buf),
-                  buf.readInt(),
-                  SlotSelection.STREAM_CODEC.decode(buf)
+                  buf.readInt()
       ));
 
             @Override

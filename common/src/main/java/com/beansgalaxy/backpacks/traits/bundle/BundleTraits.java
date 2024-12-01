@@ -8,18 +8,12 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.MutableBundleLike;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 public class BundleTraits extends BundleLikeTraits {
       public static final String NAME = "bundle";
 
-      public BundleTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound, size, new SlotSelection());
-      }
-
-      public BundleTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
-            super(location, sound, size, selection);
+      public BundleTraits(ModSound sound, int size) {
+            super(sound, size);
       }
 
       @Override

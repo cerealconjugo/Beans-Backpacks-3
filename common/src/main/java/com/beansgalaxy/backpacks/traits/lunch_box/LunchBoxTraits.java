@@ -11,7 +11,6 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -29,12 +27,8 @@ import java.util.function.Consumer;
 public class LunchBoxTraits extends BundleLikeTraits {
       public static final String NAME = "lunch";
 
-      public LunchBoxTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound, size, new SlotSelection());
-      }
-
-      public LunchBoxTraits(ResourceLocation location, ModSound sound, int size, SlotSelection selection) {
-            super(location, sound, size, selection);
+      public LunchBoxTraits(ModSound sound, int size) {
+            super(sound, size);
       }
 
       @Override

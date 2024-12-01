@@ -13,7 +13,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
@@ -34,7 +33,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
@@ -42,12 +40,8 @@ import java.util.Optional;
 public class AlchemyTraits extends BundleLikeTraits {
       public static final String NAME = "alchemy";
 
-      public AlchemyTraits(@Nullable ResourceLocation location, ModSound sound, int size) {
-            super(location, sound, size, new SlotSelection());
-      }
-
-      public AlchemyTraits(ResourceLocation location, ModSound decode, int size, SlotSelection selection) {
-            super(location, decode, size, selection);
+      public AlchemyTraits(ModSound sound, int size) {
+            super(sound, size);
       }
 
       @Override

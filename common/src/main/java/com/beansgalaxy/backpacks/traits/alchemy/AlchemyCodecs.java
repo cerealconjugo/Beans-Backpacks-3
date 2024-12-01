@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.traits.alchemy;
 import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -23,7 +22,7 @@ public class AlchemyCodecs implements ITraitCodec<AlchemyTraits> {
                               : DataResult.error(() -> "The provided field \"size\" must be smaller than 256; Provided=" + size, 255)
                         ).forGetter(BundleLikeTraits::size),
                         ModSound.MAP_CODEC.forGetter(AlchemyTraits::sound)
-            ).apply(in, (size, sound) -> new AlchemyTraits(null, sound, size))
+            ).apply(in, (size, sound) -> new AlchemyTraits(sound, size))
       );
 
       @Override
@@ -34,12 +33,10 @@ public class AlchemyCodecs implements ITraitCodec<AlchemyTraits> {
       public static final StreamCodec<RegistryFriendlyByteBuf, AlchemyTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
             buf.writeInt(traits.size());
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
-            SlotSelection.STREAM_CODEC.encode(buf, traits.selection);
       }, buf ->
-            new AlchemyTraits(null,
+            new AlchemyTraits(
                         ModSound.STREAM_CODEC.decode(buf),
-                        buf.readInt(),
-                        SlotSelection.STREAM_CODEC.decode(buf)
+                        buf.readInt()
             )
       );
 

@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.traits.quiver;
 import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.traits.ITraitCodec;
 import com.beansgalaxy.backpacks.traits.generic.BundleLikeTraits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -23,7 +22,7 @@ public class QuiverCodecs implements ITraitCodec<QuiverTraits> {
                               : DataResult.error(() -> "The provided field \"size\" must be smaller than 256; Provided=" + size, 255)
                         ).forGetter(BundleLikeTraits::size),
                         ModSound.MAP_CODEC.forGetter(QuiverTraits::sound)
-            ).apply(in, (size, sound) -> new QuiverTraits(null, sound, size))
+            ).apply(in, (size, sound) -> new QuiverTraits(sound, size))
       );
 
       @Override
@@ -34,11 +33,9 @@ public class QuiverCodecs implements ITraitCodec<QuiverTraits> {
       public static final StreamCodec<RegistryFriendlyByteBuf, QuiverTraits> STREAM_CODEC = StreamCodec.of((buf, traits) -> {
             ModSound.STREAM_CODEC.encode(buf, traits.sound());
             buf.writeInt(traits.size());
-            SlotSelection.STREAM_CODEC.encode(buf, traits.selection);
-      }, buf -> new QuiverTraits(null,
+      }, buf -> new QuiverTraits(
                   ModSound.STREAM_CODEC.decode(buf),
-                  buf.readInt(),
-                  SlotSelection.STREAM_CODEC.decode(buf)
+                  buf.readInt()
       ));
 
             @Override
