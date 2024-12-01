@@ -1,10 +1,16 @@
 package com.beansgalaxy.backpacks.data;
 
 import com.beansgalaxy.backpacks.CommonClient;
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.components.reference.ReferenceRegistry;
+import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.network.clientbound.SendEnderEntry;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.bundle.BundleTraits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.util.ModSound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -22,15 +28,19 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 public class EnderStorage {
+      public static final ResourceLocation LEGACY_ENDER_LOCATION = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "legacy_ender");
       private final HashMap<UUID, PlayerEntry> storage = new HashMap<>();
 
       public static EnderStorage get(Level level) {
@@ -95,6 +105,18 @@ public class EnderStorage {
                   entry.traits.put(location, newEntry);
             }
       }
+
+      public void setLegacyEnder(UUID uuid, List<ItemStack> itemStacks) {
+            PlayerEntry playerEntry = get(uuid);
+            playerEntry.traits.computeIfAbsent(LEGACY_ENDER_LOCATION, location -> {
+                  ReferenceRegistry reference = ReferenceRegistry.get(location);
+                  GenericTraits traits = reference.traits();
+
+                  Reference2ObjectOpenHashMap<DataComponentType<?>, Object> map = new Reference2ObjectOpenHashMap<>();
+                  map.put(ITraitData.ITEM_STACKS, itemStacks);
+                  return new TraitEntry(traits.kind(), traits, map);
+            });
+      }
       
       public void save(CompoundTag tag) {
             storage.forEach((uuid, entry) -> {
@@ -140,8 +162,9 @@ public class EnderStorage {
 
             private static @Nullable TraitEntry newMapFromLocation(ResourceLocation key) {
                   ReferenceRegistry reference = ReferenceRegistry.get(key);
-                  if (reference == null)
+                  if (reference == null) {
                         return null;
+                  }
 
                   GenericTraits fields = reference.traits();
                   Reference2ObjectOpenHashMap<DataComponentType<?>, Object> map = new Reference2ObjectOpenHashMap<>();

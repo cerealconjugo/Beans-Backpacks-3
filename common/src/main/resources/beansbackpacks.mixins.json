@@ -10,6 +10,7 @@
     "common.BowMixin",
     "common.ComparatorMixin",
     "common.CrossbowMixin",
+    "common.DataFixersMixin",
     "common.DataResourcesMixin",
     "common.HopperEntityMixin",
     "common.InventoryMenuMixin",
@@ -34,7 +35,7 @@
     "client.PlayerRendererMixin",
     "client.SimpleBakedModelMixin"
   ],
-  "server": [],
+  "server": [ ],
   "injectors": {
     "defaultRequire": 1
   }

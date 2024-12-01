@@ -2,14 +2,19 @@ package com.beansgalaxy.backpacks.data;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.config.CommonConfig;
+import com.beansgalaxy.backpacks.util.compat.ender.LegacyEnder;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+
+import java.io.IOException;
 
 public class ServerSave extends SavedData {
       public static final CommonConfig CONFIG = new CommonConfig();
@@ -24,18 +29,27 @@ public class ServerSave extends SavedData {
       private static ServerSave load(CompoundTag tag, HolderLookup.Provider provider) {
             ServerSave save = new ServerSave();
             CONFIG.read();
+            recoverLegacyEnderItems(tag, save);
             save.enderStorage.load(tag);
+
+
             return save;
       }
 
-      public static SavedData.Factory<ServerSave> factory() {
-            return new SavedData.Factory<>(ServerSave::new, ServerSave::load, DataFixTypes.LEVEL);
+      private static void recoverLegacyEnderItems(CompoundTag tag, ServerSave save) {
+            LegacyEnder legacyEnder = new LegacyEnder();
+            legacyEnder.fromNbt(tag);
+            legacyEnder.MAP.forEach(save.enderStorage::setLegacyEnder);
+            tag.remove("EnderData");
+            tag.remove("Config");
+            tag.remove("LockedAdvancement");
       }
 
       public static ServerSave getSave(MinecraftServer server, boolean updateSave) {
             ServerLevel level = server.getLevel(Level.OVERWORLD);
             DimensionDataStorage dataStorage = level.getDataStorage();
-            ServerSave save = dataStorage.computeIfAbsent(ServerSave.factory(), Constants.MOD_ID);
+            Factory<ServerSave> factory = new Factory<>(ServerSave::new, ServerSave::load, DataFixTypes.LEVEL);
+            ServerSave save = dataStorage.computeIfAbsent(factory, Constants.MOD_ID);
 
             if (updateSave)
                   save.setDirty();

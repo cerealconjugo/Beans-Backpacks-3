@@ -30,7 +30,7 @@ public enum ModItems {
       NETHERITE_BUCKET("netherite_bucket", "netherite_bucket"),
       ALCHEMIST_BAG("alchemy_bag", "alchemy_bag"),
       ROSE_BOOTS("rose_boots", "rose_boots"),
-      NETHERITE_LUNCH_BOX("netherite_lunch_box", "netherite_lunch_box"),
+      NETHERITE_LUNCH_BOX("netherite_lunch_box", "netherite_lunch_box")
       ;
 
       public static final UnaryOperator<CreativeModeTab.Builder> CREATIVE_TAB = builder -> builder

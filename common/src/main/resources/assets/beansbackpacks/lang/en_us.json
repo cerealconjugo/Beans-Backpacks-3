@@ -18,6 +18,9 @@
   "item.beansbackpacks.rose_boots": "Rose Boots",
   "item.beansbackpacks.netherite_lunch_box": "Netherite Lunch Box",
 
+  "item.beansbackpacks.legacy.winged_backpack": "Winged Backpack",
+  "item.beansbackpacks.legacy.ender_backpack": "Ender Backpack",
+
   "traits.beansbackpacks.inventory.bundle.solo": "§0.§r 1 Stack",
   "traits.beansbackpacks.inventory.bundle.size": "§0.§r %d Stacks",
   "traits.beansbackpacks.equipment.bundle.solo": "§0.§r 1 Stack",
