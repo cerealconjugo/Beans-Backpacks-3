@@ -41,13 +41,13 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
             if(BackData.get(player).isActionKeyDown() && instance.hitResult instanceof BlockHitResult blockHitResult && KeyPress.INSTANCE.consumeActionUseOn(instance, blockHitResult))
                   ci.cancel();
       }
-
-      @Inject(method = "startUseItem", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
-                  ordinal = 1, target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"))
-      private void hotkeyUseItem(CallbackInfo ci) {
-            if(BackData.get(player).isActionKeyDown() && KeyPress.INSTANCE.consumeActionUse(level, player))
-                  ci.cancel();
-      }
+//
+//      @Inject(method = "startUseItem", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
+//                  ordinal = 1, target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"))
+//      private void hotkeyUseItem(CallbackInfo ci) {
+//            if(BackData.get(player).isActionKeyDown() && KeyPress.INSTANCE.consumeActionUse(level, player))
+//                  ci.cancel();
+//      }
 
       @Inject(method = "handleKeybinds", at = @At("TAIL"))
       private void handleBackpackKeybinds(CallbackInfo ci) {

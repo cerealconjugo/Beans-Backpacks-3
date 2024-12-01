@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -63,7 +64,7 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
             return Optional.ofNullable(equipable);
       }
 
-      public static void runIfPresent(Player player, BiConsumer<EquipableComponent, EquipmentSlot> consumer) {
+      public static void runIfPresent(LivingEntity player, BiConsumer<EquipableComponent, EquipmentSlot> consumer) {
             for (EquipmentSlot value : EquipmentSlot.values()) {
                   ItemStack itemStack = player.getItemBySlot(value);
                   get(itemStack).ifPresent(equipable -> {

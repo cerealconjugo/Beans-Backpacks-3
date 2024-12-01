@@ -9,6 +9,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 
 public class TinyMenuInteract implements Packet2S {
@@ -48,8 +50,14 @@ public class TinyMenuInteract implements Packet2S {
                   else
                         backpack.viewable.onClose(sender);
             }
-            else if (entity instanceof Player player) {
-                  ViewableBackpack viewable = ViewableBackpack.get(player);
+            else {
+                  ViewableBackpack viewable;
+                  if (entity instanceof Player player)
+                        viewable = ViewableBackpack.get(player);
+                  else if (entity instanceof ArmorStand armorStand)
+                        viewable = ViewableBackpack.get(armorStand);
+                  else return;
+
                   if (isOpen)
                         viewable.onOpen(sender);
                   else

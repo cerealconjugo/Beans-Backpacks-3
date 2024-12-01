@@ -38,6 +38,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -427,7 +428,7 @@ public class CommonClient {
             }
       }
 
-      public static void handleKeyBinds(Player player, @Nullable HitResult hitResult) {
+      public static void handleKeyBinds(LocalPlayer player, @Nullable HitResult hitResult) {
             KeyPress keyPress = KeyPress.INSTANCE;
             while (keyPress.SHORTHAND_KEY.consumeClick()) {
                   Shorthand shorthand = Shorthand.get(player);
@@ -452,17 +453,24 @@ public class CommonClient {
                   shorthand.selectWeapon(inventory, false);
             }
             while (keyPress.INSTANT_KEY.consumeClick()) {
-                  if (hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof BackpackEntity entity) {
-                        InteractionResult result = entity.tryEquip(player);
-                        if (!InteractionResult.PASS.equals(result)) {
-                              InstantKeyPress.send(entity.getId());
-                              continue;
-                        }
-                  }
-
                   if (hitResult instanceof BlockHitResult blockHitResult) {
                         if (KeyPress.placeBackpack(player, blockHitResult))
                               continue;
+                        if (keyPress.pickUpThru(player))
+                              continue;
+                  }
+
+                  if (hitResult instanceof EntityHitResult entityHitResult) {
+                        Entity hit = entityHitResult.getEntity();
+                        if (hit instanceof BackpackEntity entity) {
+                              InteractionResult result = entity.tryEquip(player);
+                              if (result.consumesAction())
+                                    InstantKeyPress.send(entity.getId());
+                        } else if (hit instanceof ArmorStand entity) {
+                              InteractionResult result = CommonClass.swapBackWithArmorStand(entity, player);
+                              if (result.consumesAction())
+                                    InstantKeyPress.send(entity.getId());
+                        }
                   }
             }
       }

@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.client;
 
+import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
@@ -24,6 +25,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
@@ -106,23 +108,23 @@ public class KeyPress {
 //                  clickAccessor.beans_Backpacks_2$instantPlace();
 
       }
-
-      public boolean consumeActionUse(Level level, Player player) {
-            ItemStack backStack = player.getItemBySlot(EquipmentSlot.BODY);
-            CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir =
-                        new CallbackInfoReturnable<>("backpack_action_use", true, InteractionResultHolder.pass(backStack));
-
-            Traits.runIfPresent(backStack, traits -> {
-                  traits.use(level, player, InteractionHand.MAIN_HAND, PatchedComponentHolder.of(backStack), cir);
-            });
-
-            if (cir.getReturnValue().getResult().consumesAction()) {
-                  BackpackUse.send();
-                  return true;
-            }
-
-            return false;
-      }
+//
+//      public boolean consumeActionUse(Level level, Player player) {
+//            ItemStack backStack = player.getItemBySlot(EquipmentSlot.BODY);
+//            CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir =
+//                        new CallbackInfoReturnable<>("backpack_action_use", true, InteractionResultHolder.pass(backStack));
+//
+//            Traits.runIfPresent(backStack, traits -> {
+//                  traits.use(level, player, InteractionHand.MAIN_HAND, PatchedComponentHolder.of(backStack), backStack, cir);
+//            });
+//
+//            if (cir.getReturnValue().getResult().consumesAction()) {
+//                  BackpackUse.send();
+//                  return true;
+//            }
+//
+//            return false;
+//      }
 
       public boolean consumeActionUseOn(Minecraft instance, BlockHitResult hitResult) {
             BlockPos blockPos = hitResult.getBlockPos();
@@ -136,6 +138,10 @@ public class KeyPress {
             else if (placeBackpack(player, hitResult))
                   return true;
 
+            return pickUpThru(player);
+      }
+
+      public boolean pickUpThru(LocalPlayer player) {
             double pBlockInteractionRange = player.blockInteractionRange();
             double d0 = Math.max(pBlockInteractionRange, player.entityInteractionRange());
             double d1 = Mth.square(d0);
@@ -159,6 +165,12 @@ public class KeyPress {
             Entity entity = entityhitresult.getEntity();
             if (entity instanceof BackpackEntity backpack) {
                   InteractionResult tryEquip = backpack.tryEquip(player);
+                  if (tryEquip.consumesAction())
+                        InstantKeyPress.send(entity.getId());
+                  return true;
+            }
+            else if (entity instanceof ArmorStand armorStand) {
+                  InteractionResult tryEquip = CommonClass.swapBackWithArmorStand(armorStand, player);
                   if (tryEquip.consumesAction())
                         InstantKeyPress.send(entity.getId());
                   return true;

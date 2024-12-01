@@ -7,6 +7,7 @@
   "mixins": [
     "common.AbstractMenuMixin",
     "common.ArmorSlotMixin",
+    "common.ArmorStandMixin",
     "common.BowMixin",
     "common.ComparatorMixin",
     "common.CrossbowMixin",
@@ -23,6 +24,7 @@
   ],
   "client": [
     "client.AbstractScreenMixin",
+    "client.ArmorStandRendererMixin",
     "client.BlockStateModelMixin",
     "client.InventoryScreenMixin",
     "client.ItemInHandMixin",

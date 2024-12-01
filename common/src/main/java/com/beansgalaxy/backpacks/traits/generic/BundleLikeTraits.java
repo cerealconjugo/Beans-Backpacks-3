@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -700,10 +701,11 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             mutable.push();
       }
 
-      @Override public void onPlayerInteract(Player owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      @Override public void onPlayerInteract(LivingEntity owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
             if (player.level().isClientSide) {
                   ViewableBackpack viewable = ViewableBackpack.get(owner);
                   BundleScreen.openScreen(viewable, this);
             }
+            cir.setReturnValue(InteractionResult.SUCCESS);
       }
 }

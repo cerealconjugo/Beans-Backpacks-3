@@ -7,7 +7,6 @@ import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -39,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 @Mixin(Player.class)
@@ -159,47 +157,9 @@ public abstract class PlayerMixin implements ViewableAccessor {
 
        @Inject(method = "interactOn", cancellable = true, at = @At("HEAD"))
       private void backpackInteractOn(Entity pEntityToInteractOn, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
-             if (pEntityToInteractOn instanceof Player owner) {
-                   ItemStack backpack = owner.getItemBySlot(EquipmentSlot.BODY);
-                   if (backpack.isEmpty())
-                         return;
-
-                   // CHECKS ROTATION OF BOTH PLAYERS
-                   double yaw = Math.abs(instance.yHeadRot - owner.yBodyRot) % 360 - 180;
-                   boolean yawMatches = Math.abs(yaw) > 90;
-                   if (!yawMatches)
-                         return;
-
-                   Optional<GenericTraits> optional = Traits.get(backpack);
-                   if (optional.isEmpty())
-                         return;
-
-                   // OFFSETS OTHER PLAYER'S POSITION
-                   double angleRadians = Math.toRadians(owner.yBodyRot);
-                   double offset = -0.3;
-                   double x = owner.getX();
-                   double z = owner.getZ();
-                   double offsetX = Math.cos(angleRadians) * offset;
-                   double offsetZ = Math.sin(angleRadians) * offset;
-                   double newX = x - offsetZ;
-                   double newY = owner.getEyeY() - .45;
-                   double newZ = z + offsetX;
-
-                   // CHECKS IF PLAYER IS LOOKING
-                   Vec3 vec3d = instance.getViewVector(1.0f).normalize();
-                   Vec3 vec3d2 = new Vec3(newX - instance.getX(), newY - instance.getEyeY(), newZ - instance.getZ());
-                   double d = -vec3d2.length() + 5.65;
-                   double e = vec3d.dot(vec3d2.normalize());
-                   double maxRadius = 0.05;
-                   double radius = (d * d * d * d) / 625;
-                   boolean looking = e > 1.0 - radius * maxRadius && instance.hasLineOfSight(owner);
-                   if (!looking)
-                         return;
-
-                   GenericTraits traits = optional.get();
-                   traits.onPlayerInteract(owner, instance, backpack, cir);
-             }
-      }
+             if (pEntityToInteractOn instanceof Player player)
+                   CommonClass.interactEquippedBackpack(player, instance, cir);
+       }
 
       @Inject(method = "addAdditionalSaveData", at = @At("HEAD"))
       private void backpackAddSaveData(CompoundTag pCompound, CallbackInfo ci) {

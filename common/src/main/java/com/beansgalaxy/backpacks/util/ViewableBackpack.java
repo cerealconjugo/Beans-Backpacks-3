@@ -3,6 +3,8 @@ package com.beansgalaxy.backpacks.util;
 import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +15,22 @@ public abstract class ViewableBackpack implements PatchedComponentHolder {
       public static ViewableBackpack get(Player player) {
             ViewableAccessor accessor = (ViewableAccessor) player;
             return accessor.beans_Backpacks_3$getViewable();
+      }
+
+      public static ViewableBackpack get(ArmorStand player) {
+            ViewableAccessor accessor = (ViewableAccessor) player;
+            return accessor.beans_Backpacks_3$getViewable();
+      }
+
+      @Nullable
+      public static ViewableBackpack get(LivingEntity livingEntity) {
+            if (livingEntity instanceof Player player)
+                  return get(player);
+
+            if (livingEntity instanceof ArmorStand armorStand)
+                  return get(armorStand);
+
+            return null;
       }
 
       public static ViewableBackpack get(BackpackEntity backpack) {

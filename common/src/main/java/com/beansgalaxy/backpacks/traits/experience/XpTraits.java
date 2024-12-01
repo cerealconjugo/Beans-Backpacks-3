@@ -70,6 +70,7 @@ public class XpTraits extends GenericTraits {
 
       @Override
       public void use(Level level, Player player, InteractionHand hand, PatchedComponentHolder holder, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+            ItemStack backpack = player.getItemInHand(hand);
             XpMutable mutable = mutable(holder);
 
             if (isEmpty(holder)) {
@@ -78,12 +79,19 @@ public class XpTraits extends GenericTraits {
                         return;
 
                   mutable.fill(player);
-            } else {
-                  mutable.empty(player);
+                  int count = backpack.getCount();
+                  if (count > 1) {
+                        ItemStack pStack = backpack.copyWithCount(count - 1);
+                        mutable.push();
+                        cir.setReturnValue(InteractionResultHolder.success(backpack));
+                        player.setItemInHand(hand, pStack);
+                        player.addItem(backpack.copyWithCount(1));
+                        return;
+                  }
             }
+            else mutable.empty(player);
 
             mutable.push();
-            ItemStack backpack = player.getItemInHand(hand);
             cir.setReturnValue(InteractionResultHolder.success(backpack));
       }
 

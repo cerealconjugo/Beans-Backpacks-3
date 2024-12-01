@@ -14,7 +14,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -75,8 +77,16 @@ public class TinyMenuClick implements Packet2S {
                         bundleLikeTraits.tinyMenuClick(backpack, index, clickType, carriedAccess, sender);
                   }
             }
-            else if (entity instanceof Player player) {
-                  ItemStack backpack = player.getItemBySlot(EquipmentSlot.BODY);
+            else {
+                  LivingEntity owner;
+                  if (entity instanceof Player player) {
+                        owner = player;
+                  } else if (entity instanceof ArmorStand armorStand) {
+                        owner = armorStand;
+                  }
+                  else return;
+
+                  ItemStack backpack = owner.getItemBySlot(EquipmentSlot.BODY);
                   Optional<GenericTraits> optional = Traits.get(backpack);
                   if (optional.isPresent() && optional.get() instanceof ItemStorageTraits storageTraits) {
                         InventoryMenu menu = sender.inventoryMenu;

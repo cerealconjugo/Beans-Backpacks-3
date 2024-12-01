@@ -8,7 +8,6 @@ import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.bundle.BundleScreen;
 import com.beansgalaxy.backpacks.traits.chest.screen.EntityChestScreen;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
@@ -26,6 +25,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -567,11 +567,12 @@ public class ChestTraits extends ItemStorageTraits {
             mutable.push();
       }
 
-      @Override public void onPlayerInteract(Player owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      @Override public void onPlayerInteract(LivingEntity owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
             if (player.level().isClientSide) {
                   ViewableBackpack viewable = ViewableBackpack.get(owner);
                   EntityChestScreen.openScreen(viewable, this);
             }
+            cir.setReturnValue(InteractionResult.SUCCESS);
       }
 
       @Override
