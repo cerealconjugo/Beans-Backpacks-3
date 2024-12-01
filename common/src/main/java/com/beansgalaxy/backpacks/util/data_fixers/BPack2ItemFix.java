@@ -1,4 +1,4 @@
-package com.beansgalaxy.backpacks.util.compat;
+package com.beansgalaxy.backpacks.util.data_fixers;
 
 import com.beansgalaxy.backpacks.components.ender.EmptyEnderItem;
 import com.beansgalaxy.backpacks.data.EnderStorage;

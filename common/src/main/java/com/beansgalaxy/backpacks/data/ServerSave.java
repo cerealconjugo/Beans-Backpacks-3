@@ -2,19 +2,15 @@ package com.beansgalaxy.backpacks.data;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.config.CommonConfig;
-import com.beansgalaxy.backpacks.util.compat.ender.LegacyEnder;
-import net.minecraft.SharedConstants;
+import com.beansgalaxy.backpacks.util.data_fixers.LegacyEnder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-
-import java.io.IOException;
 
 public class ServerSave extends SavedData {
       public static final CommonConfig CONFIG = new CommonConfig();

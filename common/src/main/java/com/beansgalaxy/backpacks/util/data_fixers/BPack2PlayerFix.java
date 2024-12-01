@@ -1,4 +1,4 @@
-package com.beansgalaxy.backpacks.util.compat;
+package com.beansgalaxy.backpacks.util.data_fixers;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.mojang.datafixers.*;

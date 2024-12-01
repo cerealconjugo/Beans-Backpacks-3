@@ -1,7 +1,9 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
-import com.beansgalaxy.backpacks.util.compat.BPack2ItemFix;
-import com.beansgalaxy.backpacks.util.compat.BPack2PlayerFix;
+import com.beansgalaxy.backpacks.util.data_fixers.BPack2EntityFix;
+import com.beansgalaxy.backpacks.util.data_fixers.BPack2ItemFix;
+import com.beansgalaxy.backpacks.util.data_fixers.BPack2PlayerFix;
+import com.beansgalaxy.backpacks.util.data_fixers.EntitySchema;
 import com.mojang.datafixers.DataFixerBuilder;
 import com.mojang.datafixers.schemas.Schema;
 import net.minecraft.util.datafix.DataFixers;
@@ -22,7 +24,7 @@ public abstract class DataFixersMixin {
 
       @Inject(method = "addFixers", at = @At("TAIL"))
       private static void beans_backpacks_2$dataFix(DataFixerBuilder pBuilder, CallbackInfo ci) {
-            Schema schema1 = pBuilder.addSchema(3819, 9, SAME_NAMESPACED);
+            Schema schema1 = pBuilder.addSchema(3821, SAME_NAMESPACED);
             pBuilder.addFixer(new BPack2PlayerFix(schema1, false));
             Schema schema3 = pBuilder.addSchema(3910, V3818_5::new);
             pBuilder.addFixer(new BPack2ItemFix(schema3, true));

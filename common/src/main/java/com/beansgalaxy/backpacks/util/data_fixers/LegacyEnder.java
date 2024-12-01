@@ -1,6 +1,5 @@
-package com.beansgalaxy.backpacks.util.compat.ender;
+package com.beansgalaxy.backpacks.util.data_fixers;
 
-import com.beansgalaxy.backpacks.util.compat.BPack2PlayerFix;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.nbt.CompoundTag;
