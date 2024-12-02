@@ -1,9 +1,7 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
-import com.beansgalaxy.backpacks.util.data_fixers.BPack2EntityFix;
 import com.beansgalaxy.backpacks.util.data_fixers.BPack2ItemFix;
 import com.beansgalaxy.backpacks.util.data_fixers.BPack2PlayerFix;
-import com.beansgalaxy.backpacks.util.data_fixers.EntitySchema;
 import com.mojang.datafixers.DataFixerBuilder;
 import com.mojang.datafixers.schemas.Schema;
 import net.minecraft.util.datafix.DataFixers;

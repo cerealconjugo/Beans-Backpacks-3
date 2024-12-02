@@ -31,6 +31,18 @@ public class CommonClass {
                                         .sized(7/16f, 9/16f)
                                         .eyeHeight(0.5f)
                 );
+    public static final Supplier<EntityType<BackpackEntity>> LEGACY_ENDER_ENTITY =
+                Services.PLATFORM.register("ender_backpack",
+                            EntityType.Builder.of(BackpackEntity::new, MobCategory.MISC)
+                                        .sized(7/16f, 9/16f)
+                                        .eyeHeight(0.5f)
+                );
+    public static final Supplier<EntityType<BackpackEntity>> LEGACY_WINGED_ENTITY =
+                Services.PLATFORM.register("winged_backpack",
+                            EntityType.Builder.of(BackpackEntity::new, MobCategory.MISC)
+                                        .sized(7/16f, 9/16f)
+                                        .eyeHeight(0.5f)
+                );
 
     public static final Holder<Attribute> TOOL_BELT_ATTRIBUTE = Services.PLATFORM.register("player.tool_belt",
                 new RangedAttribute("attribute.name.player.tool_belt", 2, 0, 8).setSyncable(true));

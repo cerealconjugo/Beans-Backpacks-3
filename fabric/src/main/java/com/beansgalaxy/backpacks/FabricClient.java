@@ -8,6 +8,7 @@ import com.beansgalaxy.backpacks.events.AppendLoadedModels;
 import com.beansgalaxy.backpacks.events.NetworkPackages;
 import com.beansgalaxy.backpacks.events.TooltipImageEvent;
 import com.beansgalaxy.backpacks.util.ModItems;
+import com.mojang.datafixers.DataFixerUpper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
@@ -42,6 +43,8 @@ public class FabricClient implements ClientModInitializer {
 
             EntityModelLayerRegistry.registerModelLayer(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
             EntityRendererRegistry.register(CommonClass.BACKPACK_ENTITY.get(), EntityRender::new);
+            EntityRendererRegistry.register(CommonClass.LEGACY_ENDER_ENTITY.get(), EntityRender::new);
+            EntityRendererRegistry.register(CommonClass.LEGACY_WINGED_ENTITY.get(), EntityRender::new);
 
             CommonClient.CLIENT_CONFIG.read();
       }

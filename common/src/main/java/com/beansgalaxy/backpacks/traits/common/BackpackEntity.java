@@ -13,6 +13,7 @@ import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.ViewableBackpack;
+import com.beansgalaxy.backpacks.util.data_fixers.RecoverLocalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -387,6 +388,11 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
 
       @Override
       protected void readAdditionalSaveData(CompoundTag tag) {
+            if (tag.contains("local_data")) {
+                  RecoverLocalData.readEntity(this, tag);
+                  return;
+            }
+
             RegistryOps<Tag> serializationContext = registryAccess().createSerializationContext(NbtOps.INSTANCE);
             ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(serializationContext, tag.get("as_stack")).getOrThrow();
             entityData.set(ITEM_STACK, stack);
@@ -421,7 +427,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             setDirection(direction);
       }
 
-      protected void setDirection(Direction direction) {
+      public void setDirection(Direction direction) {
             if (direction != null) {
                   if (direction == Direction.DOWN)
                         direction = Direction.UP;
