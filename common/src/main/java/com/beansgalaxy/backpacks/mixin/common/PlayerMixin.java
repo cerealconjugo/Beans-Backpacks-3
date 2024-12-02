@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.ViewableAccessor;
+import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -20,14 +21,17 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -47,6 +51,11 @@ public abstract class PlayerMixin implements ViewableAccessor {
 
       @Shadow public abstract void setItemSlot(EquipmentSlot pSlot, ItemStack pStack);
 
+      @Shadow public abstract void playSound(SoundEvent pSound, float pVolume, float pPitch);
+
+      @Shadow public abstract Inventory getInventory();
+
+      @Shadow @Final private Inventory inventory;
       @Unique public final Player instance = (Player) (Object) this;
 
       @Unique private static final EntityDataAccessor<Boolean> IS_OPEN = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
@@ -161,7 +170,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
                    CommonClass.interactEquippedBackpack(player, instance, cir);
        }
 
-      @Inject(method = "addAdditionalSaveData", at = @At("HEAD"))
+      @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
       private void backpackAddSaveData(CompoundTag pCompound, CallbackInfo ci) {
             RegistryAccess access = instance.registryAccess();
 
@@ -176,10 +185,38 @@ public abstract class PlayerMixin implements ViewableAccessor {
             shorthand.tools.save(backpacks, access);
             shorthand.weapons.save(backpacks, access);
 
+            Inventory inventory = getInventory();
+            CompoundTag selectedSlots = new CompoundTag();
+            saveSelectedSlots("items", inventory.items, instance, selectedSlots);
+            saveSelectedSlots("armor", inventory.armor, instance, selectedSlots);
+            saveSelectedSlots("offhand", inventory.offhand, instance, selectedSlots);
+            saveSelectedSlots("back", BackData.get(instance).beans_Backpacks_3$getBody(), instance, selectedSlots);
+            backpacks.put("slot_selection", selectedSlots);
+
             pCompound.put(Constants.MOD_ID, backpacks);
       }
 
-      @Inject(method = "readAdditionalSaveData", at = @At("HEAD"))
+      private static void saveSelectedSlots(String name, List<ItemStack> items, Player instance, CompoundTag tag) {
+            int size = items.size();
+            CompoundTag slots = new CompoundTag();
+            for (int i = 0; i < size; i++) {
+                  ItemStack item = items.get(i);
+                  SlotSelection slotSelection = item.get(ITraitData.SLOT_SELECTION);
+                  if (slotSelection == null) 
+                        continue;
+                  
+                  int selectedSlot = slotSelection.getSelectedSlot(instance);
+                  if (selectedSlot == 0)
+                        continue;
+                  
+                  slots.putInt(String.valueOf(i), selectedSlot);
+            }
+            
+            tag.put(name, slots);
+      }
+
+
+      @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
       private void backpackReadSaveData(CompoundTag pCompound, CallbackInfo ci) {
             CompoundTag backpacks = pCompound.getCompound(Constants.MOD_ID);
             RegistryAccess access = instance.registryAccess();
@@ -194,6 +231,28 @@ public abstract class PlayerMixin implements ViewableAccessor {
             Shorthand shorthand = Shorthand.get(instance);
             shorthand.tools.load(backpacks, access);
             shorthand.weapons.load(backpacks, access);
+
+            CompoundTag slotSelection = backpacks.getCompound("slot_selection");
+            readSlotSelection("items", inventory.items, instance, slotSelection);
+            readSlotSelection("armor", inventory.armor, instance, slotSelection);
+            readSlotSelection("offhand", inventory.offhand, instance, slotSelection);
+            readSlotSelection("body", BackData.get(instance).beans_Backpacks_3$getBody(), instance, slotSelection);
+      }
+
+      private static void readSlotSelection(String name, List<ItemStack> items, Player instance, CompoundTag slotSelection) {
+            CompoundTag tag = slotSelection.getCompound(name);
+            for (String key : tag.getAllKeys()) {
+                  int selection = tag.getInt(key);
+                  if (selection == 0)
+                        continue;
+
+                  int slot = Integer.parseInt(key);
+                  ItemStack stack = items.get(slot);
+                  SlotSelection slotSelection1 = stack.getOrDefault(ITraitData.SLOT_SELECTION, new SlotSelection());
+
+                  slotSelection1.setSelectedSlot(instance, selection);
+                  stack.set(ITraitData.SLOT_SELECTION, slotSelection1);
+            }
       }
 
       @Inject(method = "defineSynchedData", at = @At("TAIL"))
