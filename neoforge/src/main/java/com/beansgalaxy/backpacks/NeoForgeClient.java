@@ -45,8 +45,9 @@ public class NeoForgeClient {
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("fullness"), CommonClient.FULLNESS_ITEM_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("eating"), CommonClient.EATING_TRAIT_ITEM_PREDICATE);
             ItemProperties.registerGeneric(ResourceLocation.withDefaultNamespace("searching"), CommonClient.ENDER_SEARCHING_PREDICATE);
-            container.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, screen) -> {
+            container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, screen) -> {
                   HashMap<IConfig, Function<ConfigScreen, ConfigRows>> map = Maps.newHashMapWithExpectedSize(2);
+                  Minecraft minecraft = Minecraft.getInstance();
                   CommonConfig common = new CommonConfig();
                   map.put(common, configScreen -> new CommonConfigRows(configScreen, minecraft, common));
                   ClientConfig client = new ClientConfig();

@@ -5,6 +5,7 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import com.beansgalaxy.backpacks.network.clientbound.SendWeaponSlot;
 import com.google.common.collect.Iterables;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -19,22 +20,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Iterator;
 
 public class Shorthand {
-      public final ShortContainer tools = new ShortContainer("tools") {
-            @Override public int size() {
-                  return getToolsSize();
-            }
-      };
-
-      public final ShortContainer weapons = new ShortContainer("weapons") {
-            @Override public int size() {
-                  return getWeaponsSize();
-            }
-      };
+      public final ShortContainer.Tools tools = new ShortContainer.Tools(this);
+      public final ShortContainer.Weapon weapons = new ShortContainer.Weapon(this);
 
       private final Player owner;
       private int timer = 0;
-      private int heldSelected = 0;
-      private int selectedWeapon = 0;
+      int heldSelected = 0;
+      int selectedWeapon = 0;
       private int oToolSize;
       private int oWeaponSize;
       private ItemStack oWeapon;
@@ -64,7 +56,6 @@ public class Shorthand {
       public void selectWeapon(Inventory inventory, boolean advance) {
             if (weapons.isEmpty()) {
                   resetSelected(inventory);
-                  updateRemoteWeaponSlots(inventory);
                   return;
             }
 
@@ -91,7 +82,6 @@ public class Shorthand {
 
                   if (i == selectedSlot) {
                         resetSelected(inventory);
-                        updateRemoteWeaponSlots(inventory);
                         return;
                   }
             }
@@ -99,13 +89,11 @@ public class Shorthand {
             int selected = itemsSize + toolsSize + i;
             if (selected == inventory.selected) {
                   resetSelected(inventory);
-                  updateRemoteWeaponSlots(inventory);
                   return;
             }
 
             selectedWeapon = i;
             setHeldSelected(inventory.selected);
-            updateRemoteWeaponSlots(inventory);
             inventory.selected = selected;
       }
 
@@ -121,11 +109,6 @@ public class Shorthand {
 
             int i = selectedWeapon > 0 ? selectedWeapon : weaponsSize;
             return i - 1;
-      }
-
-      private void updateRemoteWeaponSlots(Inventory inventory) {
-            if (inventory.player instanceof ServerPlayer serverPlayer) {
-            }
       }
 
       public ItemStack getItem(int slot) {
@@ -147,8 +130,9 @@ public class Shorthand {
       }
 
       public void dropOverflowItems(ShortContainer container) {
+            container.setChanged();
             int maxSlot = container.getMaxSlot();
-            int size = container.size();
+            int size = container.getSize();
 
             if (maxSlot < size)
                   return;
@@ -228,7 +212,7 @@ public class Shorthand {
             }
       }
 
-      private void setHeldSelected(int selected) {
+      void setHeldSelected(int selected) {
             if (selected < 9)
                   heldSelected = selected;
       }
@@ -345,5 +329,12 @@ public class Shorthand {
                   iterator.next();
                   iterator.remove();
             }
+      }
+
+      public boolean setSlot(Inventory inventory, int slot) {
+            setHeldSelected(inventory.selected);
+            inventory.selected = inventory.items.size() + tools.getContainerSize() + slot;
+            selectedWeapon = slot;
+            return false;
       }
 }

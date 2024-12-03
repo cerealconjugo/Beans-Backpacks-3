@@ -1,12 +1,15 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -73,5 +76,18 @@ public abstract class LivingEntityMixin extends Entity {
                   this.gameEvent(GameEvent.EQUIP);
 
             ci.cancel();
+      }
+
+      @Inject(method = "getMainHandItem", cancellable = true, at = @At("HEAD"))
+      private void backpackSyncedData(CallbackInfoReturnable<ItemStack> cir) {
+            if (instance instanceof Player player) {
+                  Shorthand shorthand = Shorthand.get(player);
+                  Inventory inventory = player.getInventory();
+                  int shorthandSlot = inventory.selected - inventory.items.size() - shorthand.tools.getSize();
+                  if (shorthandSlot == shorthand.getSelectedWeapon()) {
+                        ItemStack stack = shorthand.weapons.getItem(shorthand.getSelectedWeapon());
+                        cir.setReturnValue(stack);
+                  }
+            }
       }
 }

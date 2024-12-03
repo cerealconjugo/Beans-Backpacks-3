@@ -41,16 +41,20 @@ public class ServerPlayMixin {
       @Inject(method = "handleSetCarriedItem", at = @At(value = "HEAD", shift = At.Shift.AFTER), cancellable = true)
       private void handleShorthandCarriedItem(ServerboundSetCarriedItemPacket packet, CallbackInfo ci) {
             int size = player.getInventory().items.size();
-            if (packet.getSlot() >= size) {
+            int selectedSlot = packet.getSlot();
+            if (selectedSlot >= size) {
                   Shorthand shorthand = Shorthand.get(player);
-                  if (packet.getSlot() > size + shorthand.size() - 1)
+                  int tools = shorthand.tools.getContainerSize();
+                  int weapons = shorthand.weapons.getContainerSize();
+                  int max = size + tools + weapons;
+                  if (selectedSlot > max)
                         return;
 
-                  if (this.player.getInventory().selected != packet.getSlot() && this.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
+                  if (this.player.getInventory().selected != selectedSlot && this.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
                         this.player.stopUsingItem();
                   }
 
-                  this.player.getInventory().selected = packet.getSlot();
+                  this.player.getInventory().selected = selectedSlot;
                   this.player.resetLastActionTime();
                   ci.cancel();
             }

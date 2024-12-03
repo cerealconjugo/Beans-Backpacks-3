@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.shorthand;
 
+import com.beansgalaxy.backpacks.network.clientbound.SendSelectedSlot;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -7,7 +8,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -17,7 +20,8 @@ import java.util.OptionalInt;
 
 public abstract class ShortContainer implements Container {
       protected final Int2ObjectArrayMap<ItemStack> stacks;
-      protected final String name;
+      private final String name;
+      private int size = 0;
 
       public String getName() {
             return name;
@@ -30,7 +34,11 @@ public abstract class ShortContainer implements Container {
             this.stacks = map;
       }
 
-      public abstract int size();
+      public int getSize() {
+            return size;
+      }
+
+      public abstract int updateSize();
 
       public int getMaxSlot() {
             if (stacks.isEmpty()) {
@@ -47,7 +55,7 @@ public abstract class ShortContainer implements Container {
       @Override
       public int getContainerSize() {
             int maxSlot = getMaxSlot();
-            return Math.max(size(), maxSlot);
+            return Math.max(getSize(), maxSlot);
       }
 
       @Override
@@ -67,11 +75,13 @@ public abstract class ShortContainer implements Container {
                         ? stack.split(amount)
                         : removeItemNoUpdate(slot);
 
+            setChanged();
             return split;
       }
 
       @Override
       public ItemStack removeItemNoUpdate(int slot) {
+            setChanged();
             return stacks.remove(slot);
       }
 
@@ -80,11 +90,16 @@ public abstract class ShortContainer implements Container {
             if (stack.isEmpty())
                   stacks.remove(slot);
             else stacks.put(slot, stack);
+            setChanged();
+      }
+
+      public void putItem(int slot, ItemStack stack) {
+            stacks.put(slot, stack);
       }
 
       @Override
       public void setChanged() {
-
+            size = updateSize();
       }
 
       @Override
@@ -95,6 +110,7 @@ public abstract class ShortContainer implements Container {
       @Override
       public void clearContent() {
             stacks.clear();
+            setChanged();
       }
 
       public void save(CompoundTag tag, RegistryAccess access) {
@@ -123,6 +139,8 @@ public abstract class ShortContainer implements Container {
                   ItemStack stack = ItemStack.OPTIONAL_CODEC.parse(serializationContext, slot).getOrThrow();
                   setItem(index, stack);
             }
+
+            size = updateSize();
       }
 
       public void dropAll(Inventory inventory) {
@@ -132,6 +150,75 @@ public abstract class ShortContainer implements Container {
                   if (!itemstack.isEmpty())
                         inventory.player.drop(itemstack, true, false);
                   iterator.remove();
+            }
+      }
+
+      public static class Weapon extends ShortContainer {
+            protected final Int2ObjectArrayMap<ItemStack> lastStacks;
+            private final Shorthand shorthand;
+
+            public Weapon(Shorthand shorthand) {
+                  super("weapons");
+                  this.shorthand = shorthand;
+
+                  Int2ObjectArrayMap<ItemStack> map = new Int2ObjectArrayMap<>();
+                  map.defaultReturnValue(ItemStack.EMPTY);
+                  this.lastStacks = map;
+            }
+
+            @Override public int updateSize() {
+                  return shorthand.getWeaponsSize();
+            }
+
+            @Override public void setItem(int slot, ItemStack stack) {
+                  if (!stack.isEmpty())
+                        lastStacks.put(slot, stack);
+
+                  super.setItem(slot, stack);
+            }
+
+            public static boolean putBackLastStack(Player player, ItemStack stack) {
+                  Shorthand shorthand = Shorthand.get(player);
+                  Weapon weapons = shorthand.weapons;
+                  Inventory inventory = player.getInventory();
+                  int selected = inventory.selected;
+                  for (Int2ObjectMap.Entry<ItemStack> entry : weapons.lastStacks.int2ObjectEntrySet()) {
+                        int i = entry.getIntKey();
+                        if (!weapons.stacks.get(i).isEmpty())
+                              continue;
+
+                        ItemStack lastStack = entry.getValue();
+                        if (ItemStack.isSameItemSameComponents(lastStack, stack)) {
+                              ItemStack copy = stack.copy();
+                              stack.setCount(0);
+
+                              weapons.lastStacks.put(i, copy);
+                              weapons.stacks.put(i, copy);
+
+                              if (shorthand.selectedWeapon == i) {
+                                    shorthand.setHeldSelected(selected);
+                                    if (player instanceof ServerPlayer serverPlayer)
+                                          SendSelectedSlot.send(serverPlayer, i);
+                              }
+
+                              return true;
+                        }
+                  }
+
+                  return false;
+            }
+      }
+
+      public static class Tools extends ShortContainer {
+            private final Shorthand shorthand;
+
+            public Tools(Shorthand shorthand) {
+                  super("tools");
+                  this.shorthand = shorthand;
+            }
+
+            @Override public int updateSize() {
+                  return shorthand.getToolsSize();
             }
       }
 }

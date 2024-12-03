@@ -21,7 +21,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -50,8 +49,6 @@ public abstract class PlayerMixin implements ViewableAccessor {
       @Shadow public abstract ItemStack getItemBySlot(EquipmentSlot pSlot1);
 
       @Shadow public abstract void setItemSlot(EquipmentSlot pSlot, ItemStack pStack);
-
-      @Shadow public abstract void playSound(SoundEvent pSound, float pVolume, float pPitch);
 
       @Shadow public abstract Inventory getInventory();
 
@@ -259,4 +256,16 @@ public abstract class PlayerMixin implements ViewableAccessor {
       private void backpackSyncedData(SynchedEntityData.Builder pBuilder, CallbackInfo ci) {
             pBuilder.define(IS_OPEN, false);
       }
+
+      @Inject(method = "getWeaponItem", cancellable = true, at = @At("HEAD"))
+      private void backpackSyncedData(CallbackInfoReturnable<ItemStack> cir) {
+            Shorthand shorthand = Shorthand.get(instance);
+            Inventory inventory = getInventory();
+            int shorthandSlot = inventory.selected - inventory.items.size() - shorthand.tools.getSize();
+            if (shorthandSlot == shorthand.getSelectedWeapon()) {
+                  ItemStack stack = shorthand.weapons.getItem(shorthand.getSelectedWeapon());
+                  cir.setReturnValue(stack);
+            }
+      }
+
 }

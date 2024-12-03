@@ -5,3 +5,5 @@ accessible class net/minecraft/client/gui/screens/inventory/CreativeModeInventor
 mutable field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations permutations Ljava/util/Map;
 mutable field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations textures Ljava/util/List;
 
+mutable field net/minecraft/world/entity/player/Inventory compartments Ljava/util/List;
+

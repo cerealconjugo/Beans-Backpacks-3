@@ -26,6 +26,11 @@ dependencies {
 //    modRuntimeOnly "io.wispforest:worldmesher:0.4.6+1.21"
 //    modRuntimeOnly "io.wispforest:exo:0.1.5+1.19"
 //    modRuntimeOnly "io.wispforest:owo-lib:0.12.15+1.21"
+
+    modImplementation "maven.modrinth:better-combat:2.0.3+1.21.1-fabric"
+    modRuntimeOnly "maven.modrinth:cloth-config:15.0.140+fabric"
+    modRuntimeOnly "maven.modrinth:playeranimator:2.0.0-alpha1+1.21-fabric"
+    modRuntimeOnly "maven.modrinth:modmenu:11.0.3"
 }
 
 loom {

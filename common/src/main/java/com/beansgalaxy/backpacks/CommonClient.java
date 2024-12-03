@@ -33,6 +33,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
@@ -473,5 +474,18 @@ public class CommonClient {
                         }
                   }
             }
+      }
+
+      public static void handleSetSelectedSlot(int slot) {
+            Minecraft minecraft = Minecraft.getInstance();
+            LocalPlayer player = minecraft.player;
+            Shorthand shorthand = Shorthand.get(player);
+
+            if (slot < 0 || slot >= shorthand.weapons.getContainerSize())
+                  return;
+
+            Inventory inventory = player.getInventory();
+            shorthand.setSlot(inventory, slot);
+            minecraft.getConnection().send(new ServerboundSetCarriedItemPacket(inventory.selected));
       }
 }

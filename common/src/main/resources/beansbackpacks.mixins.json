@@ -35,7 +35,8 @@
     "client.MouseHandlerMixin",
     "client.PalettedPermutationsMixin",
     "client.PlayerRendererMixin",
-    "client.SimpleBakedModelMixin", "client.SmithingScreenMixin"
+    "client.SimpleBakedModelMixin",
+    "client.SmithingScreenMixin"
   ],
   "server": [ ],
   "injectors": {
