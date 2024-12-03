@@ -77,17 +77,18 @@ public class BulkTraits extends ItemStorageTraits {
       public void stackedOnMe(PatchedComponentHolder backpack, ItemStack other, Slot slot, ClickAction click, Player player, SlotAccess access, CallbackInfoReturnable<Boolean> cir) {
             BulkMutable mutable = mutable(backpack);
             if (!EquipableComponent.testIfPresent(backpack, equipable -> !equipable.traitRemovable())) {
-                  if (ClickAction.SECONDARY.equals(click)) {
-                        if (other.isEmpty()) {
-                              if (mutable.isEmpty())
-                                    return;
+                  if (!ClickAction.SECONDARY.equals(click))
+                        return;
 
-                              ItemStack stack = mutable.removeItem(0);
-                              access.set(stack);
-                              sound().atClient(player, ModSound.Type.REMOVE);
-                        } else if (mutable.addItem(other, player) != null) {
-                              sound().atClient(player, ModSound.Type.INSERT);
-                        }
+                  if (other.isEmpty()) {
+                        if (mutable.isEmpty())
+                              return;
+
+                        ItemStack stack = mutable.removeItem(0);
+                        access.set(stack);
+                        sound().atClient(player, ModSound.Type.REMOVE);
+                  } else if (mutable.addItem(other, player) != null) {
+                        sound().atClient(player, ModSound.Type.INSERT);
                   }
             }
             else if (EquipableComponent.canEquip(backpack, slot)) {
