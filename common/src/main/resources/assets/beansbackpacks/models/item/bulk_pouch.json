@@ -1,7 +1,8 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "beansbackpacks:item/bulk_pouch_empty"
+    "layer0": "beansbackpacks:item/bundle/empty",
+    "layer1": "beansbackpacks:item/bundle/bulk/empty"
   },
   "overrides": [
     {

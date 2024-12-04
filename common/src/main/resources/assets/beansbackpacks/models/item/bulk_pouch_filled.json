@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "beansbackpacks:item/bulk_pouch"
+    "layer0": "beansbackpacks:item/bundle/filled",
+    "layer1": "beansbackpacks:item/bundle/bulk/filled"
   }
 }

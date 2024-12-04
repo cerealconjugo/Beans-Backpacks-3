@@ -119,6 +119,9 @@ public class CommonClient {
       public static final ItemColor BUNDLE_ITEM_COLOR = (itemStack, layer) -> layer != 1 ?
                   componentTint(itemStack, 0xFFcd7b46) : 0xFFFFFFFF;
 
+      public static final ItemColor BULK_POUCH_ITEM_COLOR = (itemStack, layer) -> layer != 1 ?
+                  componentTint(itemStack, 0xFFcd7b46) : 0xFFFFFFFF;
+
       private static int componentTint(ItemStack itemStack, int rgbBase) {
             DyedItemColor itemColor = itemStack.get(DataComponents.DYED_COLOR);
             if (itemColor != null) {
