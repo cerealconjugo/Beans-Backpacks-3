@@ -31,6 +31,8 @@ dependencies {
     modRuntimeOnly "maven.modrinth:cloth-config:15.0.140+fabric"
     modRuntimeOnly "maven.modrinth:playeranimator:2.0.0-alpha1+1.21-fabric"
     modRuntimeOnly "maven.modrinth:modmenu:11.0.3"
+
+    modImplementation("com.terraformersmc:modmenu:${modmenu_version}")
 }
 
 loom {

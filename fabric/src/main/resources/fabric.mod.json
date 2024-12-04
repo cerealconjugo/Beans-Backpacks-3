@@ -8,11 +8,10 @@
         "${mod_author}"
     ],
     "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "homepage": "https://github.com/BeansGalaxy/Beans-Backpacks-3"
     },
     "license": "${license}",
-    "icon": "${mod_id}.png",
+    "icon": "assets/beansbackpacks/icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
@@ -20,6 +19,9 @@
         ],
         "client": [
           "com.beansgalaxy.backpacks.FabricClient"
+        ],
+        "modmenu": [
+            "com.beansgalaxy.backpacks.ModMenuCompat"
         ]
     },
     "mixins": [
@@ -35,6 +37,15 @@
     "accessWidener": "beansbackpacks.accesswidener",
     "suggests": {
         "another-mod": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.modrinth": "https://modrinth.com/mod/beans-backpacks-3",
+                "modmenu.youtube": "https://www.youtube.com/@BeansGalaxy"
+            },
+            "update_checker": true
+        }
     }
 }
   

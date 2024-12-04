@@ -28,7 +28,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
       protected ConfigScreen screen;
 
       public ConfigRows(ConfigScreen screen, Minecraft minecraft, IConfig config) {
-            super(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight() * 2, 35, 25);
+            super(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight() - 70, 36, 25);
             this.screen = screen;
             this.config = config;
 
