@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.SlotSelection;
+import com.beansgalaxy.backpacks.data.ServerSave;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -56,7 +57,6 @@ public abstract class PlayerMixin implements ViewableAccessor {
       @Shadow public abstract Inventory getInventory();
 
       @Shadow @Final private Inventory inventory;
-      @Shadow private int sleepCounter;
       @Unique public final Player instance = (Player) (Object) this;
 
       @Unique private static final EntityDataAccessor<Boolean> IS_OPEN = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
@@ -287,10 +287,12 @@ public abstract class PlayerMixin implements ViewableAccessor {
       @Inject(method = "dropEquipment", at = @At(value = "INVOKE",
                   target = "Lnet/minecraft/world/entity/player/Player;destroyVanishingCursedItems()V"))
       private void backpackDropEquipment(CallbackInfo ci) {
-            ItemStack backpack = instance.getItemBySlot(EquipmentSlot.BODY);
-            PlaceableComponent.get(backpack).ifPresent(placeable -> {
-                  BackpackEntity.create(backpack, placeable, Traits.get(backpack), instance.level(), instance.position().add(0, 1, 0), instance.yBodyRot + 180, Direction.UP, instance);
-            });
+            if (!ServerSave.CONFIG.keep_back_on_death.get()) {
+                  ItemStack backpack = instance.getItemBySlot(EquipmentSlot.BODY);
+                  PlaceableComponent.get(backpack).ifPresent(placeable -> {
+                        BackpackEntity.create(backpack, placeable, Traits.get(backpack), instance.level(), instance.position().add(0, 1, 0), instance.yBodyRot + 180, Direction.UP, instance);
+                  });
+            }
       }
 
 }

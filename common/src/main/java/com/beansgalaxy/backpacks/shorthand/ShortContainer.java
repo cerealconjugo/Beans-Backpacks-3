@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Iterator;
 import java.util.OptionalInt;
 
 public abstract class ShortContainer implements Container {
@@ -151,6 +152,18 @@ public abstract class ShortContainer implements Container {
                         inventory.player.drop(itemstack, true, false);
                   iterator.remove();
             }
+      }
+
+      public Iterator<ItemStack> getContent() {
+            return stacks.values().iterator();
+      }
+
+      public void replaceWith(ShortContainer that) {
+            clearContent();
+            that.stacks.forEach((i, stack) -> {
+                  if (!stack.isEmpty())
+                        this.stacks.put(i, stack);
+            });
       }
 
       public static class Weapon extends ShortContainer {

@@ -302,17 +302,8 @@ public class Shorthand {
       }
 
       public void replaceWith(Shorthand that) {
-            this.weapons.clearContent();
-            that.weapons.stacks.forEach((i, stack) -> {
-                  if (!stack.isEmpty())
-                        this.weapons.stacks.put(i, stack);
-            });
-
-            this.tools.clearContent();
-            that.tools.stacks.forEach((i, stack) -> {
-                  if (!stack.isEmpty())
-                        this.tools.stacks.put(i, stack);
-            });
+            this.weapons.replaceWith(that.weapons);
+            this.tools.replaceWith(that.tools);
 
             ItemStack backpack = that.owner.getItemBySlot(EquipmentSlot.BODY);
             this.owner.setItemSlot(EquipmentSlot.BODY, backpack);

@@ -88,10 +88,12 @@
   "key.beansbackpacks.action_disabled": "Disabled",
   "key.beansbackpacks.desc.action_disabled": "%d has been disabled because %d is bound",
 
-
   "screen.beansbackpacks.config.title-common": "Common",
   "screen.beansbackpacks.config.title-client": "Client",
   "screen.beansbackpacks.config.main.save_and_exit": "Save & Exit",
   "screen.beansbackpacks.config.main.reset_all": "Reset All",
-  "screen.beansbackpacks.config.main.undo_all": "Undo All"
+  "screen.beansbackpacks.config.main.undo_all": "Undo All",
+
+  "config.beansbackpacks.common.shorthandToolBelt": "Tool Belt & Shorthand",
+  "config.beansbackpacks.common.keepInventory": "Keep Inventory"
 }

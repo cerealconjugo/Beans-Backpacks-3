@@ -20,6 +20,7 @@
     "common.ItemStackMixin",
     "common.LivingEntityMixin",
     "common.PlayerMixin",
+    "common.ServerPlayerMixin",
     "common.ServerPlayMixin"
   ],
   "client": [
