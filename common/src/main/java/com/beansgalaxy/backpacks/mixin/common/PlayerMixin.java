@@ -4,15 +4,18 @@ import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.ViewableAccessor;
+import com.beansgalaxy.backpacks.components.PlaceableComponent;
 import com.beansgalaxy.backpacks.components.SlotSelection;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.ViewableBackpack;
 import com.mojang.serialization.DataResult;
+import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -279,6 +282,15 @@ public abstract class PlayerMixin implements ViewableAccessor {
                   ItemStack stack = shorthand.weapons.getItem(shorthand.getSelectedWeapon());
                   cir.setReturnValue(stack);
             }
+      }
+
+      @Inject(method = "dropEquipment", at = @At(value = "INVOKE",
+                  target = "Lnet/minecraft/world/entity/player/Player;destroyVanishingCursedItems()V"))
+      private void backpackDropEquipment(CallbackInfo ci) {
+            ItemStack backpack = instance.getItemBySlot(EquipmentSlot.BODY);
+            PlaceableComponent.get(backpack).ifPresent(placeable -> {
+                  BackpackEntity.create(backpack, placeable, Traits.get(backpack), instance.level(), instance.position().add(0, 1, 0), instance.yBodyRot + 180, Direction.UP, instance);
+            });
       }
 
 }

@@ -82,11 +82,8 @@ public abstract class ArmorStandMixin extends LivingEntity implements ViewableAc
             EquipableComponent equipable = optional.get();
 
             EquipmentSlot equipmentSlot = null;
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
+            for (EquipmentSlot slot : equipable.values()) {
                   if (EquipmentSlot.BODY.equals(slot))
-                        continue;
-
-                  if (!equipable.slots().test(slot))
                         continue;
 
                   equipmentSlot = slot;

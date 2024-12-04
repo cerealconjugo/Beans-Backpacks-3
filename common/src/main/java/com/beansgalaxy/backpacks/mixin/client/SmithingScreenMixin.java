@@ -29,14 +29,10 @@ public class SmithingScreenMixin {
                   return;
 
             EquipableComponent equipable = optional.get();
-            EquipmentSlot[] values = EquipmentSlot.values();
-            for (int i = values.length; i > 0; i--) {
-                  EquipmentSlot slot = values[i - 1];
-                  if (equipable.slots().test(slot)) {
-                        this.armorStandPreview.setItemSlot(slot, pStack);
-                        ci.cancel();
-                        return;
-                  }
+            for (EquipmentSlot slot : equipable.values()) {
+                  this.armorStandPreview.setItemSlot(slot, pStack);
+                  ci.cancel();
+                  return;
             }
       }
 

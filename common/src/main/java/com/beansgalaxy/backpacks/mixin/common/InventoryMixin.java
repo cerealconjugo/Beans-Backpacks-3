@@ -2,13 +2,17 @@ package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -26,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Mixin(Inventory.class)
@@ -64,6 +69,29 @@ public abstract class InventoryMixin {
       @Inject(method = "add(Lnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "HEAD"), cancellable = true)
       public void addToBackpackBeforeInventory(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
             if (!stack.isEmpty()) {
+                  Optional<EquipableComponent> optional = EquipableComponent.get(stack);
+                  if (optional.isPresent()) {
+                        EquipableComponent equipable = optional.get();
+
+                        if (Traits.testIfPresent(stack, traits -> !traits.isEmpty(PatchedComponentHolder.of(stack)))) {
+                              for (EquipmentSlot value : equipable.values()) {
+                                    ItemStack itemBySlot = player.getItemBySlot(value);
+                                    if (!itemBySlot.isEmpty())
+                                          continue;
+
+                                    player.setItemSlot(value, stack.copy());
+                                    stack.setCount(0);
+                                    cir.setReturnValue(true);
+                                    return;
+                              }
+
+                              if (!equipable.traitRemovable() && !player.isCreative()) {
+                                    cir.setReturnValue(false);
+                                    return;
+                              }
+                        }
+                  }
+
                   if (ShortContainer.Weapon.putBackLastStack(player, stack)) {
                         cir.setReturnValue(true);
                         return;

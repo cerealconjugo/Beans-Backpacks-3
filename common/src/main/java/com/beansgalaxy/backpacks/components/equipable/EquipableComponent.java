@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.util.OptionalEitherMapCodec;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -25,19 +26,37 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel customModel, @Nullable ResourceLocation backpackTexture, boolean traitRemovable, @Nullable Holder<SoundEvent> sound) {
+public final class EquipableComponent {
       public static final String NAME = "equipable";
 
-      private EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel model, boolean traitRemovable, Optional<Holder<SoundEvent>> soundEvent) {
-            this(slots, model, null, traitRemovable, soundEvent.orElse(null));
-      }
+      private final EquipmentGroups slots;
+      private final @Nullable EquipmentModel customModel;
+      private final @Nullable ResourceLocation backpackTexture;
+      private final boolean traitRemovable;
+      private final @Nullable Holder<SoundEvent> sound;
+      private final ArrayList<EquipmentSlot> values;
 
-      private EquipableComponent(EquipmentGroups slots, ResourceLocation texture, boolean traitRemovable, Optional<Holder<SoundEvent>> soundEvent) {
-            this(slots, null, texture, traitRemovable, soundEvent.orElse(null));
+      public EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel customModel, @Nullable ResourceLocation backpackTexture, boolean traitRemovable, @Nullable Holder<SoundEvent> sound) {
+            this.slots = slots;
+            this.customModel = customModel;
+            this.backpackTexture = backpackTexture;
+            this.traitRemovable = traitRemovable;
+            this.sound = sound;
+
+            ArrayList<EquipmentSlot> list = Lists.newArrayList();
+            List<EquipmentSlot> values = Lists.reverse(List.of(EquipmentSlot.values()));
+            for (EquipmentSlot value : values)
+                  if (slots.test(value))
+                        list.add(value);
+
+            this.values = list;
       }
 
       public static Optional<EquipableComponent> get(PatchedComponentHolder backpack) {
@@ -140,33 +159,37 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
                   );
 
       public static final Codec<EquipableComponent> CODEC = RecordCodecBuilder.create(in ->
-                  in.group(
-                              EquipmentGroups.CODEC.fieldOf("slots").forGetter(EquipableComponent::slots),
-                              DISPLAY.forGetter(equipable -> {
-                                    if (equipable.backpackTexture != null)
-                                          return Optional.of(Either.right(equipable.backpackTexture));
+                in.group(
+                            EquipmentGroups.CODEC.fieldOf("slots")
+                                                 .forGetter(EquipableComponent::slots),
+                            DISPLAY.forGetter(equipable -> {
+                                  if (equipable.backpackTexture != null)
+                                        return Optional.of(Either.right(equipable.backpackTexture));
 
-                                    if (equipable.customModel != null)
-                                          return Optional.of(Either.left(equipable.customModel));
+                                  if (equipable.customModel != null)
+                                        return Optional.of(Either.left(equipable.customModel));
 
-                                    return Optional.empty();
-                              }),
-                              Codec.BOOL.optionalFieldOf("trait_removable", false).forGetter(EquipableComponent::traitRemovable),
-                              SoundEvent.CODEC.optionalFieldOf("sound_event").forGetter(EquipableComponent::getSound)
-                  ).apply(in, (slots, custom_model, trait_removable, sound_event) -> {
-                        if (custom_model.isEmpty())
-                              return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
-                        Either<EquipmentModel, ResourceLocation> either = custom_model.get();
-                        Optional<ResourceLocation> right = either.right();
-                        if (right.isPresent())
-                              return new EquipableComponent(slots, null, right.get(), trait_removable, sound_event.orElse(null));
+                                  return Optional.empty();
+                            }),
+                            Codec.BOOL.optionalFieldOf("trait_removable", false)
+                                      .forGetter(EquipableComponent::traitRemovable),
+                            SoundEvent.CODEC.optionalFieldOf("sound_event")
+                                            .forGetter(EquipableComponent::getSound)
+                )
+                .apply(in, (slots, custom_model, trait_removable, sound_event) -> {
+                      if (custom_model.isEmpty())
+                            return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                      Either<EquipmentModel, ResourceLocation> either = custom_model.get();
+                      Optional<ResourceLocation> right = either.right();
+                      if (right.isPresent())
+                            return new EquipableComponent(slots, null, right.get(), trait_removable, sound_event.orElse(null));
 
-                        Optional<EquipmentModel> left = either.left();
-                        if (left.isPresent())
-                              return new EquipableComponent(slots, left.get(), null, trait_removable, sound_event.orElse(null));
+                      Optional<EquipmentModel> left = either.left();
+                      if (left.isPresent())
+                            return new EquipableComponent(slots, left.get(), null, trait_removable, sound_event.orElse(null));
 
-                        return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
-                  })
+                      return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                })
       );
 
       private Optional<ResourceLocation> getTexture() {
@@ -176,6 +199,58 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
       public Optional<Holder<SoundEvent>> getSound() {
             return Optional.ofNullable(sound);
       }
+
+      public EquipmentGroups slots() {
+            return slots;
+      }
+
+      public @Nullable EquipmentModel customModel() {
+            return customModel;
+      }
+
+      public @Nullable ResourceLocation backpackTexture() {
+            return backpackTexture;
+      }
+
+      public boolean traitRemovable() {
+            return traitRemovable;
+      }
+
+      public @Nullable Holder<SoundEvent> sound() {
+            return sound;
+      }
+
+      public EquipmentSlot[] values() {
+            return values.toArray(EquipmentSlot[]::new);
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (EquipableComponent) obj;
+            return Objects.equals(this.slots, that.slots) &&
+                        Objects.equals(this.customModel, that.customModel) &&
+                        Objects.equals(this.backpackTexture, that.backpackTexture) &&
+                        this.traitRemovable == that.traitRemovable &&
+                        Objects.equals(this.sound, that.sound);
+      }
+
+      @Override
+      public int hashCode() {
+            return Objects.hash(slots, customModel, backpackTexture, traitRemovable, sound);
+      }
+
+      @Override
+      public String toString() {
+            return "EquipableComponent[" +
+                        "slots=" + slots + ", " +
+                        "customModel=" + customModel + ", " +
+                        "backpackTexture=" + backpackTexture + ", " +
+                        "traitRemovable=" + traitRemovable + ", " +
+                        "sound=" + sound + ']';
+      }
+
 
       public static final StreamCodec<RegistryFriendlyByteBuf, EquipableComponent> STREAM_CODEC = new StreamCodec<>() {
 
@@ -210,18 +285,18 @@ public record EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel
 
                   boolean hasModel = buf.readBoolean();
                   EquipmentModel model = hasModel
-                              ? EquipmentModel.STREAM_CODEC.decode(buf)
-                              : null;
+                                         ? EquipmentModel.STREAM_CODEC.decode(buf)
+                                         : null;
 
                   boolean hasTexture = buf.readBoolean();
                   ResourceLocation texture = hasTexture
-                              ? buf.readResourceLocation()
-                              : null;
+                                             ? buf.readResourceLocation()
+                                             : null;
 
                   boolean hasSound = buf.readBoolean();
                   Holder<SoundEvent> sound = hasSound
-                              ? SoundEvent.STREAM_CODEC.decode(buf)
-                              : null;
+                                             ? SoundEvent.STREAM_CODEC.decode(buf)
+                                             : null;
 
                   return new EquipableComponent(slotGroup, model, texture, traitRemovable, sound);
             }

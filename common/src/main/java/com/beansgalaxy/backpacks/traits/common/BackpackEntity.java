@@ -225,10 +225,14 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                   }
             }
 
+            return create(backpackStack, placeable, traits, level, pos, yRot, clickedFace, player);
+      }
+
+      public static @NotNull BackpackEntity create(ItemStack backpackStack, PlaceableComponent placeable, Optional<GenericTraits> traits, Level level, Vec3 pos, float yRot, Direction direction, Player player) {
             BackpackEntity backpackEntity = new BackpackEntity(CommonClass.BACKPACK_ENTITY.get(), level);
             backpackEntity.setPos(pos);
             backpackEntity.setYRot(yRot);
-            backpackEntity.setDirection(clickedFace);
+            backpackEntity.setDirection(direction);
 
             backpackEntity.entityData.set(PLACEABLE, placeable);
 
@@ -243,7 +247,7 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
                   level.addFreshEntity(backpackEntity);
             }
 
-            if (clickedFace.getAxis().isHorizontal()) {
+            if (direction.getAxis().isHorizontal()) {
                   level.updateNeighbourForOutputSignal(backpackEntity.blockPosition(), Blocks.AIR);
             }
 
@@ -466,7 +470,10 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             if (this.isPassengerOfSameVehicle(that))
                   return false;
 
-            return (that.canBeCollidedWith() || that.isPushable());
+            if (that.position().y < this.position().y)
+                  return false;
+
+            return that.canBeCollidedWith() || that.isPushable();
       }
 
       @Override
