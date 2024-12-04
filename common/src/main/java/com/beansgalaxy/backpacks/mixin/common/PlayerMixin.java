@@ -53,6 +53,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
       @Shadow public abstract Inventory getInventory();
 
       @Shadow @Final private Inventory inventory;
+      @Shadow private int sleepCounter;
       @Unique public final Player instance = (Player) (Object) this;
 
       @Unique private static final EntityDataAccessor<Boolean> IS_OPEN = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
@@ -186,8 +187,10 @@ public abstract class PlayerMixin implements ViewableAccessor {
             CompoundTag selectedSlots = new CompoundTag();
             saveSelectedSlots("items", inventory.items, instance, selectedSlots);
             saveSelectedSlots("armor", inventory.armor, instance, selectedSlots);
-            saveSelectedSlots("offhand", inventory.offhand, instance, selectedSlots);
-            saveSelectedSlots("back", BackData.get(instance).beans_Backpacks_3$getBody(), instance, selectedSlots);
+            ItemStack offhand = inventory.offhand.getFirst();
+            saveSelectedSlots("offhand", offhand, instance, selectedSlots);
+            ItemStack back = BackData.get(instance).beans_Backpacks_3$getBody().getFirst();
+            saveSelectedSlots("back", back, instance, selectedSlots);
             backpacks.put("slot_selection", selectedSlots);
 
             pCompound.put(Constants.MOD_ID, backpacks);
@@ -198,18 +201,22 @@ public abstract class PlayerMixin implements ViewableAccessor {
             CompoundTag slots = new CompoundTag();
             for (int i = 0; i < size; i++) {
                   ItemStack item = items.get(i);
-                  SlotSelection slotSelection = item.get(ITraitData.SLOT_SELECTION);
-                  if (slotSelection == null) 
-                        continue;
-                  
-                  int selectedSlot = slotSelection.getSelectedSlot(instance);
-                  if (selectedSlot == 0)
-                        continue;
-                  
-                  slots.putInt(String.valueOf(i), selectedSlot);
+                  saveSelectedSlots(String.valueOf(i), item, instance, slots);
             }
             
             tag.put(name, slots);
+      }
+
+      private static void saveSelectedSlots(String name, ItemStack item, Player instance, CompoundTag tag) {
+            SlotSelection slotSelection = item.get(ITraitData.SLOT_SELECTION);
+            if (slotSelection == null)
+                  return;
+
+            int selectedSlot = slotSelection.getSelectedSlot(instance);
+            if (selectedSlot == 0)
+                  return;
+
+            tag.putInt(name, selectedSlot);
       }
 
 
@@ -232,24 +239,30 @@ public abstract class PlayerMixin implements ViewableAccessor {
             CompoundTag slotSelection = backpacks.getCompound("slot_selection");
             readSlotSelection("items", inventory.items, instance, slotSelection);
             readSlotSelection("armor", inventory.armor, instance, slotSelection);
-            readSlotSelection("offhand", inventory.offhand, instance, slotSelection);
-            readSlotSelection("body", BackData.get(instance).beans_Backpacks_3$getBody(), instance, slotSelection);
+            ItemStack offhand = inventory.offhand.getFirst();
+            readSlotSelection("offhand", offhand, instance, slotSelection);
+            ItemStack back = BackData.get(instance).beans_Backpacks_3$getBody().getFirst();
+            readSlotSelection("back", back, instance, slotSelection);
       }
 
       private static void readSlotSelection(String name, List<ItemStack> items, Player instance, CompoundTag slotSelection) {
             CompoundTag tag = slotSelection.getCompound(name);
             for (String key : tag.getAllKeys()) {
-                  int selection = tag.getInt(key);
-                  if (selection == 0)
-                        continue;
-
                   int slot = Integer.parseInt(key);
                   ItemStack stack = items.get(slot);
-                  SlotSelection slotSelection1 = stack.getOrDefault(ITraitData.SLOT_SELECTION, new SlotSelection());
-
-                  slotSelection1.setSelectedSlot(instance, selection);
-                  stack.set(ITraitData.SLOT_SELECTION, slotSelection1);
+                  readSlotSelection(key, stack, instance, tag);
             }
+      }
+
+      private static void readSlotSelection(String name, ItemStack item, Player instance, CompoundTag slotSelection) {
+            int selection = slotSelection.getInt(name);
+            if (selection == 0)
+                  return;
+
+            SlotSelection slotSelection1 = item.getOrDefault(ITraitData.SLOT_SELECTION, new SlotSelection());
+
+            slotSelection1.setSelectedSlot(instance, selection);
+            item.set(ITraitData.SLOT_SELECTION, slotSelection1);
       }
 
       @Inject(method = "defineSynchedData", at = @At("TAIL"))
