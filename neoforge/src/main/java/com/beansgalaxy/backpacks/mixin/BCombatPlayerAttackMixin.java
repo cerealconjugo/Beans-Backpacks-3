@@ -33,7 +33,6 @@ public abstract class BCombatPlayerAttackMixin {
                   } else ci.cancel();
 
                   synchronized (player) {
-
                         ItemStack mainHandStack = shorthand.weapons.getItem(i);
                         ItemStack offHandStack = inventory.offhand.get(0);
 
