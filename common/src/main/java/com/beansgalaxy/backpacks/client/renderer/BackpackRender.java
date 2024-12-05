@@ -31,7 +31,9 @@ import org.jetbrains.annotations.Nullable;
 public interface BackpackRender {
 
       ModelLayerLocation BACKPACK_MODEL =
-                  new ModelLayerLocation(ResourceLocation.parse(Constants.MOD_ID + ":backpack_model"), "main");
+                  new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "backpack_model"), "main");
+      ModelLayerLocation PACK_CAPE_MODEL
+                  = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "backpack_cape_model"), "main");
 
       BackpackModel<?> model();
 
@@ -40,7 +42,6 @@ public interface BackpackRender {
       BlockRenderDispatcher blockRenderer();
 
       default void renderTexture(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, ResourceLocation texture, ItemStack itemStack) {
-            pose.translate(0, 13 / 16f, 0);
             if (texture.equals(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "leather"))) {
                   builtInLeatherModel(pose, pBufferSource, pCombinedLight, itemStack);
                   return;

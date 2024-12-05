@@ -27,6 +27,7 @@
     "client.AbstractScreenMixin",
     "client.ArmorStandRendererMixin",
     "client.BlockStateModelMixin",
+    "client.CapeRendererMixin",
     "client.InventoryScreenMixin",
     "client.ItemInHandMixin",
     "client.ItemRendererMixin",

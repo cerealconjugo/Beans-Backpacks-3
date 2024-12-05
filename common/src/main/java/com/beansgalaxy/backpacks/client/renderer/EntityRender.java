@@ -96,6 +96,7 @@ public class EntityRender extends EntityRenderer<BackpackEntity> implements Back
                   model().setOpenAngle(headPitch);
                   viewable.lastDelta = tick;
 
+                  pose.translate(0, 13 / 16f, 0);
                   renderTexture(pose, source, light, texture, stack);
                   pose.popPose();
             }

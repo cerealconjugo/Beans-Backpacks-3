@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
@@ -38,6 +39,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
@@ -490,5 +492,13 @@ public class CommonClient {
             Inventory inventory = player.getInventory();
             shorthand.setSlot(inventory, slot);
             minecraft.getConnection().send(new ServerboundSetCarriedItemPacket(inventory.selected));
+      }
+
+      public static Boolean cancelCapeRender(Player player) {
+            ItemStack backpack = player.getItemBySlot(EquipmentSlot.BODY);
+            return EquipableComponent.get(backpack).map(equipable -> {
+                  ResourceLocation texture = equipable.backpackTexture();
+                  return texture != null;
+            }).orElse(false);
       }
 }

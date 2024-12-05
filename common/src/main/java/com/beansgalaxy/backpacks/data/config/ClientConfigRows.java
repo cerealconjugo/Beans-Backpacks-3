@@ -18,7 +18,8 @@ public class ClientConfigRows extends ConfigRows {
       public List<ConfigLabel> getRows() {
             ClientConfig config = (ClientConfig) this.config;
             return List.of(
-                        new EnumConfigRow<>(config.shorthand_hud_location, ShorthandHUD.values())
+                        new EnumConfigRow<>(config.shorthand_hud_location, ShorthandHUD.values()),
+                        new ItemListConfigRow(config.elytra_model_equipment)
             );
       }
 

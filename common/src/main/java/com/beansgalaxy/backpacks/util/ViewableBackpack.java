@@ -91,7 +91,7 @@ public abstract class ViewableBackpack implements PatchedComponentHolder {
             if (newPitch > 0)
                   newPitch = 0;
 
-            //newPitch = -3f; // HOLDS TOP OPEN FOR TEXTURING
+//            newPitch = -3f; // HOLDS TOP OPEN FOR TEXTURING
             lastPitch = headPitch;
             headPitch = newPitch;
       }

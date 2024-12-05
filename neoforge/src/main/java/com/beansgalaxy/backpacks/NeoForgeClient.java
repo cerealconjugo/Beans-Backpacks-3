@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks;
 
 import com.beansgalaxy.backpacks.client.KeyPress;
+import com.beansgalaxy.backpacks.client.renderer.BackpackCapeModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackModel;
 import com.beansgalaxy.backpacks.client.renderer.BackpackRender;
 import com.beansgalaxy.backpacks.client.renderer.EntityRender;
@@ -16,6 +17,7 @@ import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.google.common.collect.Maps;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
@@ -79,6 +81,7 @@ public class NeoForgeClient {
             @SubscribeEvent
             public static void registerLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
                   event.registerLayerDefinition(BackpackRender.BACKPACK_MODEL, BackpackModel::getTexturedModelData);
+                  event.registerLayerDefinition(BackpackRender.PACK_CAPE_MODEL, BackpackCapeModel::createBodyLayer);
             }
 
             @SubscribeEvent

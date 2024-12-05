@@ -72,6 +72,7 @@ public class ArmorStandFeature extends RenderLayer<ArmorStand, ArmorStandArmorMo
                         model().setOpenAngle(headPitch);
                         viewable.lastDelta = tick;
 
+                        pose.translate(0, 13 / 16f, 0);
                         renderTexture(pose, pBufferSource, pCombinedLight, texture, itemStack);
                         pose.popPose();
                   }
