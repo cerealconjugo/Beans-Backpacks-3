@@ -2,11 +2,13 @@ package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,5 +60,13 @@ public class ServerPlayMixin {
                   this.player.resetLastActionTime();
                   ci.cancel();
             }
+      }
+
+      @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", ordinal = 0,
+                  target = "Lnet/minecraft/server/level/ServerPlayer;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"))
+      private void shorthandOnSwapOffhand(ServerboundPlayerActionPacket pPacket, CallbackInfo ci) {
+            Inventory inventory = player.getInventory();
+            Shorthand shorthand = Shorthand.get(player);
+            shorthand.resetSelected(inventory);
       }
 }

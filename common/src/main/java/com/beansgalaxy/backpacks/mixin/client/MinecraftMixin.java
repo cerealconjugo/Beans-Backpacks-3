@@ -5,9 +5,11 @@ import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
 import com.beansgalaxy.backpacks.data.EnderStorage;
+import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
@@ -52,5 +54,13 @@ public abstract class MinecraftMixin implements MinecraftAccessor {
       @Inject(method = "handleKeybinds", at = @At("TAIL"))
       private void handleBackpackKeybinds(CallbackInfo ci) {
             CommonClient.handleKeyBinds(player, hitResult);
+      }
+
+      @Inject(method = "handleKeybinds", at = @At(value = "INVOKE",
+                  target = "Lnet/minecraft/client/Minecraft;getConnection()Lnet/minecraft/client/multiplayer/ClientPacketListener;"))
+      private void shorthandOnSwapOffhand(CallbackInfo ci) {
+            Inventory inventory = player.getInventory();
+            Shorthand shorthand = Shorthand.get(player);
+            shorthand.resetSelected(inventory);
       }
 }
