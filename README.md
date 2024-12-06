@@ -1,4 +1,4 @@
-# WIP ALPHA VERSION
+# WIP ~ALPHA~ (BETA) VERSION
 
 This mod is still an early preview of the overhauled mechanics from the original Bean's Backpacks.
 
