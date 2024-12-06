@@ -12,23 +12,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 
 public abstract class ViewableBackpack implements PatchedComponentHolder {
-      public static ViewableBackpack get(Player player) {
-            ViewableAccessor accessor = (ViewableAccessor) player;
-            return accessor.beans_Backpacks_3$getViewable();
-      }
-
-      public static ViewableBackpack get(ArmorStand player) {
-            ViewableAccessor accessor = (ViewableAccessor) player;
-            return accessor.beans_Backpacks_3$getViewable();
-      }
 
       @Nullable
       public static ViewableBackpack get(LivingEntity livingEntity) {
-            if (livingEntity instanceof Player player)
-                  return get(player);
-
-            if (livingEntity instanceof ArmorStand armorStand)
-                  return get(armorStand);
+            if (livingEntity instanceof ViewableAccessor access) {
+                  return access.beans_Backpacks_3$getViewable();
+            }
 
             return null;
       }

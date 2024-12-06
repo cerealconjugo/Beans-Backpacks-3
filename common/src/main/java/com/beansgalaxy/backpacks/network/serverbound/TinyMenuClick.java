@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.network.serverbound;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.access.ViewableAccessor;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.Traits;
@@ -79,11 +80,8 @@ public class TinyMenuClick implements Packet2S {
             }
             else {
                   LivingEntity owner;
-                  if (entity instanceof Player player) {
-                        owner = player;
-                  } else if (entity instanceof ArmorStand armorStand) {
-                        owner = armorStand;
-                  }
+                  if (entity instanceof ViewableAccessor)
+                        owner = (LivingEntity) entity;
                   else return;
 
                   ItemStack backpack = owner.getItemBySlot(EquipmentSlot.BODY);

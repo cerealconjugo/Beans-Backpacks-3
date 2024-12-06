@@ -11,6 +11,7 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.ViewableBackpack;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -67,10 +68,8 @@ public class TinyHotbarClick implements Packet2S {
             }
             else {
                   LivingEntity owner;
-                  if (entity instanceof Player player)
-                        owner = player;
-                  else if (entity instanceof ArmorStand armorStand)
-                        owner = armorStand;
+                  if (entity instanceof ViewableAccessor)
+                        owner = (LivingEntity) entity;
                   else return;
 
                   ItemStack backpack = owner.getItemBySlot(EquipmentSlot.BODY);

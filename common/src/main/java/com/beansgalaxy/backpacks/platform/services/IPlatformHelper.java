@@ -6,6 +6,7 @@ import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
 import com.beansgalaxy.backpacks.network.serverbound.Packet2S;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.mojang.serialization.Codec;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -16,9 +17,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -64,6 +68,10 @@ public interface IPlatformHelper {
     SoundEvent register(String name, SoundEvent event);
 
     Holder<Attribute> register (String name, Attribute attribute);
+
+    Supplier<Activity> registerActivity(String name);
+
+    <T> Supplier<MemoryModuleType<T>> registerMemoryModule(String name, Codec<T> codec);
 
     void send(Network2C network, Packet2C packet2C, ServerPlayer to);
 

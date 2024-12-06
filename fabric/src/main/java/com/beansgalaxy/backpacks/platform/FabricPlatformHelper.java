@@ -11,6 +11,7 @@ import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
@@ -26,9 +27,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
@@ -125,6 +129,16 @@ public class FabricPlatformHelper implements IPlatformHelper {
                     ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name),
                     attribute
         );
+    }
+
+    @Override public Supplier<Activity> registerActivity(String name) {
+        Activity register = Registry.register(BuiltInRegistries.ACTIVITY, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), new Activity(name));
+        return () -> register;
+    }
+
+    @Override public <T> Supplier<MemoryModuleType<T>> registerMemoryModule(String name, Codec<T> codec) {
+        MemoryModuleType<T> register = Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), new MemoryModuleType<>(Optional.of(codec)));
+        return () -> register;
     }
 
     @Override

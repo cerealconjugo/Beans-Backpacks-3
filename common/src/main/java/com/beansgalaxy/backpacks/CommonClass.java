@@ -8,6 +8,7 @@ import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.ModSound;
 import net.minecraft.core.Holder;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -15,13 +16,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class CommonClass {
@@ -44,7 +48,15 @@ public class CommonClass {
                                         .eyeHeight(0.5f)
                 );
 
-    public static final Holder<Attribute> TOOL_BELT_ATTRIBUTE = Services.PLATFORM.register("player.tool_belt",
+    public static final Supplier<Activity> CHESTER_ACTIVITY =
+                Services.PLATFORM.registerActivity("chester");
+    public static final Supplier<Activity> CHESTER_IDLE_ACTIVITY =
+                Services.PLATFORM.registerActivity("chester_idle");
+      public static final Supplier<MemoryModuleType<UUID>> BACKPACK_OWNER_MEMORY =
+                  Services.PLATFORM.registerMemoryModule("backpack_owner", UUIDUtil.CODEC);
+
+
+      public static final Holder<Attribute> TOOL_BELT_ATTRIBUTE = Services.PLATFORM.register("player.tool_belt",
                 new RangedAttribute("attribute.name.player.tool_belt", 2, 0, 8).setSyncable(true));
     public static final Holder<Attribute> SHORTHAND_ATTRIBUTE = Services.PLATFORM.register("player.shorthand",
                 new RangedAttribute("attribute.name.player.shorthand", 1, 0, 8).setSyncable(true));

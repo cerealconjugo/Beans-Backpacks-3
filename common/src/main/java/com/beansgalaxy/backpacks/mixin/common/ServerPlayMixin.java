@@ -52,9 +52,8 @@ public class ServerPlayMixin {
                   if (selectedSlot > max)
                         return;
 
-                  if (this.player.getInventory().selected != selectedSlot && this.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
+                  if (this.player.getInventory().selected != selectedSlot && this.player.getUsedItemHand() == InteractionHand.MAIN_HAND)
                         this.player.stopUsingItem();
-                  }
 
                   this.player.getInventory().selected = selectedSlot;
                   this.player.resetLastActionTime();

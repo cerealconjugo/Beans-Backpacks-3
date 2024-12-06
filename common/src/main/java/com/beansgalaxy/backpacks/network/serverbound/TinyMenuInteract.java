@@ -52,10 +52,8 @@ public class TinyMenuInteract implements Packet2S {
             }
             else {
                   ViewableBackpack viewable;
-                  if (entity instanceof Player player)
-                        viewable = ViewableBackpack.get(player);
-                  else if (entity instanceof ArmorStand armorStand)
-                        viewable = ViewableBackpack.get(armorStand);
+                  if (entity instanceof ViewableAccessor accessor)
+                        viewable = accessor.beans_Backpacks_3$getViewable();
                   else return;
 
                   if (isOpen)

@@ -6,6 +6,8 @@
   "compatibilityLevel": "JAVA_18",
   "mixins": [
     "common.AbstractMenuMixin",
+    "common.AllayAiMixin",
+    "common.AllayMixin",
     "common.ArmorSlotMixin",
     "common.ArmorStandMixin",
     "common.BowMixin",
@@ -25,6 +27,8 @@
   ],
   "client": [
     "client.AbstractScreenMixin",
+    "client.AllayModelMixin",
+    "client.AllayRendererMixin",
     "client.ArmorStandRendererMixin",
     "client.BlockStateModelMixin",
     "client.CapeRendererMixin",

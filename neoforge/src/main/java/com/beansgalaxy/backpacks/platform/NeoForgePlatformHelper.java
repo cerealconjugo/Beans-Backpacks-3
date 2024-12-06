@@ -1,7 +1,6 @@
 package com.beansgalaxy.backpacks.platform;
 
 import com.beansgalaxy.backpacks.Constants;
-import com.beansgalaxy.backpacks.NeoForgeClient;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -12,33 +11,29 @@ import com.beansgalaxy.backpacks.traits.battery.BatteryCodecs;
 import com.beansgalaxy.backpacks.traits.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.traits.bucket.BucketCodecs;
 import com.beansgalaxy.backpacks.traits.bucket.BucketTraits;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.atlas.sources.PalettedPermutations;
+import com.mojang.serialization.Codec;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.Main;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.fml.loading.moddiscovery.locators.NeoForgeDevProvider;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.NeoForgeConfig;
-import net.neoforged.neoforge.common.NeoForgeEventHandler;
-import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
@@ -120,6 +115,20 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public Holder<Attribute> register(String name, Attribute attribute) {
         return ATTRIBUTE_REGISTRY.register(name, () -> attribute);
+    }
+
+    public static final DeferredRegister<Activity> ACTIVITY_REGISTRY =
+                DeferredRegister.create(BuiltInRegistries.ACTIVITY, Constants.MOD_ID);
+
+    @Override public Supplier<Activity> registerActivity(String name) {
+        return ACTIVITY_REGISTRY.register(name, () -> new Activity(name));
+    }
+
+    public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_REGISTRY =
+                DeferredRegister.create(BuiltInRegistries.MEMORY_MODULE_TYPE, Constants.MOD_ID);
+
+    @Override public <T> Supplier<MemoryModuleType<T>> registerMemoryModule(String name, Codec<T> codec) {
+        return MEMORY_MODULE_REGISTRY.register(name, () -> new MemoryModuleType<>(Optional.of(codec)));
     }
 
     @Override

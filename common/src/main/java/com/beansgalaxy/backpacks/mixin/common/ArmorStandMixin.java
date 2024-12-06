@@ -207,12 +207,7 @@ public abstract class ArmorStandMixin extends LivingEntity implements ViewableAc
                   return instance.getItemBySlot(EquipmentSlot.BODY);
             }
 
-            Vec3 openedPos = null;
-            float openedYaw = 0;
-
             @Override public void onOpen(Player player) {
-                  openedPos = instance.position();
-                  openedYaw = instance.yHeadRot;
                   super.onOpen(player);
             }
 
@@ -224,18 +219,7 @@ public abstract class ArmorStandMixin extends LivingEntity implements ViewableAc
                   if (stack.isEmpty())
                         return true;
 
-                  if (Traits.get(stack).isEmpty())
-                        return true;
-
-                  if (openedPos == null)
-                        return false;
-
-                  if (instance.distanceToSqr(openedPos) > 0.5)
-                        return true;
-
-                  double yaw = Math.abs(instance.yHeadRot - openedYaw) % 360 - 180;
-                  boolean yawMatches = Math.abs(yaw) > 90;
-                  return !yawMatches;
+                  return Traits.get(stack).isEmpty();
             }
       };
 

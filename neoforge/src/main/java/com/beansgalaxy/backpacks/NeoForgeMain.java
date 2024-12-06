@@ -46,6 +46,8 @@ public class NeoForgeMain {
         NeoForgePlatformHelper.COMPONENTS_REGISTRY.register(eventBus);
         NeoForgePlatformHelper.ENTITY_REGISTRY.register(eventBus);
         NeoForgePlatformHelper.ATTRIBUTE_REGISTRY.register(eventBus);
+        NeoForgePlatformHelper.ACTIVITY_REGISTRY.register(eventBus);
+        NeoForgePlatformHelper.MEMORY_MODULE_REGISTRY.register(eventBus);
         ENTITY_SERIALIZERS.register(eventBus);
         ENTITY_SERIALIZERS.register("placeable_backpack", BackpackEntity.PLACEABLE::serializer);
         CREATIVE_TAB_REGISTRY.register(eventBus);
