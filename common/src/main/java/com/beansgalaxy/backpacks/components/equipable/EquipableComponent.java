@@ -11,6 +11,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -40,15 +41,17 @@ public final class EquipableComponent {
       private final @Nullable EquipmentModel customModel;
       private final @Nullable ResourceLocation backpackTexture;
       private final boolean traitRemovable;
-      private final @Nullable Holder<SoundEvent> sound;
+      private final @Nullable Holder<SoundEvent> equip;
+      private final @Nullable Holder<SoundEvent> unequip;
       private final ArrayList<EquipmentSlot> values;
 
-      public EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel customModel, @Nullable ResourceLocation backpackTexture, boolean traitRemovable, @Nullable Holder<SoundEvent> sound) {
+      public EquipableComponent(EquipmentGroups slots, @Nullable EquipmentModel customModel, @Nullable ResourceLocation backpackTexture, boolean traitRemovable, @Nullable Holder<SoundEvent> equip, @Nullable Holder<SoundEvent> unequip) {
             this.slots = slots;
             this.customModel = customModel;
             this.backpackTexture = backpackTexture;
             this.traitRemovable = traitRemovable;
-            this.sound = sound;
+            this.equip = equip;
+            this.unequip = unequip;
 
             ArrayList<EquipmentSlot> list = Lists.newArrayList();
             List<EquipmentSlot> values = Lists.reverse(List.of(EquipmentSlot.values()));
@@ -173,31 +176,59 @@ public final class EquipableComponent {
                             }),
                             Codec.BOOL.optionalFieldOf("trait_removable", false)
                                       .forGetter(EquipableComponent::traitRemovable),
-                            SoundEvent.CODEC.optionalFieldOf("sound_event")
-                                            .forGetter(EquipableComponent::getSound)
+                            SoundEvent.CODEC.listOf().validate(list -> list.size() < 3
+                                       ? !list.isEmpty()
+                                       ? DataResult.success(list)
+                                       : DataResult.error(() -> "field \"sound_event\" must contain at least 1 entry")
+                                       : DataResult.error(() -> "field \"sound_event\" must contain no more than 2 entries")
+                            ).optionalFieldOf("sound_event").forGetter(EquipableComponent::packageSound)
                 )
-                .apply(in, (slots, custom_model, trait_removable, sound_event) -> {
+                .apply(in, (slots, custom_model, trait_removable, packagedSound) -> {
+                      Holder<SoundEvent> equip;
+                      Holder<SoundEvent> unequip;
+                      if (packagedSound.isEmpty()) {
+                            equip = null;
+                            unequip = null;
+                      }
+                      else {
+                            List<Holder<SoundEvent>> holders = packagedSound.get();
+                            equip = holders.get(0);
+                            unequip = holders.size() == 2
+                                      ? holders.get(1)
+                                      : null;
+                      }
+
                       if (custom_model.isEmpty())
-                            return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                            return new EquipableComponent(slots, null, null, trait_removable, equip, unequip);
                       Either<EquipmentModel, ResourceLocation> either = custom_model.get();
                       Optional<ResourceLocation> right = either.right();
                       if (right.isPresent())
-                            return new EquipableComponent(slots, null, right.get(), trait_removable, sound_event.orElse(null));
+                            return new EquipableComponent(slots, null, right.get(), trait_removable, equip, unequip);
 
                       Optional<EquipmentModel> left = either.left();
                       if (left.isPresent())
-                            return new EquipableComponent(slots, left.get(), null, trait_removable, sound_event.orElse(null));
+                            return new EquipableComponent(slots, left.get(), null, trait_removable, equip, unequip);
 
-                      return new EquipableComponent(slots, null, null, trait_removable, sound_event.orElse(null));
+                      return new EquipableComponent(slots, null, null, trait_removable, equip, unequip);
                 })
       );
 
-      private Optional<ResourceLocation> getTexture() {
-            return Optional.ofNullable(backpackTexture);
+      private Optional<List<Holder<SoundEvent>>> packageSound() {
+            if (equip == null)
+                  return Optional.empty();
+
+            return Optional.of(unequip == null
+                         ? List.of(equip)
+                         : List.of(equip, unequip)
+            );
       }
 
-      public Optional<Holder<SoundEvent>> getSound() {
-            return Optional.ofNullable(sound);
+      public Optional<Holder<SoundEvent>> getEquipSound() {
+            return Optional.ofNullable(equip);
+      }
+
+      public Optional<Holder<SoundEvent>> getUnEquipOrFallback() {
+            return Optional.ofNullable(unequip == null ? equip : unequip);
       }
 
       public EquipmentGroups slots() {
@@ -216,10 +247,6 @@ public final class EquipableComponent {
             return traitRemovable;
       }
 
-      public @Nullable Holder<SoundEvent> sound() {
-            return sound;
-      }
-
       public EquipmentSlot[] values() {
             return values.toArray(EquipmentSlot[]::new);
       }
@@ -233,12 +260,13 @@ public final class EquipableComponent {
                         Objects.equals(this.customModel, that.customModel) &&
                         Objects.equals(this.backpackTexture, that.backpackTexture) &&
                         this.traitRemovable == that.traitRemovable &&
-                        Objects.equals(this.sound, that.sound);
+                        Objects.equals(this.equip, that.equip) &&
+                        Objects.equals(this.unequip, that.unequip);
       }
 
       @Override
       public int hashCode() {
-            return Objects.hash(slots, customModel, backpackTexture, traitRemovable, sound);
+            return Objects.hash(slots, customModel, backpackTexture, traitRemovable, equip, unequip);
       }
 
       @Override
@@ -248,7 +276,7 @@ public final class EquipableComponent {
                         "customModel=" + customModel + ", " +
                         "backpackTexture=" + backpackTexture + ", " +
                         "traitRemovable=" + traitRemovable + ", " +
-                        "sound=" + sound + ']';
+                        "sound={" + equip + ", " + unequip + "}]";
       }
 
 
@@ -271,11 +299,17 @@ public final class EquipableComponent {
                   if (hasTexture)
                         buf.writeResourceLocation(texture);
 
-                  Holder<SoundEvent> sound = component.sound;
-                  boolean hasSound = sound != null;
+                  Holder<SoundEvent> equip = component.equip;
+                  boolean hasSound = equip != null;
                   buf.writeBoolean(hasSound);
                   if (hasSound)
-                        SoundEvent.STREAM_CODEC.encode(buf, component.sound);
+                        SoundEvent.STREAM_CODEC.encode(buf, component.equip);
+
+                  Holder<SoundEvent> unequip = component.unequip;
+                  boolean hasUnequip = unequip != null;
+                  buf.writeBoolean(hasUnequip);
+                  if (hasUnequip)
+                        SoundEvent.STREAM_CODEC.encode(buf, component.unequip);
             }
 
             @Override
@@ -298,7 +332,12 @@ public final class EquipableComponent {
                                              ? SoundEvent.STREAM_CODEC.decode(buf)
                                              : null;
 
-                  return new EquipableComponent(slotGroup, model, texture, traitRemovable, sound);
+                  boolean hasUnEquip = buf.readBoolean();
+                  Holder<SoundEvent> unequip = hasUnEquip
+                                             ? SoundEvent.STREAM_CODEC.decode(buf)
+                                             : null;
+
+                  return new EquipableComponent(slotGroup, model, texture, traitRemovable, sound, unequip);
             }
       };
 }

@@ -9,14 +9,17 @@ import com.beansgalaxy.backpacks.util.ModItems;
 import com.beansgalaxy.backpacks.util.ModSound;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
@@ -68,7 +71,7 @@ public class CommonClass {
         ModItems.register();
     }
 
-      public static InteractionResult swapBackWithArmorStand(ArmorStand armorStand, Player player) {
+      public static InteractionResult swapBackWith(ArmorStand armorStand, Player player) {
             EquipmentSlot slot = EquipmentSlot.BODY;
             ItemStack backpack = player.getItemBySlot(slot);
             ItemStack standItem = armorStand.getItemBySlot(slot);
@@ -78,6 +81,38 @@ public class CommonClass {
             armorStand.onEquipItem(slot, standItem, backpack);
             player.onEquipItem(slot, backpack, standItem);
             armorStand.setItemSlot(slot, backpack);
+            player.setItemSlot(slot, standItem);
+            return InteractionResult.SUCCESS;
+      }
+
+      public static InteractionResult swapBackWith(Allay allay, Player player) {
+            EquipmentSlot slot = EquipmentSlot.BODY;
+            ItemStack backpack = player.getItemBySlot(slot);
+            ItemStack standItem = allay.getItemBySlot(slot);
+
+            if (backpack.isEmpty()) {
+                  if (standItem.isEmpty())
+                        return InteractionResult.FAIL;
+                  else
+                        allay.getBrain().eraseMemory(BACKPACK_OWNER_MEMORY.get());
+            }
+            else {
+                  Optional<GenericTraits> traitsOptional = Traits.get(backpack);
+                  if (traitsOptional.isEmpty())
+                        return InteractionResult.FAIL;
+
+                  ItemStack itemInHand = allay.getItemInHand(InteractionHand.MAIN_HAND);
+                  if (!itemInHand.isEmpty() && !player.addItem(itemInHand))
+                        return InteractionResult.FAIL;
+
+                  Brain<Allay> brain = allay.getBrain();
+                  brain.setMemory(BACKPACK_OWNER_MEMORY.get(), player.getUUID());
+                  brain.setActiveActivityIfPossible(CommonClass.CHESTER_ACTIVITY.get());
+            }
+
+            allay.onEquipItem(slot, standItem, backpack);
+            player.onEquipItem(slot, backpack, standItem);
+            allay.setItemSlot(slot, backpack);
             player.setItemSlot(slot, standItem);
             return InteractionResult.SUCCESS;
       }

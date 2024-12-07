@@ -1,17 +1,12 @@
 package com.beansgalaxy.backpacks.client;
 
 import com.beansgalaxy.backpacks.CommonClass;
-import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.access.BackData;
-import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
-import com.beansgalaxy.backpacks.network.serverbound.BackpackUse;
 import com.beansgalaxy.backpacks.network.serverbound.BackpackUseOn;
 import com.beansgalaxy.backpacks.network.serverbound.InstantKeyPress;
 import com.beansgalaxy.backpacks.network.serverbound.SyncHotkey;
-import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.chest.screen.MenuChestScreen;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
-import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -20,23 +15,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class KeyPress {
       public static final KeyPress INSTANCE = new KeyPress();
@@ -163,6 +151,10 @@ public class KeyPress {
                   return false;
 
             Entity entity = entityhitresult.getEntity();
+            return tryEquip(player, entity);
+      }
+
+      public static boolean tryEquip(LocalPlayer player, Entity entity) {
             if (entity instanceof BackpackEntity backpack) {
                   InteractionResult tryEquip = backpack.tryEquip(player);
                   if (tryEquip.consumesAction())
@@ -170,12 +162,17 @@ public class KeyPress {
                   return true;
             }
             else if (entity instanceof ArmorStand armorStand) {
-                  InteractionResult tryEquip = CommonClass.swapBackWithArmorStand(armorStand, player);
+                  InteractionResult tryEquip = CommonClass.swapBackWith(armorStand, player);
                   if (tryEquip.consumesAction())
                         InstantKeyPress.send(entity.getId());
                   return true;
             }
-
+            else if (entity instanceof Allay allay) {
+                  InteractionResult tryEquip = CommonClass.swapBackWith(allay, player);
+                  if (tryEquip.consumesAction())
+                        InstantKeyPress.send(entity.getId());
+                  return true;
+            }
             return false;
       }
 

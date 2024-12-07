@@ -468,15 +468,7 @@ public class CommonClient {
 
                   if (hitResult instanceof EntityHitResult entityHitResult) {
                         Entity hit = entityHitResult.getEntity();
-                        if (hit instanceof BackpackEntity entity) {
-                              InteractionResult result = entity.tryEquip(player);
-                              if (result.consumesAction())
-                                    InstantKeyPress.send(entity.getId());
-                        } else if (hit instanceof ArmorStand entity) {
-                              InteractionResult result = CommonClass.swapBackWithArmorStand(entity, player);
-                              if (result.consumesAction())
-                                    InstantKeyPress.send(entity.getId());
-                        }
+                        KeyPress.tryEquip(player, hit);
                   }
             }
       }

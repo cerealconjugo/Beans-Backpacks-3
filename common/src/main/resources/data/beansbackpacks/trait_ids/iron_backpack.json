@@ -5,7 +5,7 @@
   "equipable": {
     "slots": "body",
     "backpack_texture": "beansbackpacks:iron",
-    "sound_event": "beansbackpacks:metal_equip"
+    "sound_event": ["beansbackpacks:metal_equip", "beansbackpacks:metal_place"]
   },
   "placeable": {
     "backpack_texture": "beansbackpacks:iron"

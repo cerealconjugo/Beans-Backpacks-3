@@ -8,6 +8,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 
@@ -39,7 +40,9 @@ public class InstantKeyPress implements Packet2S {
             if (entity instanceof BackpackEntity backpack)
                   backpack.tryEquip(sender);
             else if (entity instanceof ArmorStand armorStand)
-                  CommonClass.swapBackWithArmorStand(armorStand, sender);
+                  CommonClass.swapBackWith(armorStand, sender);
+            else if (entity instanceof Allay allay)
+                  CommonClass.swapBackWith(allay, sender);
       }
 
       public static Type<InstantKeyPress> ID = new Type<>(ResourceLocation.parse(Constants.MOD_ID + ":instant_key_press_s"));

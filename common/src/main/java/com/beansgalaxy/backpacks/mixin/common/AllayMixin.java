@@ -145,48 +145,9 @@ public abstract class AllayMixin extends PathfinderMob implements ViewableAccess
             if (!BackData.get(player).isActionKeyDown())
                   return;
 
-            if (!bodyArmorItem.isEmpty()) {
-                  Optional<EquipableComponent> equipableOptional = EquipableComponent.get(bodyArmorItem);
-                  if (equipableOptional.isEmpty())
-                        return;
-
-                  EquipableComponent equipable = equipableOptional.get();
-                  if (!equipable.slots().test(EquipmentSlot.BODY))
-                        return;
-
-                  setItemSlot(EquipmentSlot.BODY, ItemStack.EMPTY);
-                  player.setItemSlot(EquipmentSlot.BODY, bodyArmorItem);
-                  cir.setReturnValue(InteractionResult.SUCCESS);
-
-                  getBrain().eraseMemory(CommonClass.BACKPACK_OWNER_MEMORY.get());
-                  return;
-            }
-
-            ItemStack itemInHand = getItemInHand(InteractionHand.MAIN_HAND);
-            if (!itemInHand.isEmpty() && !player.addItem(itemInHand))
-                  return;
-
-            ItemStack backpack = player.getItemBySlot(EquipmentSlot.BODY);
-            Optional<GenericTraits> traitsOptional = Traits.get(backpack);
-            if (traitsOptional.isEmpty())
-                  return;
-
-            Optional<EquipableComponent> equipableOptional = EquipableComponent.get(backpack);
-            if (equipableOptional.isEmpty())
-                  return;
-
-            EquipableComponent equipable = equipableOptional.get();
-            if (!equipable.slots().test(EquipmentSlot.BODY))
-                  return;
-
-            setItemSlot(EquipmentSlot.BODY, backpack);
-            player.setItemSlot(EquipmentSlot.BODY, ItemStack.EMPTY);
-            cir.setReturnValue(InteractionResult.SUCCESS);
-
-            Brain<Allay> brain = getBrain();
-            brain.setMemory(CommonClass.BACKPACK_OWNER_MEMORY.get(), player.getUUID());
-            brain.setActiveActivityIfPossible(CommonClass.CHESTER_ACTIVITY.get());
-
+            InteractionResult result = CommonClass.swapBackWith((Allay) (Object) this, player);
+            if (!InteractionResult.FAIL.equals(result))
+                  cir.setReturnValue(result);
       }
 
       @Inject(method = "hasItemInHand", at = @At("HEAD"), cancellable = true)

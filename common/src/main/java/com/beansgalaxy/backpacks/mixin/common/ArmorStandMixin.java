@@ -63,7 +63,7 @@ public abstract class ArmorStandMixin extends LivingEntity implements ViewableAc
                   return;
 
             if (!pPlayer.isSpectator() && BackData.get(pPlayer).isActionKeyDown()) {
-                  InteractionResult result = CommonClass.swapBackWithArmorStand(instance, pPlayer);
+                  InteractionResult result = CommonClass.swapBackWith(instance, pPlayer);
                   if (result.consumesAction())
                         cir.setReturnValue(result);
             }

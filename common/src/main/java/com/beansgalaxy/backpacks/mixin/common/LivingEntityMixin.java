@@ -3,6 +3,7 @@ package com.beansgalaxy.backpacks.mixin.common;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -66,8 +67,10 @@ public abstract class LivingEntityMixin extends Entity {
                   return;
             }
 
+            boolean isPlayer = instance instanceof Player;
             EquipableComponent equipable = optional.get();
-            equipable.getSound().ifPresent(sound -> {
+            Optional<Holder<SoundEvent>> equipSound = isPlayer ? equipable.getEquipSound() : equipable.getUnEquipOrFallback();
+            equipSound.ifPresent(sound -> {
                   if (!isSilent() && equipable.slots().test(equipmentSlot))
                         level().playSeededSound(null, getX(), getY(), getZ(), sound, getSoundSource(), 1F, 1F, random.nextLong());
             });
