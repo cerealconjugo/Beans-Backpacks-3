@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.client.renderer;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.platform.Services;
 import com.beansgalaxy.backpacks.util.Tint;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
