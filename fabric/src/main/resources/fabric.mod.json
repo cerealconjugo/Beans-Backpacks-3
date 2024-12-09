@@ -11,7 +11,7 @@
         "homepage": "https://github.com/BeansGalaxy/Beans-Backpacks-3"
     },
     "license": "${license}",
-    "icon": "assets/beansbackpacks/icon.png",
+    "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [

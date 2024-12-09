@@ -3,7 +3,6 @@ package com.beansgalaxy.backpacks.data.config.screen;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.PlainTextButton;
@@ -16,17 +15,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ConfigScreen extends Screen {
-      private final HashMap<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor;
+      private final Map<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor;
       private final Screen lastScreen;
       private final IConfig[] pages;
       private ConfigRows[] rows;
       private ConfigRows currentPage;
 
-      public ConfigScreen(Screen lastScreen, HashMap<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor) {
+      public ConfigScreen(Screen lastScreen, Map<IConfig, Function<ConfigScreen, ConfigRows>> pageConstructor) {
             super(Component.empty());
             this.pageConstructor = pageConstructor;
             this.lastScreen = lastScreen;
@@ -84,8 +82,7 @@ public class ConfigScreen extends Screen {
       private void addWidgets() {
             int center = this.width / 2;
             this.addRenderableWidget(Button.builder(Component.translatable("screen.beansbackpacks.config.main.reset_all"), ($$0) -> {
-                  for (ConfigRows.ConfigLabel row : currentPage.getRows())
-                        row.resetToDefault();
+                  currentPage.resetToDefault();
             }).bounds(center - 165, this.height - 26, 70, 20).build());
 
             this.addRenderableWidget(Button.builder(Component.translatable("screen.beansbackpacks.config.main.undo_all"), ($$0) -> {
@@ -94,8 +91,11 @@ public class ConfigScreen extends Screen {
             }).bounds(center - 80, this.height - 26, 70, 20).build());
 
             this.addRenderableWidget(Button.builder(Component.translatable("screen.beansbackpacks.config.main.save_and_exit"), ($$0) -> {
-                  for (IConfig page : pages)
-                        page.write();
+                  for (ConfigRows row : rows) {
+                        row.onSave();
+                        row.config.write();
+                  }
+
                   this.minecraft.setScreen(this.lastScreen);
             }).bounds(center + 5, this.height - 26, 160, 20).build());
       }
@@ -103,13 +103,6 @@ public class ConfigScreen extends Screen {
       @Override
       public void onClose() {
             this.minecraft.setScreen(this.lastScreen);
-      }
-
-      public void onSave() {
-            for (ConfigRows row : rows) {
-                  for (ConfigRows.ConfigLabel label : row.getRows())
-                        label.onSave();
-            }
       }
 
       @Override

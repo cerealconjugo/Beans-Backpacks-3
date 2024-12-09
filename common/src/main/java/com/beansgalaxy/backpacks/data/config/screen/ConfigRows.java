@@ -4,6 +4,8 @@ import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.config.types.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.StringSplitter;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -13,10 +15,10 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.NotNull;
@@ -31,11 +33,6 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
             super(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight() - 70, 36, 25);
             this.screen = screen;
             this.config = config;
-
-            List<ConfigLabel> rows = getRows();
-            for (ConfigLabel row : rows) {
-                  addEntry(row);
-            }
       }
 
       @Override
@@ -46,7 +43,9 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
             return super.mouseClicked(mouseX, mouseY, i);
       }
 
-      public abstract List<ConfigLabel> getRows();
+      public abstract void resetToDefault();
+
+      public abstract void onSave();
 
       public class ConfigLabel extends Entry<ConfigLabel> {
             public final Component name;
@@ -80,6 +79,41 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             public void onSave() {
 
+            }
+
+            public int getHeight() {
+                  return itemHeight;
+            }
+      }
+
+      public class ConfigDescription extends ConfigLabel {
+            int height = 0;
+
+            public ConfigDescription(Component name) {
+                  super(name);
+            }
+
+            @Override public void render(GuiGraphics guiGraphics, int index, int y, int x, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+                  int center = x + rowWidth / 2;
+                  Font font = minecraft.font;
+                  Language language = Language.getInstance();
+
+                  StringSplitter splitter = font.getSplitter();
+                  List<FormattedText> texts = splitter.splitLines(name, rowWidth, Style.EMPTY.withColor(ChatFormatting.GRAY));
+                  int yO = 0;
+                  for (FormattedText text : texts) {
+                        FormattedCharSequence ordered = language.getVisualOrder(text);
+                        int width = font.width(text);
+                        int leftPos = center - width / 2;
+                        guiGraphics.drawString(font, ordered, leftPos, y + yO, 0xFFFFFFFF);
+                        yO += 9;
+                  }
+
+                  height = yO;
+            }
+
+            @Override public int getHeight() {
+                  return height + 6;
             }
       }
 
@@ -465,10 +499,6 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
                         }
                   }).bounds(x + 20, 0, 20, 20)
                               .build();
-            }
-
-            @Override
-            public void onSave() {
             }
 
             private void toggleExpanded(Button in) {

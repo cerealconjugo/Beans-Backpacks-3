@@ -90,6 +90,7 @@
 
   "screen.beansbackpacks.config.title-common": "Common",
   "screen.beansbackpacks.config.title-client": "Client",
+  "screen.beansbackpacks.config.title-traits": "Traits",
   "screen.beansbackpacks.config.main.save_and_exit": "Save & Exit",
   "screen.beansbackpacks.config.main.reset_all": "Reset All",
   "screen.beansbackpacks.config.main.undo_all": "Undo All",

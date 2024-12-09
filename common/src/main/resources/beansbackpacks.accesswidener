@@ -7,3 +7,4 @@ mutable field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermut
 
 mutable field net/minecraft/world/entity/player/Inventory compartments Ljava/util/List;
 
+extendable method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;

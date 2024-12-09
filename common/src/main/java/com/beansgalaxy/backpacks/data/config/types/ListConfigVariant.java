@@ -26,6 +26,10 @@ public class ListConfigVariant<ENTRY> extends ConfigVariant<ArrayList<ENTRY>> {
             this.decode = decode;
       }
 
+      public static <E> Builder<E> create(Function<E, String> encode, Function<JsonElement, E> decode) {
+            return new Builder<>(encode, decode);
+      }
+
       public ENTRY get(int i) {
             return value.get(i);
       }
@@ -84,10 +88,6 @@ public class ListConfigVariant<ENTRY> extends ConfigVariant<ArrayList<ENTRY>> {
             private Builder(Function<E, String> encode, Function<JsonElement, E> decode) {
                   this.encode = encode;
                   this.decode = decode;
-            }
-
-            public static <E> Builder<E> create(Function<E, String> encode, Function<JsonElement, E> decode) {
-                  return new Builder<>(encode, decode);
             }
 
             public Builder<E> comment(String comment) {
