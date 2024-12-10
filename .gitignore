@@ -20,7 +20,9 @@ build
 
 # other
 eclipse
-runs
-run
-!/screenshots/
+fabric/runs/server
+fabric/runs/client/*
+!fabric/runs/client/screenshots
+neoforge/run/*
+!neoforge/run/screenshots
 
