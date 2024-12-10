@@ -7,12 +7,10 @@ import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
-import com.beansgalaxy.backpacks.network.serverbound.InstantKeyPress;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
@@ -37,11 +35,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -217,16 +213,16 @@ public class CommonClient {
       private static final ResourceLocation SHORTHAND_MANY_1 = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_many_1");
       private static final ResourceLocation SHORTHAND_SELECT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_selection");
 
-      public static void renderShorthandGui(Minecraft minecraft, GuiGraphics gui, DeltaTracker tickCounter) {
-            if (minecraft.options.hideGui)
+      public static void renderShorthandHUD(Minecraft minecraft, GuiGraphics gui, DeltaTracker tickCounter, Player player) {
+            if (player == null || player.isSpectator() || minecraft.options.hideGui)
                   return;
 
+            PoseStack pose = gui.pose();
             Window window = minecraft.getWindow();
             int height = window.getGuiScaledHeight();
             int width = window.getGuiScaledWidth();
             int y = height - 1 - 18;
 
-            LocalPlayer player = minecraft.player;
             Shorthand shorthand = Shorthand.get(player);
             ShortContainer weapons = shorthand.weapons;
 
@@ -256,7 +252,6 @@ public class CommonClient {
                         gui.renderItem(utility, x - 3, y, player.getId());
                         gui.renderItemDecorations(minecraft.font, utility, x - 3, y);
 
-                        PoseStack pose = gui.pose();
                         pose.pushPose();
                         pose.translate(0, 0, 200);
                         if (selected == 1)
@@ -337,7 +332,7 @@ public class CommonClient {
             RenderSystem.disableBlend();
       }
 
-      private static void renderToolBelt(Minecraft minecraft, GuiGraphics gui, int selected, int slot, LocalPlayer player, Shorthand shorthand, HumanoidArm mainArm, ShorthandHUD hud, int width, int y) {
+      private static void renderToolBelt(Minecraft minecraft, GuiGraphics gui, int selected, int slot, Player player, Shorthand shorthand, HumanoidArm mainArm, ShorthandHUD hud, int width, int y) {
             int toolBeltSlot = -1;
             boolean toolBeltSelected = false;
             if (selected < 0 && slot > -1) {

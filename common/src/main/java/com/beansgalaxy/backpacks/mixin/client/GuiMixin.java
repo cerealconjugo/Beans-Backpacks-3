@@ -1,11 +1,11 @@
-package com.beansgalaxy.backpacks.mixin;
+package com.beansgalaxy.backpacks.mixin.client;
 
-import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,18 +13,22 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.beansgalaxy.backpacks.CommonClient;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Gui.class)
 public class GuiMixin {
       @Shadow @Final private Minecraft minecraft;
 
-      @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/gui/GuiLayerManager;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
-      public void render(GuiGraphics drawContext, DeltaTracker tickCounter, CallbackInfo callbackInfo) {
+      @Inject(method = "renderItemHotbar", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE",
+                  target = "Lnet/minecraft/world/entity/player/Player;getOffhandItem()Lnet/minecraft/world/item/ItemStack;"))
+      public void render(GuiGraphics drawContext, DeltaTracker tickCounter, CallbackInfo callbackInfo, Player player) {
             if (minecraft.hitResult instanceof EntityHitResult hitResult && hitResult.getEntity() instanceof BackpackEntity backpack) {
                   backpack.getTraits().ifPresent(trait -> {
                         trait.client().renderEntityOverlay(minecraft, backpack, trait, drawContext, tickCounter);
                   });
             }
-            CommonClient.renderShorthandGui(minecraft, drawContext, tickCounter);
+
+            CommonClient.renderShorthandHUD(minecraft, drawContext, tickCounter, player);
       }
 }

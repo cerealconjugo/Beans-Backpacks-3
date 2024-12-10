@@ -4,10 +4,14 @@
   "package": "com.beansgalaxy.backpacks.mixin",
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [ "BCombatPlayerAttackMixin", "BlockBehaviourMixin", "InventoryMixin", "ItemsMixin", "ItemStackMixin" ],
+  "mixins": [
+    "BCombatPlayerAttackMixin",
+    "BlockBehaviourMixin",
+    "InventoryMixin",
+    "ItemsMixin",
+    "ItemStackMixin"
+  ],
   "client": [
-    "CreativeInventoryMixin",
-    "GuiMixin",
     "MinecraftMixin"
   ],
   "server": [ ],

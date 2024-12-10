@@ -30,6 +30,8 @@ import java.util.Optional;
 public abstract class LivingEntityMixin extends Entity {
       @Shadow protected abstract boolean doesEmitEquipEvent(EquipmentSlot pSlot);
 
+      @Shadow public abstract void remove(RemovalReason pReason);
+
       @Unique public final LivingEntity instance = (LivingEntity) (Object) this;
 
       public LivingEntityMixin(EntityType<?> pEntityType, Level pLevel) {
@@ -67,18 +69,26 @@ public abstract class LivingEntityMixin extends Entity {
                   return;
             }
 
-            boolean isPlayer = instance instanceof Player;
-            EquipableComponent equipable = optional.get();
-            Optional<Holder<SoundEvent>> equipSound = isPlayer ? equipable.getEquipSound() : equipable.getUnEquipOrFallback();
-            equipSound.ifPresent(sound -> {
-                  if (!isSilent() && equipable.slots().test(equipmentSlot))
-                        level().playSeededSound(null, getX(), getY(), getZ(), sound, getSoundSource(), 1F, 1F, random.nextLong());
-            });
-
+            ci.cancel();
             if (this.doesEmitEquipEvent(equipmentSlot))
                   this.gameEvent(GameEvent.EQUIP);
 
-            ci.cancel();
+            EquipableComponent equipable = optional.get();
+            if (!isSilent() && equipable.slots().test(equipmentSlot)) {
+
+                  Optional<Holder<SoundEvent>> equipSound;
+                  if (instance instanceof Player player) {
+                        if (player.isCreative()) return;
+                        equipSound = equipable.getEquipSound();
+                  }
+                  else equipSound = equipable.getUnEquipOrFallback();
+
+                  equipSound.ifPresent(sound -> {
+                        level().playSeededSound(null, getX(), getY(), getZ(), sound, getSoundSource(), 1F, 1F, random.nextLong());
+                  });
+            }
+
+
       }
 
       @Inject(method = "getMainHandItem", cancellable = true, at = @At("HEAD"))

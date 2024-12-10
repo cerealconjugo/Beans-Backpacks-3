@@ -3,10 +3,14 @@
   "minVersion": "0.8",
   "package": "com.beansgalaxy.backpacks.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [ "BCombatPlayerAttackMixin", "BlockBehaviourMixin", "InventoryMixin", "ItemsMixin", "ItemStackMixin" ],
+  "mixins": [
+    "BCombatPlayerAttackMixin",
+    "BlockBehaviourMixin",
+    "InventoryMixin",
+    "ItemsMixin",
+    "ItemStackMixin"
+  ],
   "client": [
-    "CreativeInventoryMixin",
-    "GuiMixin",
     "MinecraftMixin"
   ],
   "server": [ ],
