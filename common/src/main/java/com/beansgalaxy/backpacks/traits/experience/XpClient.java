@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.traits.experience;
 
+import com.beansgalaxy.backpacks.components.reference.NonTrait;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
@@ -30,18 +31,18 @@ public class XpClient implements IClientTraits<XpTraits> {
       }
 
       @Override
-      public void isBarVisible(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
-
+      public boolean isBarVisible(XpTraits trait, PatchedComponentHolder holder) {
+            return false;
       }
 
       @Override
-      public void getBarWidth(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
-
+      public int getBarColor(XpTraits trait, PatchedComponentHolder holder) {
+            return 0;
       }
 
       @Override
-      public void getBarColor(XpTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
-
+      public int getBarWidth(XpTraits trait, PatchedComponentHolder holder) {
+            return 0;
       }
 
       @Override

@@ -18,21 +18,27 @@
     },
     {
       "predicate": {
-        "fullness": 0.4
+        "fullness": 0.3
       },
       "model": "beansbackpacks:item/quiver/2"
     },
     {
       "predicate": {
-        "fullness": 0.7
+        "fullness": 0.5
       },
       "model": "beansbackpacks:item/quiver/3"
     },
     {
       "predicate": {
-        "fullness": 0.9
+        "fullness": 0.7
       },
       "model": "beansbackpacks:item/quiver/4"
+    },
+    {
+      "predicate": {
+        "fullness": 0.9
+      },
+      "model": "beansbackpacks:item/quiver/5"
     },
     {
       "predicate": {

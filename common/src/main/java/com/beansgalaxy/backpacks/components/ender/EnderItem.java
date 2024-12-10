@@ -101,44 +101,6 @@ public class EnderItem extends Item {
       // ==================================================================================================================== CLIENT SYNC ONLY
 
       @Override
-      public boolean isBarVisible(ItemStack ender) {
-            EnderTraits enderTraits = ender.get(Traits.ENDER);
-            if (enderTraits == null)
-                  return false;
-
-            EnderCallback<Boolean> enderCallback = EnderCallback.of(false);
-            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
-            trait.client().isBarVisible(trait, enderTraits, enderCallback);
-            return enderCallback.getReturnValue();
-
-      }
-
-      @Override
-      public int getBarWidth(ItemStack ender) {
-            EnderTraits enderTraits = ender.get(Traits.ENDER);
-            if (enderTraits == null)
-                  return 13;
-
-            EnderCallback<Integer> cir = EnderCallback.of(13);
-            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
-            trait.client().getBarWidth(trait, enderTraits, cir);
-            return cir.getReturnValue();
-      }
-
-      @Override
-      public int getBarColor(ItemStack ender) {
-            EnderTraits enderTraits = ender.get(Traits.ENDER);
-            if (enderTraits == null)
-                  return 0x000000;
-
-            EnderCallback<Integer> cir = EnderCallback.of(0x000000);
-            GenericTraits trait = enderTraits.getTrait(CommonClient.getLevel());
-            trait.client().getBarColor(trait, enderTraits, cir);
-
-            return cir.getReturnValue();
-      }
-
-      @Override
       public ItemStack finishUsingItem(ItemStack ender, Level pLevel, LivingEntity entity) {
             EnderCallback<ItemStack> cir = EnderCallback.of(ender);
             runIfPresent(ender, entity, cir, (enderTraits, genericTraits) -> {

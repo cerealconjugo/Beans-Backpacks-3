@@ -22,20 +22,19 @@ public class NonTraitClient implements IClientTraits<NonTrait> {
       }
 
       @Override
-      public void isBarVisible(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
-
+      public boolean isBarVisible(NonTrait trait, PatchedComponentHolder holder) {
+            return false;
       }
 
       @Override
-      public void getBarWidth(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
-
+      public int getBarColor(NonTrait trait, PatchedComponentHolder holder) {
+            return 0;
       }
 
       @Override
-      public void getBarColor(NonTrait trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
-
+      public int getBarWidth(NonTrait trait, PatchedComponentHolder holder) {
+            return 0;
       }
-
 
       @Override
       public void appendEquipmentLines(NonTrait traits, Consumer<Component> pTooltipAdder) {

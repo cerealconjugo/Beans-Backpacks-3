@@ -27,6 +27,11 @@ public class SlotSelection {
             return slots.get(player.getId());
       }
 
+      public int getSelectedSlotSafe(Player player) {
+            int i = getSelectedSlot(player);
+            return i == 0 ? 0 : i - 1;
+      }
+
       public void setSelectedSlot(Player player, int selectedSlot) {
             slots.put(player.getId(), selectedSlot);
       }

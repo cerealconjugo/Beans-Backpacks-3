@@ -77,36 +77,6 @@ public class ItemMixin {
             });
       }
 
-// ===================================================================================================================== CLIENT METHODS
-
-      @Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
-      private void backpackBarVisible(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-            if (!stack.isDamageableItem()) {
-                  Traits.runIfPresent(stack, traits -> {
-                        traits.client().isBarVisible(traits, PatchedComponentHolder.of(stack), cir);
-            });
-            }
-      }
-
-      @Inject(method = "getBarWidth", at = @At("HEAD"), cancellable = true)
-      private void backpackBarWidth(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-            if (!stack.isDamageableItem()) {
-                  Traits.runIfPresent(stack, traits -> {
-                        traits.client().getBarWidth(traits, PatchedComponentHolder.of(stack), cir);
-                  });
-            }
-      }
-
-      @Inject(method = "getBarColor", at = @At("HEAD"), cancellable = true)
-      private void backpackBarColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-            if (!stack.isDamageableItem()) {
-                  Traits.runIfPresent(stack, traits -> {
-                        traits.client().getBarColor(traits, PatchedComponentHolder.of(stack), cir);
-//                        traits.setBarColor(cir);
-                  });
-            }
-      }
-
       // =============================================================================================================== LUNCH BOX TRAITS
 
       @Inject(method = "finishUsingItem", at = @At("HEAD"), cancellable = true)

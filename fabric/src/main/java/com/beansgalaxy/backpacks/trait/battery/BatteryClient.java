@@ -26,9 +26,8 @@ public class BatteryClient implements IClientTraits<BatteryTraits> {
       static final BatteryClient INSTANCE = new BatteryClient();
 
       @Override
-      public void isBarVisible(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Boolean> cir) {
-            if (holder.has(ITraitData.SOLO_STACK) || holder.has(ITraitData.LONG))
-                  cir.setReturnValue(true);
+      public boolean isBarVisible(BatteryTraits trait, PatchedComponentHolder holder) {
+            return holder.has(ITraitData.SOLO_STACK) || holder.has(ITraitData.LONG);
       }
 
       @Override
@@ -77,24 +76,24 @@ public class BatteryClient implements IClientTraits<BatteryTraits> {
       }
 
       @Override
-      public void getBarWidth(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public int getBarWidth(BatteryTraits trait, PatchedComponentHolder holder) {
             Fraction fullness = trait.fullness(holder);
             if (fullness.equals(Fraction.ONE))
-                  cir.setReturnValue(14);
+                  return 14;
             else if (fullness.getNumerator() == 0) {
-                  cir.setReturnValue(0);
+                  return 0;
             } else {
                   float value = fullness.multiplyBy(Fraction.getFraction(13, 1)).floatValue();
-                  cir.setReturnValue(Mth.floor(value) + 1);
+                  return Mth.floor(value) + 1;
             }
       }
 
       @Override
-      public void getBarColor(BatteryTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public int getBarColor(BatteryTraits trait, PatchedComponentHolder holder) {
             if (!holder.has(ITraitData.SOLO_STACK))
-                  cir.setReturnValue(Mth.color(0.4F, 0.4F, 1.0F));
+                  return BAR_COLOR;
             else
-                  cir.setReturnValue(Mth.color(0.9F, 1F, 0.3F));
+                  return RED_BAR;//Mth.color(0.9F, 1F, 0.3F);
       }
 
       @Override

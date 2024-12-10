@@ -44,22 +44,22 @@ public class BulkClient implements IClientTraits<BulkTraits> {
       }
 
       @Override
-      public void getBarWidth(BulkTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public int getBarWidth(BulkTraits trait, PatchedComponentHolder holder) {
             Fraction fullness = trait.fullness(holder);
             if (trait.isFull(holder))
-                  cir.setReturnValue(14);
+                  return (14);
             else {
                   float value = fullness.multiplyBy(Fraction.getFraction(13, 1)).floatValue();
-                  cir.setReturnValue(Mth.floor(value) + 1);
+                  return (Mth.floor(value) + 1);
             }
       }
 
       @Override
-      public void getBarColor(BulkTraits trait, PatchedComponentHolder holder, CallbackInfoReturnable<Integer> cir) {
+      public int getBarColor(BulkTraits trait, PatchedComponentHolder holder) {
             if (trait.isFull(holder))
-                  cir.setReturnValue(Mth.color(0.9F, 0.2F, 0.3F));
+                  return RED_BAR;
             else
-                  cir.setReturnValue(Mth.color(0.4F, 0.4F, 1.0F));
+                  return BAR_COLOR;
       }
 
       @Override

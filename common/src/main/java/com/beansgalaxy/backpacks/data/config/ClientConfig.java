@@ -7,6 +7,7 @@ import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
