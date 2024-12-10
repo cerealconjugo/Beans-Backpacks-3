@@ -151,6 +151,10 @@ public class KeyPress {
                   return false;
 
             Entity entity = entityhitresult.getEntity();
+
+            if (!player.hasLineOfSight(entity))
+                  return false;
+
             return tryEquip(player, entity);
       }
 
