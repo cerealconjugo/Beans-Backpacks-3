@@ -470,6 +470,9 @@ public class BackpackEntity extends Entity implements PatchedComponentHolder {
             if (this.isPassengerOfSameVehicle(that))
                   return false;
 
+            if (that instanceof BackpackEntity)
+                  return true;
+
             if (that.position().y < this.position().y)
                   return false;
 

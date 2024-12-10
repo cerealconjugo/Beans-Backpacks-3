@@ -47,11 +47,11 @@ public abstract class ViewableBackpack implements PatchedComponentHolder {
             }
       }
 
-      public float headPitch = 0;
+      public float headPitch = 0f;
       public float lastPitch = 0;
       public float velocity = 0;
       public float lastDelta = 0;
-      public int wobble = 0;
+      public int wobble = 8;
 
       public void updateOpen() {
             float impulse = 22f;
@@ -80,7 +80,7 @@ public abstract class ViewableBackpack implements PatchedComponentHolder {
             if (newPitch > 0)
                   newPitch = 0;
 
-//            newPitch = -3f; // HOLDS TOP OPEN FOR TEXTURING
+//            newPitch = -2f; // HOLDS TOP OPEN FOR TEXTURING
             lastPitch = headPitch;
             headPitch = newPitch;
       }
