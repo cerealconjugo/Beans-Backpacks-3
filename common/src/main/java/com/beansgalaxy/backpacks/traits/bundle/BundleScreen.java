@@ -19,10 +19,12 @@ import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -162,6 +164,11 @@ public class BundleScreen extends TinyTraitScreen {
             TinyMenuClick.send(backpack, index, clickType);
       }
 
+      private int lastSlotIndex() {
+            List<ItemStack> stacks = backpack.get(ITraitData.ITEM_STACKS);
+            return stacks == null ? 0 : stacks.isEmpty() ? 0 : stacks.size();
+      }
+
       public class BundleTraitSlot extends TinyTraitScreen.TinyTraitSlot {
 
             public BundleTraitSlot(int pX, int pY, int index) {
@@ -174,6 +181,35 @@ public class BundleScreen extends TinyTraitScreen {
                         return ItemStack.EMPTY;
 
                   return index < stacks.size() ? stacks.get(index) : ItemStack.EMPTY;
+            }
+
+            public void hotbarClick(int hotbarSlot) {
+                  LocalPlayer player = minecraft.player;
+                  AbstractContainerMenu menu = player.containerMenu;
+                  SlotAccess carriedAccess = new SlotAccess() {
+                        public ItemStack get() {
+                              return menu.getCarried();
+                        }
+
+                        public boolean set(ItemStack p_150452_) {
+                              menu.setCarried(p_150452_);
+                              return true;
+                        }
+                  };
+
+                  if (index == -1) {
+                        tinyHotbarClick(TinyClickType.SHIFT, player.inventoryMenu, player, hotbarSlot);
+                        return;
+                  }
+
+                  int lastSlot = lastSlotIndex();
+                  if (index >= lastSlot)
+                        tinyHotbarClick(TinyClickType.SWAP_SHIFT, player.inventoryMenu, player, hotbarSlot);
+                  else {
+                        TinyClickType clickType = TinyClickType.getHotbar(hotbarSlot);
+                        tinyMenuClick(index, clickType, carriedAccess, player);
+                  }
+
             }
 
             @Override

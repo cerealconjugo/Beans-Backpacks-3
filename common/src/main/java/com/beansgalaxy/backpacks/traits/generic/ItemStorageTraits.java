@@ -197,6 +197,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
                   ItemStack hotbar = stacks.get(index);
                   MutableItemStorage mutable = mutable(holder);
                   if (mutable.addItem(hotbar, player) != null) {
+                        sound().atClient(player, ModSound.Type.INSERT);
                         mutable.push();
                   }
                   return;

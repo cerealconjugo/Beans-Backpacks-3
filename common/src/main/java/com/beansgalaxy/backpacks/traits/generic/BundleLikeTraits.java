@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
@@ -701,7 +702,24 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             mutable.push();
       }
 
-      @Override public void onPlayerInteract(LivingEntity owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
+      @Override
+      public void tinyHotbarClick(PatchedComponentHolder holder, int index, TinyClickType clickType, InventoryMenu menu, Player player) {
+            if (TinyClickType.SWAP_SHIFT.equals(clickType)) {
+                  NonNullList<ItemStack> stacks = player.getInventory().items;
+                  ItemStack hotbar = stacks.get(index);
+                  MutableBundleLike<?> mutable = mutable(holder);
+                  if (mutable.addItem(hotbar, mutable.getItemStacks().size(), player) != null) {
+                        sound().atClient(player, ModSound.Type.INSERT);
+                        mutable.push();
+                  }
+                  return;
+            }
+
+            super.tinyHotbarClick(holder, index, clickType, menu, player);
+      }
+
+      @Override
+      public void onPlayerInteract(LivingEntity owner, Player player, ItemStack backpack, CallbackInfoReturnable<InteractionResult> cir) {
             if (player.level().isClientSide) {
                   ViewableBackpack viewable = ViewableBackpack.get(owner);
                   BundleScreen.openScreen(viewable, this);

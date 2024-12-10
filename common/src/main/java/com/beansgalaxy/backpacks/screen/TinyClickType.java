@@ -4,6 +4,7 @@ public enum TinyClickType {
       LEFT(-1),
       RIGHT(-1),
       SHIFT(-1),
+      SWAP_SHIFT(-1),
       ACTION(-1),
       H_0(0),
       H_1(1),
@@ -46,7 +47,7 @@ public enum TinyClickType {
       }
 
       public boolean isShift() {
-            return this == SHIFT;
+            return this == SHIFT || this == SWAP_SHIFT;
       }
 
       public boolean isAction() {
