@@ -50,7 +50,8 @@ public class ConfigScreen extends Screen {
                   ConfigRows row = pageConstructor.get(page).apply(this);
                   rows.add(row);
 
-                  MutableComponent title = Component.translatable("screen.beansbackpacks.config.title" + row.config.getPath());
+                  String path = row.config.getPath();
+                  MutableComponent title = Component.translatableWithFallback("screen.beansbackpacks.config.title-" + path, path);
                   int titleWidth = minecraft.font.width(title);
                   totalWidth += 20 + titleWidth;
                   tabs.add(new PageTab(row, title, titleWidth));

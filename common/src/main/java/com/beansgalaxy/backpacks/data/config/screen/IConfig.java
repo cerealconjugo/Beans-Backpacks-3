@@ -33,7 +33,10 @@ public interface IConfig {
             try {
                   // Read the .json5 content from the file
                   Path path = Services.PLATFORM.getConfigPath();
-                  Path resolve = path.resolve(Constants.MOD_ID + getPath() + ".json5");
+                  Path resolve = path.resolve(getPath() + ".json5");
+                  if (!Files.exists(resolve))
+                        resolve = Services.PLATFORM.getConfigDir().resolve(Constants.MOD_ID + '-' + getPath() + ".json5");
+
                   String json5Content = new String(Files.readAllBytes(resolve));
 
                   // Remove comments from the .json5 content
@@ -44,7 +47,8 @@ public interface IConfig {
                   Constants.LOG.warn("No Config for " + Constants.MOD_ID + " : Created new config");
             }
 
-            if (andWrite) this.write();
+            if (andWrite)
+                  this.write();
       }
 
       default void write() {
@@ -71,7 +75,11 @@ public interface IConfig {
 
             try {
                   Path path = Services.PLATFORM.getConfigPath();
-                  Path resolve = path.resolve(Constants.MOD_ID + getPath() + ".json5");
+                  Path resolve = path.resolve(getPath() + ".json5");
+
+                  if (!Files.exists(path))
+                        Files.createDirectory(path);
+
                   String string = sb.toString();
                   Files.writeString(resolve, string);
             } catch (IOException e) {

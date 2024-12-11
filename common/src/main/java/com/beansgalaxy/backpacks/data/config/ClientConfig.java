@@ -27,7 +27,7 @@ public class ClientConfig implements IConfig {
 
       @Override
       public String getPath() {
-            return "-client";
+            return "client";
       }
 
       @Override

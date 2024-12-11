@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.platform.services;
 
+import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.Packet2C;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -87,5 +87,9 @@ public interface IPlatformHelper {
 
     ModelResourceLocation getModelVariant(ResourceLocation location);
 
-    Path getConfigPath();
+    Path getConfigDir();
+
+    default Path getConfigPath() {
+        return getConfigDir().resolve(Constants.MOD_ID);
+    }
 }

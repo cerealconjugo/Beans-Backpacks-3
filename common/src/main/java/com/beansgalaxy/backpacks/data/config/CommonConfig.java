@@ -36,7 +36,7 @@ public class CommonConfig implements IConfig {
 
       @Override
       public String getPath() {
-            return "-common";
+            return "common";
       }
 
       @Override

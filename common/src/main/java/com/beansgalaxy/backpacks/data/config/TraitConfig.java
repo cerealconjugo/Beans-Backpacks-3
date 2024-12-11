@@ -3,15 +3,11 @@ package com.beansgalaxy.backpacks.data.config;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.config.screen.IConfig;
 import com.beansgalaxy.backpacks.data.config.types.ConfigLine;
-import com.beansgalaxy.backpacks.data.config.types.ListConfigVariant;
 import com.beansgalaxy.backpacks.platform.Services;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import com.mojang.realmsclient.util.JsonUtils;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -24,7 +20,7 @@ public class TraitConfig implements IConfig {
 
       @Override
       public String getPath() {
-            return "-traits";
+            return "traits";
       }
 
       @Override
@@ -48,9 +44,6 @@ public class TraitConfig implements IConfig {
       @Override
       public void write() {
             try {
-                  Path path = Services.PLATFORM.getConfigPath();
-                  Path resolve = path.resolve(Constants.MOD_ID + getPath() + ".json5");
-
                   StringBuilder builder = new StringBuilder("{");
 
                   Iterator<Map.Entry<String, JsonObject>> iterator = traits.entrySet().iterator();
@@ -108,6 +101,13 @@ public class TraitConfig implements IConfig {
                   }
 
                   builder.append("\n}");
+
+                  Path path = Services.PLATFORM.getConfigPath();
+                  Path resolve = path.resolve(getPath() + ".json5");
+
+                  if (!Files.exists(path))
+                        Files.createDirectory(path);
+
                   String string = builder.toString();
                   Files.writeString(resolve, string);
             } catch (IOException e) {
