@@ -126,7 +126,8 @@ public class Shorthand {
       public int getWeaponsSize() {
             int offset = ServerSave.CONFIG.shorthand_size.get() - 1;
             double attributeValue = owner.getAttributeValue(CommonClass.SHORTHAND_ATTRIBUTE) + offset;
-            return Mth.clamp((int) attributeValue, 0, 8);
+            int clamp = Mth.clamp((int) attributeValue, 0, 8);
+            return clamp;
       }
 
       public void dropOverflowItems(ShortContainer container) {
@@ -226,10 +227,12 @@ public class Shorthand {
       }
 
       public void tick(Inventory inventory) {
-            if (oToolSize > getToolsSize())
+            int toolsSize = getToolsSize();
+            if (oToolSize > toolsSize)
                   dropOverflowItems(tools);
 
-            if (oWeaponSize > getWeaponsSize())
+            int weaponsSize = getWeaponsSize();
+            if (oWeaponSize > weaponsSize)
                   dropOverflowItems(weapons);
 
             int slot = inventory.selected - inventory.items.size();
@@ -260,8 +263,8 @@ public class Shorthand {
                   }
             }
 
-            oToolSize = getToolsSize();
-            oWeaponSize = getWeaponsSize();
+            oToolSize = tools.getContainerSize();
+            oWeaponSize = weapons.getContainerSize();
 
             if (size() <= slot || slot < 0) {
                   if (inventory.selected >= inventory.items.size())

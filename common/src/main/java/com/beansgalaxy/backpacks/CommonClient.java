@@ -236,9 +236,13 @@ public class CommonClient {
 
             renderToolBelt(minecraft, gui, selected, slot, player, shorthand, mainArm, hud, width, y);
 
-            RenderSystem.enableBlend();
             int weaponsSize = weapons.getContainerSize();
+            if (weaponsSize == 0)
+                  return;
+
             int x = getShorthandHudX(mainArm, width, weaponsSize, ShorthandHUD.FAR_CORNER.equals(hud));
+
+            RenderSystem.enableBlend();
             if (weaponsSize < 3) {
                   ItemStack weapon = weapons.getItem(0);
 
@@ -333,6 +337,9 @@ public class CommonClient {
       }
 
       private static void renderToolBelt(Minecraft minecraft, GuiGraphics gui, int selected, int slot, Player player, Shorthand shorthand, HumanoidArm mainArm, ShorthandHUD hud, int width, int y) {
+            if (shorthand.tools.getSize() == 0)
+                  return;
+
             int toolBeltSlot = -1;
             boolean toolBeltSelected = false;
             if (selected < 0 && slot > -1) {

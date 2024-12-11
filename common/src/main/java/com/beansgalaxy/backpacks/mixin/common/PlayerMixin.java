@@ -199,6 +199,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
             pCompound.put(Constants.MOD_ID, backpacks);
       }
 
+      @Unique
       private static void saveSelectedSlots(String name, List<ItemStack> items, Player instance, CompoundTag tag) {
             int size = items.size();
             CompoundTag slots = new CompoundTag();
@@ -210,6 +211,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
             tag.put(name, slots);
       }
 
+      @Unique
       private static void saveSelectedSlots(String name, ItemStack item, Player instance, CompoundTag tag) {
             SlotSelection slotSelection = item.get(ITraitData.SLOT_SELECTION);
             if (slotSelection == null)
@@ -248,6 +250,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
             readSlotSelection("back", back, instance, slotSelection);
       }
 
+      @Unique
       private static void readSlotSelection(String name, List<ItemStack> items, Player instance, CompoundTag slotSelection) {
             CompoundTag tag = slotSelection.getCompound(name);
             for (String key : tag.getAllKeys()) {
@@ -257,6 +260,7 @@ public abstract class PlayerMixin implements ViewableAccessor {
             }
       }
 
+      @Unique
       private static void readSlotSelection(String name, ItemStack item, Player instance, CompoundTag slotSelection) {
             int selection = slotSelection.getInt(name);
             if (selection == 0)
