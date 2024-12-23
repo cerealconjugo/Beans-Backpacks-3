@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.reference.ReferenceTrait;
 import com.beansgalaxy.backpacks.events.InteractBlockCallback;
 import com.beansgalaxy.backpacks.events.NetworkPackages;
+import com.beansgalaxy.backpacks.events.ServerStartEvent;
 import com.beansgalaxy.backpacks.events.SyncDataEvent;
 import com.beansgalaxy.backpacks.trait.battery.BatteryTraits;
 import com.beansgalaxy.backpacks.trait.bucket.BucketTraits;
@@ -88,6 +89,7 @@ public class FabricMain implements ModInitializer {
         });
 
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(new SyncDataEvent());
+        ServerLifecycleEvents.SERVER_STARTED.register(new ServerStartEvent());
     }
 
     public static final CreativeModeTab BACKPACK_TAB = ModItems.CREATIVE_TAB.apply(FabricItemGroup.builder()).build();
