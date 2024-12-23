@@ -45,7 +45,7 @@ public class FabricMain implements ModInitializer {
                 return batteryTraits.mutable(PatchedComponentHolder.of(stack)).getStorage();
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
-            if (reference != null && !reference.isEmpty()) {
+            if (reference != null) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BatteryTraits battery)
                     return battery.mutable(PatchedComponentHolder.of(stack)).getStorage();
@@ -69,7 +69,7 @@ public class FabricMain implements ModInitializer {
                 return bucketTraits.mutable(PatchedComponentHolder.of(stack));
 
             ReferenceTrait reference = stack.get(Traits.REFERENCE);
-            if (reference != null && !reference.isEmpty()) {
+            if (reference != null) {
                 Optional<GenericTraits> trait = reference.getTrait();
                 if (trait.isPresent() && trait.get() instanceof BucketTraits bucket)
                     return bucket.mutable(PatchedComponentHolder.of(stack));

@@ -2,10 +2,10 @@ package com.beansgalaxy.backpacks.data.config.types;
 
 import com.google.gson.JsonObject;
 
-public class ConfigLabel implements ConfigLine {
+public class ConfigTitle implements ConfigLine {
       private final String label;
 
-      public ConfigLabel(String label) {
+      public ConfigTitle(String label) {
             this.label = label;
       }
 

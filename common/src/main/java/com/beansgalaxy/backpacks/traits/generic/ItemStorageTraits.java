@@ -47,7 +47,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
             }
 
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
-            if (referenceTrait != null && !referenceTrait.isEmpty())
+            if (referenceTrait != null)
                   return referenceTrait.getTrait().map(traits -> {
                         if (traits instanceof ItemStorageTraits storageTraits)
                               return storageTraits;

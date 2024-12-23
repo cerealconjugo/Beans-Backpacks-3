@@ -62,7 +62,7 @@ public class LunchBoxTraits extends BundleLikeTraits {
             }
 
             ReferenceTrait referenceTrait = lunchBox.get(Traits.REFERENCE);
-            if (referenceTrait == null || referenceTrait.isEmpty())
+            if (referenceTrait == null)
                   return;
 
             referenceTrait.getTrait().ifPresent(traits -> {

@@ -53,7 +53,7 @@ public final class EquipableComponent {
             this.equip = equip;
             this.unequip = unequip;
 
-            ArrayList<EquipmentSlot> list = Lists.newArrayList();
+            ArrayList<EquipmentSlot> list = new ArrayList<>();
             List<EquipmentSlot> values = Lists.reverse(List.of(EquipmentSlot.values()));
             for (EquipmentSlot value : values)
                   if (slots.test(value))
@@ -71,7 +71,7 @@ public final class EquipableComponent {
                   return Optional.of(equipable);
 
             ReferenceTrait referenceTrait = backpack.get(Traits.REFERENCE);
-            if (referenceTrait != null && !referenceTrait.isEmpty())
+            if (referenceTrait != null)
                   return referenceTrait.getEquipable();
 
             return Optional.empty();
@@ -79,7 +79,7 @@ public final class EquipableComponent {
 
       public static Optional<EquipableComponent> get(ItemStack stack) {
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
-            if (referenceTrait != null && !referenceTrait.isEmpty())
+            if (referenceTrait != null)
                   return referenceTrait.getEquipable();
 
             EquipableComponent equipable = stack.get(Traits.EQUIPABLE);

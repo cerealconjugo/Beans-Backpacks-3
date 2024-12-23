@@ -3,11 +3,10 @@ package com.beansgalaxy.backpacks.data.config;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.config.screen.IConfig;
 import com.beansgalaxy.backpacks.data.config.types.*;
-import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
+import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;

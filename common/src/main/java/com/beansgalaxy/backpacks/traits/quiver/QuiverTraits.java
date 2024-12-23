@@ -42,7 +42,7 @@ public class QuiverTraits extends BundleLikeTraits {
                   return Optional.of(quiverTraits);
 
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
-            if (referenceTrait == null || referenceTrait.isEmpty())
+            if (referenceTrait == null)
                   return Optional.empty();
 
             return referenceTrait.getTrait().map(traits -> {

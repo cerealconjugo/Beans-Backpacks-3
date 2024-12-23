@@ -88,13 +88,22 @@
   "key.beansbackpacks.action_disabled": "Disabled",
   "key.beansbackpacks.desc.action_disabled": "%d has been disabled because %d is bound",
 
-  "screen.beansbackpacks.config.title-common": "Common",
+  "screen.beansbackpacks.config.title-common": "Server & Singleplayer",
   "screen.beansbackpacks.config.title-client": "Client",
   "screen.beansbackpacks.config.title-traits": "Traits",
+  "screen.beansbackpacks.config.title-features": "Features",
   "screen.beansbackpacks.config.main.save_and_exit": "Save & Exit",
   "screen.beansbackpacks.config.main.reset_all": "Reset All",
   "screen.beansbackpacks.config.main.undo_all": "Undo All",
 
   "config.beansbackpacks.common.shorthandToolBelt": "Tool Belt & Shorthand",
-  "config.beansbackpacks.common.keepInventory": "Keep Inventory"
+  "config.beansbackpacks.common.keepInventory": "Keep Inventory",
+  "config.beansbackpacks.traits.description": "\"Registers new & overrides existing\nTrait References to be used with the \"beansbackpacks:reference\" Component\"",
+  "config.beansbackpacks.traits.new-title": "Register New",
+  "config.beansbackpacks.traits.new-box": "namespace:trait_id",
+  "config.beansbackpacks.traits.remove-trait": "Remove Trait?",
+  "config.beansbackpacks.features.description": "Enable and disable features for Beans' Backpacks to customize your experience!\n\nData Packs in either feature folder in .../config/beansbackpacks/ appear here.",
+  "config.beansbackpacks.features.enabled-packs": "Enabled Features",
+  "config.beansbackpacks.features.disabled-packs": "Available Features",
+  "config.beansbackpacks.features.enabled-comment": ""
 }

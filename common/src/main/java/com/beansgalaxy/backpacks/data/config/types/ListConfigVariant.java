@@ -44,7 +44,7 @@ public class ListConfigVariant<ENTRY> extends ConfigVariant<ArrayList<ENTRY>> {
             Iterator<ENTRY> iterator = value.iterator();
             while (iterator.hasNext()) {
                   String entry = encode.apply(iterator.next());
-                  sb.append(entry);
+                  sb.append('"').append(entry).append('"');
                   if (iterator.hasNext())
                         sb.append(", ");
             }

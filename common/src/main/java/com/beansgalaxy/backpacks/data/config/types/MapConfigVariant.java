@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.data.config.types;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
@@ -12,15 +13,15 @@ import java.util.function.UnaryOperator;
 public class MapConfigVariant<KEY, ENTRY> extends ConfigVariant<HashMap<String, ENTRY>> {
       private final Function<KEY, String> keyEncode;
       private final Function<String, KEY> keyDecode;
-      private final Function<ENTRY, String> entryEncode;
-      private final Function<String, ENTRY> entryDecode;
+      private final Function<ENTRY, JsonElement> entryEncode;
+      private final Function<JsonElement, ENTRY> entryDecode;
       public final BiPredicate<String, ENTRY> validate;
       public final UnaryOperator<ENTRY> clamp;
       private final HashMap<String, ENTRY> example;
 
       protected MapConfigVariant(String name, HashMap<String, ENTRY> defau, String comment,
                                  Function<KEY, String> keyEncode, Function<String, KEY> keyDecode,
-                                 Function<ENTRY, String> entryEncode, Function<String, ENTRY> entryDecode,
+                                 Function<ENTRY, JsonElement> entryEncode, Function<JsonElement, ENTRY> entryDecode,
                                  BiPredicate<String, ENTRY> validate, UnaryOperator<ENTRY> clamp, HashMap<String, ENTRY> example)
       {
             super(name, defau, comment);
@@ -33,6 +34,16 @@ public class MapConfigVariant<KEY, ENTRY> extends ConfigVariant<HashMap<String, 
             this.clamp = clamp;
             this.example = example;
       }
+
+      public static <K, E> Builder<K, E> create(Function<K, String> keyEncode, Function<String, K> keyDecode, Function<E, JsonElement> entryEncode, Function<JsonElement, E> entryDecode) {
+            return new Builder<>(keyEncode, keyDecode, entryEncode, entryDecode);
+      }
+
+      public static <E> Builder<String, E> create(Function<E, JsonElement> entryEncode, Function<JsonElement, E> entryDecode) {
+            Function<String, String> transcode = in -> in;
+            return new Builder<>(transcode, transcode, entryEncode, entryDecode);
+      }
+
 
       public boolean contains(KEY key) {
             return value.containsKey(keyEncode.apply(key));
@@ -103,7 +114,7 @@ public class MapConfigVariant<KEY, ENTRY> extends ConfigVariant<HashMap<String, 
             value.clear();
             JsonObject jsonValue = jsonObject.getAsJsonObject(name);
             for (String key : jsonValue.keySet()) {
-                  String entry = GsonHelper.getAsString(jsonValue, key);
+                  JsonElement entry = jsonValue.get(key);
                   ENTRY appliedEntry = entryDecode.apply(entry);
                   put(key, appliedEntry);
             }
@@ -114,26 +125,17 @@ public class MapConfigVariant<KEY, ENTRY> extends ConfigVariant<HashMap<String, 
             private final HashMap<String, E> example = new HashMap<>();
             private final Function<K, String> keyEncode;
             private final Function<String, K> keyDecode;
-            private final Function<E, String> entryEncode;
-            private final Function<String, E> entryDecode;
+            private final Function<E, JsonElement> entryEncode;
+            private final Function<JsonElement, E> entryDecode;
             private BiPredicate<String, E> validator = (k, e) -> true;
             private UnaryOperator<E> clamp = e -> e;
             private String comment = "";
 
-            private Builder(Function<K, String> keyEncode, Function<String, K> keyDecode, Function<E, String> entryEncode, Function<String, E> entryDecode) {
+            private Builder(Function<K, String> keyEncode, Function<String, K> keyDecode, Function<E, JsonElement> entryEncode, Function<JsonElement, E> entryDecode) {
                   this.keyEncode = keyEncode;
                   this.keyDecode = keyDecode;
                   this.entryEncode = entryEncode;
                   this.entryDecode = entryDecode;
-            }
-
-            public static <K, E> Builder<K, E> create(Function<K, String> keyEncode, Function<String, K> keyDecode, Function<E, String> entryEncode, Function<String, E> entryDecode) {
-                  return new Builder<>(keyEncode, keyDecode, entryEncode, entryDecode);
-            }
-
-            public static <E> Builder<String, E> create(Function<E, String> entryEncode, Function<String, E> entryDecode) {
-                  Function<String, String> transcode = in -> in;
-                  return new Builder<>(transcode, transcode, entryEncode, entryDecode);
             }
 
             public Builder<K, E> defau(String[] keys, E[] entries) {

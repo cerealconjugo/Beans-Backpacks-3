@@ -28,6 +28,7 @@ import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -70,7 +71,7 @@ public class BucketClient implements IClientTraits<BucketTraits> {
             Font font = minecraft.font;
             int hOffset = y + (y / 10) + 5;
 
-            List<Consumer<Integer>> icons = Lists.newArrayList();
+            List<Consumer<Integer>> icons = new ArrayList<>();
 
             int x = 0;
             if (buckets > 0) {

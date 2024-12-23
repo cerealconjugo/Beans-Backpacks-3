@@ -22,6 +22,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -46,6 +47,71 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
       public abstract void resetToDefault();
 
       public abstract void onSave();
+
+      @Override
+      protected int getMaxPosition() {
+            return children().stream().mapToInt(ConfigLabel::getHeight).sum() + headerHeight;
+      }
+
+      @Nullable @Override
+      protected ConfigLabel getEntryAtPosition(double pMouseX, double pMouseY) {
+            int i = this.getRowWidth() / 2;
+            int j = this.getX() + this.width / 2;
+            int left = j - i;
+            int right = j + i;
+
+            if (pMouseX < left || pMouseX > right)
+                  return null;
+
+            int y = 0;
+            for (ConfigLabel child : children()) {
+                  int topPos = getY() + headerHeight + y;
+                  int height = child.getHeight();
+                  int botPos = topPos + height;
+
+                  if (pMouseY > topPos && pMouseY < botPos)
+                        return child;
+
+                  y += height;
+            }
+            return null;
+      }
+
+      protected void renderListItems(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+            int leftPos = this.getRowLeft();
+            int j = this.getRowWidth();
+            int l = this.getItemCount();
+
+            for(int index = 0; index < l; ++index) {
+                  int topPos = this.getRowTop(index);
+                  ConfigLabel configLabel = children().get(index);
+                  int height = configLabel.getHeight();
+                  int k1 = height + topPos;
+
+                  if (k1 >= this.getY() && topPos <= this.getBottom()) {
+                        this.renderItem(pGuiGraphics, pMouseX, pMouseY, pPartialTick, index, leftPos, topPos, j, height);
+                  }
+            }
+      }
+
+      @Override
+      protected int getRowTop(int pIndex) {
+            int i = 0;
+            int height = headerHeight - (int) getScrollAmount() + getY() + 4;
+            for (ConfigLabel child : children()) {
+                  if (i == pIndex)
+                        return height;
+
+                  height += child.getHeight();
+                  i++;
+            }
+            return height;
+      }
+
+      @Override
+      protected int getRowBottom(int pIndex) {
+            return getRowTop(pIndex) + children().get(pIndex).getHeight();
+      }
 
       public class ConfigLabel extends Entry<ConfigLabel> {
             public final Component name;
@@ -94,12 +160,12 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
             }
 
             @Override public void render(GuiGraphics guiGraphics, int index, int y, int x, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-                  int center = x + rowWidth / 2;
+                  int center = x + rowWidth / 2 - 6;
                   Font font = minecraft.font;
                   Language language = Language.getInstance();
 
                   StringSplitter splitter = font.getSplitter();
-                  List<FormattedText> texts = splitter.splitLines(name, rowWidth, Style.EMPTY.withColor(ChatFormatting.GRAY));
+                  List<FormattedText> texts = splitter.splitLines(name, rowWidth + 12, Style.EMPTY.withColor(ChatFormatting.GRAY));
                   int yO = 0;
                   for (FormattedText text : texts) {
                         FormattedCharSequence ordered = language.getVisualOrder(text);

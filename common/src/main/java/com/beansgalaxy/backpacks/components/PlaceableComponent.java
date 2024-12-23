@@ -29,7 +29,7 @@ public record PlaceableComponent(@Nullable ResourceLocation customModel, @Nullab
                   return Optional.of(placeableComponent);
 
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
-            if (referenceTrait != null && !referenceTrait.isEmpty())
+            if (referenceTrait != null)
                   return referenceTrait.getPlaceable();
 
             return Optional.empty();

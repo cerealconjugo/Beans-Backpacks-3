@@ -23,7 +23,8 @@
     "common.LivingEntityMixin",
     "common.PlayerMixin",
     "common.ServerPlayerMixin",
-    "common.ServerPlayMixin"
+    "common.ServerPlayMixin",
+    "common.data_features.ServerPackSource"
   ],
   "client": [
     "client.AbstractScreenMixin",

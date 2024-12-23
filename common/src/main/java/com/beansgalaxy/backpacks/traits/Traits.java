@@ -119,7 +119,7 @@ public interface Traits {
             }
 
             ReferenceTrait reference = stack.get(REFERENCE);
-            if (reference != null && !reference.isEmpty())
+            if (reference != null)
                   return reference.getTrait();
 
             return Optional.empty();

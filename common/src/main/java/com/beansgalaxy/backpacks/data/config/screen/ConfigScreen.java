@@ -2,7 +2,10 @@ package com.beansgalaxy.backpacks.data.config.screen;
 
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.ServerSave;
+import com.beansgalaxy.backpacks.data.config.*;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.PlainTextButton;
@@ -32,6 +35,24 @@ public class ConfigScreen extends Screen {
             for (IConfig page : this.pages) {
                   page.read();
             }
+      }
+
+      public static void buildPageMap(Minecraft minecraft, ImmutableMap.Builder<IConfig, Function<ConfigScreen, ConfigRows>> map) {
+            CommonConfig common = new CommonConfig();
+            map.put(common, configScreen ->
+                        new CommonConfigRows(configScreen, minecraft, common));
+
+            ClientConfig client = new ClientConfig();
+            map.put(client, configScreen ->
+                        new ClientConfigRows(configScreen, minecraft, client));
+
+            TraitConfig traits = new TraitConfig();
+            map.put(traits, configScreen ->
+                        new TraitConfigRows(configScreen, minecraft, traits));
+
+            FeaturesConfig features = new FeaturesConfig();
+            map.put(features, configScreen ->
+                        new FeaturesConfigRows(configScreen, minecraft, features));
       }
 
       @Override

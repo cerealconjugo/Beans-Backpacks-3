@@ -6,7 +6,7 @@ import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
-import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
+import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;

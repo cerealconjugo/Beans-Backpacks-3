@@ -24,11 +24,12 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class TinyTraitScreen extends Screen {
-      protected final List<TinyTraitSlot> slots = Lists.newArrayList();
+      protected final List<TinyTraitSlot> slots = new ArrayList<>();
       protected int leftPos;
       private int topPos;
 

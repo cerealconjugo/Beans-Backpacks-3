@@ -67,6 +67,7 @@ public class DataResourcesMixin {
             });
       }
 
+      @Unique
       private static void registerTraitsFromJson(JsonObject parse, RegistryOps<JsonElement> registryOps, ResourceLocation location) {
             Iterator<String> iterator = parse.keySet().iterator();
 
@@ -150,10 +151,5 @@ public class DataResourcesMixin {
                   return;
 
             ReferenceRegistry.put(location, new ReferenceRegistry(fields, attributes, placeable, equipable));
-      }
-
-      @Unique
-      private static <T extends GenericTraits> void parseAndSaveReference(TraitComponentKind<T> bundle, RegistryOps<JsonElement> registryOps, JsonElement json, ResourceLocation location) {
-
       }
 }

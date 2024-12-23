@@ -21,12 +21,7 @@ public class ModMenuCompat implements ModMenuApi {
             return screen -> {
                   ImmutableMap.Builder<IConfig, Function<ConfigScreen, ConfigRows>> map = ImmutableMap.builder();
                   Minecraft minecraft = Minecraft.getInstance();
-                  CommonConfig common = new CommonConfig();
-                  map.put(common, configScreen -> new CommonConfigRows(configScreen, minecraft, common));
-                  ClientConfig client = new ClientConfig();
-                  map.put(client, configScreen -> new ClientConfigRows(configScreen, minecraft, client));
-                  TraitConfig traits = new TraitConfig();
-                  map.put(traits, configScreen -> new TraitConfigRows(configScreen, minecraft, traits));
+                  ConfigScreen.buildPageMap(minecraft, map);
                   return new ConfigScreen(screen, map.build());
             };
       }

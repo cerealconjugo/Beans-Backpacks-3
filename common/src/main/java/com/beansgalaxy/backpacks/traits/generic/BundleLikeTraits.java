@@ -56,7 +56,7 @@ public abstract class BundleLikeTraits extends ItemStorageTraits {
             }
 
             ReferenceTrait referenceTrait = stack.get(Traits.REFERENCE);
-            if (referenceTrait != null && !referenceTrait.isEmpty())
+            if (referenceTrait != null)
                   return referenceTrait.getTrait().map(traits -> {
                         if (traits instanceof BundleLikeTraits storageTraits)
                               return storageTraits;

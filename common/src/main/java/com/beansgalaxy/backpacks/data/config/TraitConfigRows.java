@@ -15,9 +15,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -27,20 +25,22 @@ public class TraitConfigRows extends ConfigRows {
       public TraitConfigRows(ConfigScreen screen, Minecraft minecraft, TraitConfig config) {
             super(screen, minecraft, config);
 
-            addEntry(new ConfigDescription(Component.literal("Registers new & overrides existing\nTrait References to be used with the \"beansbackpacks:reference\" Component")));
+            addEntry(new ConfigDescription(Component.translatable("config.beansbackpacks.traits.description")));
             this.parentRow = new MultiLineParentRow(config.traits);
             addEntry(parentRow);
 
-            addEntry(new ConfigLabel(Component.literal("Register New")));
+            addEntry(new ConfigLabel(Component.translatable("config.beansbackpacks.traits.new")));
             addEntry(new NewTraitEntryRow(parentRow));
       }
 
-      @Override public void resetToDefault() {
+      @Override
+      public void resetToDefault() {
             TraitConfig config = (TraitConfig) this.config;
             parentRow = new MultiLineParentRow(config.traits);
       }
 
-      @Override public void onSave() {
+      @Override
+      public void onSave() {
             TraitConfig traitConfig = (TraitConfig) config;
             Map<String, JsonObject> map = traitConfig.traits;
             map.clear();
@@ -52,78 +52,14 @@ public class TraitConfigRows extends ConfigRows {
             });
       }
 
-      @Override protected int getMaxPosition() {
-            return children().stream().mapToInt(ConfigLabel::getHeight).sum() + headerHeight;
-      }
-
-      @Nullable @Override
-      protected ConfigLabel getEntryAtPosition(double pMouseX, double pMouseY) {
-            int i = this.getRowWidth() / 2;
-            int j = this.getX() + this.width / 2;
-            int left = j - i;
-            int right = j + i;
-
-            if (pMouseX < left || pMouseX > right)
-                  return null;
-
-            int y = 0;
-            for (ConfigLabel child : children()) {
-                  int topPos = getY() + headerHeight + y;
-                  int height = child.getHeight();
-                  int botPos = topPos + height;
-
-                  if (pMouseY > topPos && pMouseY < botPos)
-                        return child;
-
-                  y += height;
-            }
-            return null;
-      }
-
-      protected void renderListItems(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-            int leftPos = this.getRowLeft();
-            int j = this.getRowWidth();
-            int l = this.getItemCount();
-
-            for(int index = 0; index < l; ++index) {
-                  int topPos = this.getRowTop(index);
-                  ConfigLabel configLabel = children().get(index);
-                  int height = configLabel.getHeight();
-                  int k1 = height + topPos;
-
-                  if (k1 >= this.getY() && topPos <= this.getBottom()) {
-                        this.renderItem(pGuiGraphics, pMouseX, pMouseY, pPartialTick, index, leftPos, topPos, j, height);
-                  }
-            }
-      }
-
-      @Override
-      protected int getRowTop(int pIndex) {
-            int i = 0;
-            int height = headerHeight - (int) getScrollAmount() + getY() + 4;
-            for (ConfigLabel child : children()) {
-                  if (i == pIndex)
-                        return height;
-
-                  height += child.getHeight();
-                  i++;
-            }
-            return height;
-      }
-
-      @Override
-      protected int getRowBottom(int pIndex) {
-            return getRowTop(pIndex) + children().get(pIndex).getHeight();
-      }
-
       public class NewTraitEntryRow extends ConfigLabel {
             private final EditBox editBox;
             private final MultiLineParentRow parentRow;
 
             public NewTraitEntryRow(MultiLineParentRow parentRow) {
-                  super(Component.literal("create new trait row"));
-                  this.editBox = new EditBox(minecraft.font, getRowWidth(), 12, Component.literal("New Trait"));
-                  editBox.setHint(Component.literal("namespace:trait_id").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                  super(Component.literal("new_trait_row"));
+                  this.editBox = new EditBox(minecraft.font, getRowWidth(), 12, Component.translatable("config.beansbackpacks.traits.new-title"));
+                  editBox.setHint(Component.translatable("config.beansbackpacks.traits.new-box").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
                   this.parentRow = parentRow;
             }
 
@@ -156,7 +92,7 @@ public class TraitConfigRows extends ConfigRows {
             protected final HashMap<String, MultiLineEntry> map = new HashMap<>();
 
             public MultiLineParentRow(Map<String, JsonObject> traits) {
-                  super(Component.literal("multiline parent"));
+                  super(Component.literal("multiline_parent"));
                   traits.forEach(this::createRow);
                   reloadMap();
             }
@@ -286,7 +222,7 @@ public class TraitConfigRows extends ConfigRows {
                                     Component component;
                                     if (!active) {
                                           component = removal_title;
-                                          MutableComponent text = Component.literal("Remove?").withStyle(ChatFormatting.GRAY);
+                                          MutableComponent text = Component.translatable("config.beansbackpacks.traits.remove-trait").withStyle(ChatFormatting.GRAY);
                                           int width = font.width(text);
                                           pGuiGraphics.drawString(font, text, getRowRight() - yesWidth - noWidth - width - 10, this.getY(), 16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
 

@@ -2,12 +2,10 @@ package com.beansgalaxy.backpacks.data.config;
 
 import com.beansgalaxy.backpacks.data.config.screen.ConfigRows;
 import com.beansgalaxy.backpacks.data.config.screen.ConfigScreen;
-import com.beansgalaxy.backpacks.data.options.ShorthandHUD;
+import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.List;
-import java.util.Optional;
 
 public class ClientConfigRows extends ConfigRows {
       private final List<ConfigLabel> rows;
