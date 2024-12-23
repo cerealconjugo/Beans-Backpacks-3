@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks.data.config;
 
 import com.beansgalaxy.backpacks.Constants;
+import com.beansgalaxy.backpacks.data.config.options.ToolBeltHUD;
 import com.beansgalaxy.backpacks.data.config.screen.IConfig;
 import com.beansgalaxy.backpacks.data.config.types.*;
 import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
@@ -14,14 +15,16 @@ import java.util.List;
 public class ClientConfig implements IConfig {
       public EnumConfigVariant<ShorthandHUD> shorthand_hud_location;
       public HSetConfigVariant<Item> elytra_model_equipment;
+      public EnumConfigVariant<ToolBeltHUD> tool_belt_hud_visibility;
 
       private final ConfigLine[] LINES = new ConfigLine[] {
                   shorthand_hud_location = new EnumConfigVariant<>("shorthand_hud_location", ShorthandHUD.NEAR_CENTER, ShorthandHUD.values()),
+                  tool_belt_hud_visibility = new EnumConfigVariant<>("tool_belt_hud_visibility", ToolBeltHUD.CONTEXT, ToolBeltHUD.values()),
                   elytra_model_equipment = HSetConfigVariant.Builder.create(Constants::itemShortString, in -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(in)))
                                                                  .isValid(in -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(in)))
                                                                  .defauString("minecraft:elytra")
                                                                  .comment("effects the position of the backpack on the player's back while these items are equipped in the chestplate slot")
-                                                                 .build("elytra_model_equipment"),
+                                                                 .build("elytra_model_equipment")
       };
 
       @Override

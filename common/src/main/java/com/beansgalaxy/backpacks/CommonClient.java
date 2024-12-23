@@ -7,6 +7,7 @@ import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
+import com.beansgalaxy.backpacks.data.config.options.ToolBeltHUD;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
@@ -337,6 +338,10 @@ public class CommonClient {
       }
 
       private static void renderToolBelt(Minecraft minecraft, GuiGraphics gui, int selected, int slot, Player player, Shorthand shorthand, HumanoidArm mainArm, ShorthandHUD hud, int width, int y) {
+            ToolBeltHUD visibility = CLIENT_CONFIG.tool_belt_hud_visibility.get();
+            if (ToolBeltHUD.HIDDEN.equals(visibility))
+                  return;
+
             if (shorthand.tools.getSize() == 0)
                   return;
 
@@ -347,6 +352,9 @@ public class CommonClient {
                   toolBeltSelected = true;
             }
             else {
+                  if (ToolBeltHUD.SELECTED.equals(visibility))
+                        return;
+
                   HitResult hitResult = minecraft.hitResult;
                   if (HitResult.Type.BLOCK.equals(hitResult.getType())) {
                         BlockHitResult blockHitResult = (BlockHitResult) hitResult;

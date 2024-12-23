@@ -1,5 +1,7 @@
 package com.beansgalaxy.backpacks.data.config;
 
+import com.beansgalaxy.backpacks.CommonClient;
+import com.beansgalaxy.backpacks.data.config.options.ToolBeltHUD;
 import com.beansgalaxy.backpacks.data.config.screen.ConfigRows;
 import com.beansgalaxy.backpacks.data.config.screen.ConfigScreen;
 import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
@@ -22,6 +24,7 @@ public class ClientConfigRows extends ConfigRows {
             ClientConfig config = (ClientConfig) this.config;
             return List.of(
                         new EnumConfigRow<>(config.shorthand_hud_location, ShorthandHUD.values()),
+                        new EnumConfigRow<>(config.tool_belt_hud_visibility, ToolBeltHUD.values()),
                         new ItemListConfigRow(config.elytra_model_equipment)
             );
       }
@@ -33,8 +36,7 @@ public class ClientConfigRows extends ConfigRows {
       }
 
       @Override public void onSave() {
-            for (ConfigLabel row : rows) {
+            for (ConfigLabel row : rows)
                   row.onSave();
-            }
       }
 }

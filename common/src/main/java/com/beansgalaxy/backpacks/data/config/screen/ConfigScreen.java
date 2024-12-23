@@ -1,5 +1,6 @@
 package com.beansgalaxy.backpacks.data.config.screen;
 
+import com.beansgalaxy.backpacks.CommonClient;
 import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import com.beansgalaxy.backpacks.data.config.*;
@@ -42,7 +43,7 @@ public class ConfigScreen extends Screen {
             map.put(common, configScreen ->
                         new CommonConfigRows(configScreen, minecraft, common));
 
-            ClientConfig client = new ClientConfig();
+            ClientConfig client = CommonClient.CLIENT_CONFIG;
             map.put(client, configScreen ->
                         new ClientConfigRows(configScreen, minecraft, client));
 
