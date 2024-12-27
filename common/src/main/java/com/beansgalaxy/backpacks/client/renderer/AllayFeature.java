@@ -67,7 +67,7 @@ public class AllayFeature extends RenderLayer<Allay, AllayModel> implements Back
             float pAgeInTicks = allay.tickCount + tick;
             float f3 = pAgeInTicks * 9.0F * 0.017453292F;
 
-            float bobY = (float)Math.cos(f3) * 0.0125F;
+            float bobY = (float)Math.cos(f3) * 0.015F;
 
             if (texture != null) {
                   pose.pushPose();
@@ -79,9 +79,9 @@ public class AllayFeature extends RenderLayer<Allay, AllayModel> implements Back
                   model().setOpenAngle(headPitch);
                   viewable.lastDelta = tick;
 
-                  pose.translate(0, 26 / 16f + bobY, 0.15f);
+                  pose.translate(0, 25.5f / 16f + bobY, 0.15f + 3/32f);
                   pose.mulPose(Axis.YP.rotationDegrees(180));
-                  pose.mulPose(Axis.XN.rotationDegrees(5));
+                  pose.mulPose(Axis.XN.rotationDegrees(16));
                   float scale = 0.875f;
                   pose.scale(scale, scale, scale);
                   renderTexture(pose, pBufferSource, pCombinedLight, texture, itemStack);
