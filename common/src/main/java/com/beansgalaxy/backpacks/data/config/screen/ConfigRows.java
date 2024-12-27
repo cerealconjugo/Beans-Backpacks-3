@@ -63,16 +63,17 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
             if (pMouseX < left || pMouseX > right)
                   return null;
 
-            int y = 0;
+            double amount = getScrollAmount();
+
+            int topPos = getY() + headerHeight - (int) amount;
             for (ConfigLabel child : children()) {
-                  int topPos = getY() + headerHeight + y;
                   int height = child.getHeight();
                   int botPos = topPos + height;
 
                   if (pMouseY > topPos && pMouseY < botPos)
                         return child;
 
-                  y += height;
+                  topPos += height;
             }
             return null;
       }

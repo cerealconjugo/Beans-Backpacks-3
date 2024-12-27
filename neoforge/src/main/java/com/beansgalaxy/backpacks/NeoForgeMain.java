@@ -1,6 +1,7 @@
 package com.beansgalaxy.backpacks;
 
 import com.beansgalaxy.backpacks.data.ServerSave;
+import com.beansgalaxy.backpacks.data.config.options.DataFeaturesSource;
 import com.beansgalaxy.backpacks.network.Network2C;
 import com.beansgalaxy.backpacks.network.Network2S;
 import com.beansgalaxy.backpacks.network.clientbound.ConfigureConfig;
@@ -18,14 +19,18 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.*;
+import net.minecraft.server.packs.repository.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -34,6 +39,9 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforgespi.language.IModInfo;
+
+import java.nio.file.Path;
 
 @Mod(Constants.MOD_ID)
 public class NeoForgeMain {

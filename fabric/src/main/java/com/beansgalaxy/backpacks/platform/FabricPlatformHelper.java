@@ -15,6 +15,7 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -23,6 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -149,5 +151,16 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
+    }
+
+    @Override
+    public Optional<Path> getModFeaturesDir() {
+        Optional<ModContainer> optional = FabricLoader.getInstance().getModContainer(Constants.MOD_ID);
+        if (optional.isEmpty())
+            return Optional.empty();
+
+        ModContainer container = optional.get();
+        Optional<Path> path = container.findPath("features");
+        return path;
     }
 }

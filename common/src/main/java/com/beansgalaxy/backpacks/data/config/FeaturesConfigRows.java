@@ -47,22 +47,15 @@ public class FeaturesConfigRows extends ConfigRows {
 
             List<FeatureEntry> enabled = new ArrayList<>();
             List<FeatureEntry> disabled = new ArrayList<>();
-            Path path = DataFeaturesSource.getPath();
-            RepositorySource source = DataFeaturesSource.createRepositorySource(path, minecraft.directoryValidator());
 
-            source.loadPacks(pack -> {
+            DataFeaturesSource.addPacks(pack -> {
                   ResourceLocation icon = loadPackIcon(minecraft.getTextureManager(), pack);
                   FeatureEntry entry = new FeatureEntry(pack, icon);
-                  enabled.add(entry);
-                  entry.enabled = true;
-            });
-
-            Path disabledPath = DataFeaturesSource.getDisabledPath();
-            RepositorySource disabledSource = DataFeaturesSource.createRepositorySource(disabledPath, minecraft.directoryValidator());
-            disabledSource.loadPacks(pack -> {
-                  ResourceLocation icon = loadPackIcon(minecraft.getTextureManager(), pack);
-                  FeatureEntry entry = new FeatureEntry(pack, icon);
-                  disabled.add(entry);
+                  if (config.enabled_features.get().contains(entry.pack.getId())) {
+                        enabled.add(entry);
+                        entry.enabled = true;
+                  } else
+                        disabled.add(entry);
             });
 
             this.enabled_features = enabled;
@@ -86,49 +79,11 @@ public class FeaturesConfigRows extends ConfigRows {
                   row.resetToDefault();
       }
 
-      @Override public void onSave() {
-            ArrayList<String> packs = new ArrayList<>();
-            Path featuresPath = DataFeaturesSource.getPath();
-            Path disabledPath = DataFeaturesSource.getDisabledPath();
-            try {
-                  if (Files.notExists(featuresPath))
-                        Files.createDirectory(featuresPath);
-
-                  if (Files.notExists(disabledPath))
-                        Files.createDirectory(disabledPath);
-            }
-            catch (IOException e) {
-                  throw new RuntimeException(e);
-            }
-
-            for (FeatureEntry entry : enabled_features) {
-                  String id = entry.pack.getId();
-                  String fileName = id.replaceFirst("backpacks/", "");
-                  Path filePath = disabledPath.resolve(fileName);
-                  if (Files.exists(filePath))
-                        try {
-                              Path targetPath = featuresPath.resolve(fileName);
-                              Files.move(filePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                              Constants.LOG.warn("Error saving features config", e);
-                        }
-
-                  packs.add(id);
-            }
-
-
-            for (FeatureEntry entry : disabled_features) {
-                  String id = entry.pack.getId();
-                  String fileName = id.replaceFirst("backpacks/", "");
-                  Path filePath = featuresPath.resolve(fileName);
-                  if (Files.exists(filePath))
-                        try {
-                              Path targetPath = disabledPath.resolve(fileName);
-                              Files.move(filePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                              Constants.LOG.warn("Error saving features config", e);
-                        }
-            }
+      @Override
+      public void onSave() {
+            FeaturesConfig featuresConfig = (FeaturesConfig) config;
+            List<String> list = enabled_features.stream().map(entry -> entry.pack.getId()).toList();
+            featuresConfig.enabled_features.set(new ArrayList<>(list));
       }
 
       private final class EnabledFeaturesRow extends FeatureSelectionRow {
@@ -210,11 +165,11 @@ public class FeaturesConfigRows extends ConfigRows {
                   int y = getY();
 
                   gui.blit(icon, x, y, 0, 0, 32, 32, 32, 32);
-                  int leftPos = x + 40;
+                  int leftPos = x + 38;
                   Font font = minecraft.font;
                   Component title = pack.getTitle();
                   gui.drawString(font, title, leftPos, y + 1, 0xFFFFFFFF);
-                  gui.drawWordWrap(font, pack.getDescription(), leftPos, y + 13, getRowWidth() - 48, 0xFFFFFFFF);
+                  gui.drawWordWrap(font, pack.getDescription(), leftPos, y + 13, getRowWidth() - 38, 0xFFFFFFFF);
 
                   if (isHovered()) {
                         int left = x - 8;

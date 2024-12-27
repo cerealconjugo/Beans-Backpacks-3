@@ -30,6 +30,10 @@ public class ListConfigVariant<ENTRY> extends ConfigVariant<ArrayList<ENTRY>> {
             return new Builder<>(encode, decode);
       }
 
+      public static Builder<String> stringList() {
+            return create(s -> s, JsonElement::getAsString);
+      }
+
       public ENTRY get(int i) {
             return value.get(i);
       }

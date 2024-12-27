@@ -23,6 +23,7 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -88,6 +89,8 @@ public interface IPlatformHelper {
     ModelResourceLocation getModelVariant(ResourceLocation location);
 
     Path getConfigDir();
+
+    Optional<Path> getModFeaturesDir();
 
     default Path getConfigPath() {
         return getConfigDir().resolve(Constants.MOD_ID);

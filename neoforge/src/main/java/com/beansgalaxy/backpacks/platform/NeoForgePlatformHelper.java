@@ -26,11 +26,13 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -139,6 +141,17 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
+    }
+
+    @Override
+    public Optional<Path> getModFeaturesDir() {
+        Optional<? extends ModContainer> optional = ModList.get().getModContainerById(Constants.MOD_ID);
+        if (optional.isEmpty())
+            return Optional.empty();
+
+        IModInfo modInfo = optional.get().getModInfo();
+        Path resourcePath = modInfo.getOwningFile().getFile().findResource("features");
+        return Optional.ofNullable(resourcePath);
     }
 
     @Override
