@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.4 Fabric <br> 0.4 NeoForge
+
+- **Major Changes**
+  - Hidden many "half-baked" items under the new Feature ["**Backpack Experiments**"](https://github.com/BeansGalaxy/Beans-Backpacks-3/wiki/Config-Options/_edit#backpack-experiments). Enabled by default but this will change soon.
+- **Config**
+  - All config now saves to sub-directory `.../config/beansbackpacks/`
+  - Added Client option `tool_belt_hud_visibility` ([*read more*](https://github.com/BeansGalaxy/Beans-Backpacks-3/wiki/Config-Options/_edit#backpack-experiments))
+  - Added new config page ["**Features**"](https://github.com/BeansGalaxy/Beans-Backpacks-3/wiki/Config-Options/_edit#backpack-experiments)
+- **Fixes**
+  - Adjusting the sizes of the Tool Belt and Shorthand now update correctly on load
+  - Config on the Server was not loading
+  - Adjusted how Allay hold Backpacks
+
+## 0.3 Fabric <br> 0.3 NeoForge
+
+- **Added Traits Config Page**
+  - Check out [the wiki](https://github.com/BeansGalaxy/Beans-Backpacks-3/wiki/Config-Options#trait-registry) for help!
+- **Item Rendering**
+  - Holding the Lunch Box and Alchemy Bag in your hand now renders at the selected item
+  - The Quiver shows the selected arrow at a glance
+  - Simplified Quiver texture for readability
+  - The Fullness Bar's color has been changed to gold to match the item's tooltip
+  - The Fullness Bar now renders under the Damage Bar
+- **Backpack Entities**
+  - Backpacks wobble once again when placed onto the ground
+  - Backpacks could be picked up through solid blocks
+  - Using the hotbar keys on an empty Bundle Menu Slot would crash the game
+- **Creative Mode**
+  - Fixed the Backpack from being unusable once an item was stored
+  - Fixed the Equipment equip sound from being played when switching gamemodes
+- **Miscellaneous**
+  - Shorthand/Toolbar HUD elements render on the same plane as the Hotbar
+  - Config Pages' order is no longer shuffled each load
+
 ## 0.2 Fabric <br> 0.2 NeoForge
 
 - **Backpack Appearance**
