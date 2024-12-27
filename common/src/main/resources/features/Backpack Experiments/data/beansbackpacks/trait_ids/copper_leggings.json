@@ -1,5 +1,5 @@
 {
-  "non": {
+  "battery": {
     "size": 10000,
     "speed": 20
   },
@@ -10,7 +10,7 @@
       "leftLeg": "beansbackpacks:backpack/copper_legging_left",
       "rightLeg": "beansbackpacks:backpack/copper_legging_right"
     },
-    "sound_event": "item.armor.equip_generic"
+    "sound_event": ["item.armor.equip_generic"]
   },
   "modifiers": [
     {

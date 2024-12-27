@@ -102,10 +102,12 @@
   "config.beansbackpacks.traits.new-title": "Register New",
   "config.beansbackpacks.traits.new-box": "namespace:trait_id",
   "config.beansbackpacks.traits.remove-trait": "Remove Trait?",
-  "config.beansbackpacks.features.description": "Enable and disable features for Beans' Backpacks to customize your experience!\n\nData Packs in either feature folder in .../config/beansbackpacks/ appear here.",
+  "config.beansbackpacks.features.description": "Enable and disable features for Beans' Backpacks to customize your experience!\n\nData Packs appear here if in '.../config/beansbackpacks/features'",
   "config.beansbackpacks.features.enabled-packs": "Enabled Features",
   "config.beansbackpacks.features.disabled-packs": "Available Features",
 
   "config.beansbackpacks.shorthand-hud.near-center": "The Shorthand will appear on the Main Hand's side of the Hotbar",
-  "config.beansbackpacks.shorthand-hud.far-corner": "The Shorthand will appear in the corner of the Screen on the Main Hand's side"
+  "config.beansbackpacks.shorthand-hud.far-corner": "The Shorthand will appear in the corner of the Screen on the Main Hand's side",
+
+  "pack.source.beansbackpacks": "backpacks"
 }
