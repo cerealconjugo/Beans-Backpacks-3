@@ -76,6 +76,22 @@ public class SlotSelection {
             }
       };
 
+      public void clamp(int slot) {
+            if (slot == 0) {
+                  slots.clear();
+                  return;
+            }
+
+            for (int key : slots.keySet()) {
+                  int selectedSlot = slots.get(key);
+                  if (selectedSlot <= slot)
+                              continue;
+
+                  slots.put(key, slot);
+            }
+
+      }
+
       public void limit(int slot, int size) {
             if (size == 0) {
                   slots.clear();

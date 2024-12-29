@@ -1,20 +1,30 @@
 package com.beansgalaxy.backpacks.mixin.client;
 
+import com.beansgalaxy.backpacks.CommonClient;
+import com.beansgalaxy.backpacks.components.StackableComponent;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -26,9 +36,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> extends Screen {
@@ -49,6 +57,8 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
 
       @Shadow @Nullable private Slot lastClickSlot;
 
+      @Shadow protected abstract List<Component> getTooltipFromContainerItem(ItemStack pStack);
+
       protected AbstractScreenMixin(Component pTitle) {
             super(pTitle);
       }
@@ -65,21 +75,43 @@ public abstract class AbstractScreenMixin<T extends AbstractContainerMenu> exten
             }
       }
 
+      @Inject(method = "renderTooltip", cancellable = true, at = @At(value = "INVOKE",
+                  target = "Lnet/minecraft/client/gui/GuiGraphics;renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;II)V"))
+      private void backpacks_renderStackable(GuiGraphics pGuiGraphics, int pX, int pY, CallbackInfo ci, @Local ItemStack itemstack) {
+            StackableComponent component = itemstack.get(ITraitData.STACKABLE);
+            if (component == null)
+                  return;
+
+            int selectedSlot = component.selection.getSelectedSlot(minecraft.player);
+            Holder<Item> item = itemstack.getItemHolder();
+            ItemStack selectedStack = component.stacks().get(selectedSlot).withItem(item);
+
+            List<Component> lines;
+            if (!selectedStack.has(DataComponents.HIDE_TOOLTIP)) {
+                  List<Component> tooltip = this.getTooltipFromContainerItem(selectedStack);
+                  lines = new ArrayList<>(tooltip);
+                  int i = selectedSlot + 1;
+                  String s = i + "/" + component.stacks().size();
+                  Component literal = Component.literal(s).withStyle(ChatFormatting.GRAY);
+                  lines.add(literal);
+            }
+            else lines = List.of();
+
+            Optional<TooltipComponent> tooltipImage = selectedStack.getTooltipImage();
+            pGuiGraphics.renderTooltip(this.font, lines, tooltipImage, pX, pY);
+            ci.cancel();
+      }
+
       @Override
       public boolean mouseScrolled(double pMouseX, double pMouseY, double pScrollX, double pScrollY) {
             if (hoveredSlot != null) {
                   ItemStack stack = hoveredSlot.getItem();
                   int containerId = menu.containerId;
                   ClientLevel level = minecraft.level;
-                  if (ItemStorageTraits.testIfPresent(stack, traits ->
-                              traits.client().mouseScrolled(traits, PatchedComponentHolder.of(stack), level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5))))
+
+                  int scrolled = Mth.floor(pScrollY + 0.5);
+                  if (CommonClient.scrollTraits(stack, level, containerId, scrolled, hoveredSlot))
                         return true;
-                  else {
-                        EnderTraits.get(stack).ifPresent(enderTraits -> enderTraits.getTrait().ifPresent(traits -> {
-                              if (traits instanceof ItemStorageTraits storageTraits)
-                                    traits.client().mouseScrolled(storageTraits, enderTraits, level, hoveredSlot, containerId, Mth.floor(pScrollY + 0.5));
-                        }));
-                  }
             }
             return super.mouseScrolled(pMouseX, pMouseY, pScrollX, pScrollY);
       }

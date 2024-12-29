@@ -10,7 +10,7 @@ public class FeaturesConfig implements IConfig {
       public ListConfigVariant<String> enabled_features;
 
       private final ConfigLine[] LINES = new ConfigLine[] {
-                  enabled_features = ListConfigVariant.stringList().build("enabled_features")
+                  enabled_features = ListConfigVariant.stringList().defau("built-in/Backpack Experiments").build("enabled_features")
       };
 
       @Override
@@ -20,6 +20,6 @@ public class FeaturesConfig implements IConfig {
 
       @Override
       public Collection<ConfigLine> getLines() {
-            return List.of(enabled_features);
+            return List.of(LINES);
       }
 }

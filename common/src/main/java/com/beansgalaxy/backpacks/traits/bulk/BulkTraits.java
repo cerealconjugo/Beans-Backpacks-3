@@ -8,6 +8,7 @@ import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
+import com.beansgalaxy.backpacks.util.EmptyStack;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
@@ -157,7 +158,7 @@ public class BulkTraits extends ItemStorageTraits {
             return stacks(bulkStacks.itemHolder(), bulkStacks.emptyStacks());
       }
 
-      static List<ItemStack> stacks(Holder<Item> item, List<BulkMutable.EmptyStack> emptyStacks) {
+      static List<ItemStack> stacks(Holder<Item> item, List<EmptyStack> emptyStacks) {
             return emptyStacks.stream().map(
                         empty -> new ItemStack(item, empty.amount(), empty.data())
             ).toList();
@@ -191,10 +192,10 @@ public class BulkTraits extends ItemStorageTraits {
 
                         BulkMutable.BulkStacks bulkList = mutable.bulkList.get();
                         Holder<Item> itemHolder = bulkList.itemHolder();
-                        List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
+                        List<EmptyStack> emptyStacks = bulkList.emptyStacks();
 
-                        Iterator<BulkMutable.EmptyStack> iterator = emptyStacks.iterator();
-                        BulkMutable.EmptyStack stack = iterator.next();
+                        Iterator<EmptyStack> iterator = emptyStacks.iterator();
+                        EmptyStack stack = iterator.next();
                         ItemStack pStack = stack.withItem(itemHolder);
                         int stackableSlot = inventory.getSlotWithRemainingSpace(pStack);
                         if (stackableSlot == -1) {
@@ -207,7 +208,7 @@ public class BulkTraits extends ItemStorageTraits {
                                     ItemStack splitStack = stack.splitItem(itemHolder, maxStackSize);
                                     do {
                                           if (!inventory.add(-1, splitStack)) {
-                                                emptyStacks.addFirst(new BulkMutable.EmptyStack(splitStack.getCount(), splitStack.getComponentsPatch()));
+                                                emptyStacks.addFirst(new EmptyStack(splitStack.getCount(), splitStack.getComponentsPatch()));
                                                 return;
                                           }
                                           splitStack = stack.splitItem(itemHolder, maxStackSize);
@@ -299,8 +300,8 @@ public class BulkTraits extends ItemStorageTraits {
             else if (EquipableComponent.get(backpack).isPresent())
             {
                   BulkMutable.BulkStacks bulkList = mutable.bulkList.get();
-                  List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
-                  BulkMutable.EmptyStack first = emptyStacks.getFirst();
+                  List<EmptyStack> emptyStacks = bulkList.emptyStacks();
+                  EmptyStack first = emptyStacks.getFirst();
                   ItemStack stack = first.splitItem(bulkList.itemHolder(), 1);
                   if (first.isEmpty())
                         emptyStacks.removeFirst();
@@ -400,7 +401,7 @@ public class BulkTraits extends ItemStorageTraits {
             if (bulkStacks == null)
                   return null;
 
-            BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
+            EmptyStack first = bulkStacks.emptyStacks().getFirst();
             Holder<Item> itemHolder = bulkStacks.itemHolder();
             return first.withCappedStackSize(itemHolder);
       }

@@ -2,6 +2,7 @@ package com.beansgalaxy.backpacks.traits.bulk;
 
 import com.beansgalaxy.backpacks.data.HopperTraitContainer;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.EmptyStack;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,8 +27,8 @@ public class BulkHopper extends HopperTraitContainer<BulkMutable> {
             if (bulkList.isEmpty())
                   return ItemStack.EMPTY;
 
-            List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
-            BulkMutable.EmptyStack first = emptyStacks.getFirst();
+            List<EmptyStack> emptyStacks = bulkList.emptyStacks();
+            EmptyStack first = emptyStacks.getFirst();
             Holder<Item> itemHolder = bulkList.itemHolder();
             int maxStackSize = first.getMaxStackSize(itemHolder);
             int min = Math.min(maxStackSize, first.amount);
@@ -43,8 +44,8 @@ public class BulkHopper extends HopperTraitContainer<BulkMutable> {
             if (bulkList.isEmpty())
                   return ItemStack.EMPTY;
 
-            List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
-            BulkMutable.EmptyStack first = emptyStacks.getFirst();
+            List<EmptyStack> emptyStacks = bulkList.emptyStacks();
+            EmptyStack first = emptyStacks.getFirst();
             Holder<Item> itemHolder = bulkList.itemHolder();
             int maxStackSize = first.getMaxStackSize(itemHolder);
             int min = Math.min(maxStackSize, first.amount);
@@ -61,8 +62,8 @@ public class BulkHopper extends HopperTraitContainer<BulkMutable> {
             if (bulkList.isEmpty())
                   return ItemStack.EMPTY;
 
-            List<BulkMutable.EmptyStack> emptyStacks = bulkList.emptyStacks();
-            BulkMutable.EmptyStack first = emptyStacks.getFirst();
+            List<EmptyStack> emptyStacks = bulkList.emptyStacks();
+            EmptyStack first = emptyStacks.getFirst();
             Holder<Item> itemHolder = bulkList.itemHolder();
             int maxStackSize = first.getMaxStackSize(itemHolder);
             int min = Math.min(maxStackSize, first.amount);

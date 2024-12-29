@@ -4,6 +4,7 @@ import com.beansgalaxy.backpacks.Constants;
 import com.beansgalaxy.backpacks.traits.IClientTraits;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.common.BackpackEntity;
+import com.beansgalaxy.backpacks.util.EmptyStack;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.TraitTooltip;
 import com.mojang.blaze3d.platform.Window;
@@ -19,7 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class BulkClient implements IClientTraits<BulkTraits> {
             BulkMutable.BulkStacks bulkStacks = holder.get(ITraitData.BULK_STACKS);
             if (bulkStacks != null) {
                   Minecraft minecraft = Minecraft.getInstance();
-                  BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
+                  EmptyStack first = bulkStacks.emptyStacks().getFirst();
                   ItemStack stack = first.withItem(bulkStacks.itemHolder());
                   Component title = Constants.getName(stack);
 
@@ -86,7 +86,7 @@ public class BulkClient implements IClientTraits<BulkTraits> {
                   return;
             }
 
-            BulkMutable.EmptyStack first = bulkStacks.emptyStacks().getFirst();
+            EmptyStack first = bulkStacks.emptyStacks().getFirst();
             ItemStack item = first.withItem(bulkStacks.itemHolder());
             int amount = bulkStacks.amount();
 

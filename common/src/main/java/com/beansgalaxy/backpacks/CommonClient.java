@@ -1,21 +1,27 @@
 package com.beansgalaxy.backpacks;
 
+import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.access.MinecraftAccessor;
 import com.beansgalaxy.backpacks.client.KeyPress;
+import com.beansgalaxy.backpacks.components.StackableComponent;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.EnderStorage;
 import com.beansgalaxy.backpacks.data.config.ClientConfig;
 import com.beansgalaxy.backpacks.data.config.options.ShorthandHUD;
 import com.beansgalaxy.backpacks.data.config.options.ToolBeltHUD;
+import com.beansgalaxy.backpacks.network.serverbound.SyncSelectedSlot;
 import com.beansgalaxy.backpacks.screen.BackSlot;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
+import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.Traits;
 import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
+import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.beansgalaxy.backpacks.util.Tint;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,6 +32,7 @@ import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -41,6 +48,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -52,6 +60,7 @@ import net.minecraft.world.phys.HitResult;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public class CommonClient {
@@ -502,5 +511,51 @@ public class CommonClient {
                   ResourceLocation texture = equipable.backpackTexture();
                   return texture != null;
             }).orElse(false);
+      }
+
+      public static boolean scrollTraits(ItemStack stack, ClientLevel level, int containerId, int scrolled, Slot hoveredSlot) {
+            StackableComponent component = stack.get(ITraitData.STACKABLE);
+            if (component != null) {
+                  LocalPlayer player = Minecraft.getInstance().player;
+                  int startSlot = component.selection.getSelectedSlot(player);
+
+                  ItemStack carried = player.containerMenu.getCarried();
+                  if (!carried.isEmpty())
+                        return false;
+
+
+                  int selectedSlot = startSlot - scrolled;
+                  int size = component.stacks().size();
+                  int i = size == 0 || selectedSlot < 0 ? 0
+                          : Math.min(selectedSlot, size - 1);
+
+                  if (startSlot == i)
+                        return true;
+
+                  component.selection.setSelectedSlot(player, i);
+                  SyncSelectedSlot.send(containerId, hoveredSlot.index, i);
+
+                  return true;
+            }
+
+            Optional<ItemStorageTraits> optionalStorage = ItemStorageTraits.get(stack);
+            if (optionalStorage.isPresent()) {
+                  ItemStorageTraits traits = optionalStorage.get();
+                  PatchedComponentHolder holder = PatchedComponentHolder.of(stack);
+                  return traits.client().mouseScrolled(traits, holder, level, hoveredSlot, containerId, scrolled);
+            }
+
+            Optional<EnderTraits> optionalEnder = EnderTraits.get(stack);
+            if (optionalEnder.isPresent()) {
+                  EnderTraits enderTraits = optionalEnder.get();
+                  Optional<GenericTraits> optional = enderTraits.getTrait();
+                  if (optional.isPresent()) {
+                        GenericTraits traits = optional.get();
+                        if (traits instanceof ItemStorageTraits storageTraits) {
+                              return traits.client().mouseScrolled(storageTraits, enderTraits, level, hoveredSlot, containerId, scrolled);
+                        }
+                  }
+            }
+            return false;
       }
 }

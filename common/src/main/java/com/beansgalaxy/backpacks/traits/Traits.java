@@ -24,6 +24,7 @@ import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxCodecs;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverCodecs;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
+import com.beansgalaxy.backpacks.traits.stacking.StackingTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.NonNullList;
@@ -86,6 +87,9 @@ public interface Traits {
       TraitComponentKind<ChestTraits>
                   CHEST = TraitComponentKind.register(ChestTraits.NAME, ChestCodecs.INSTANCE);
 
+      TraitComponentKind<StackingTraits>
+                  STACKING = TraitComponentKind.register(StackingTraits.NAME, StackingTraits.CODECS);
+
       List<TraitComponentKind<? extends GenericTraits>> ALL_TRAITS = List.of(
                   BUNDLE,     LUNCH_BOX,        BULK,       BUCKET,
                   BATTERY,    EXPERIENCE,       QUIVER,     ALCHEMY,
@@ -130,6 +134,14 @@ public interface Traits {
                   Optional<GenericTraits> traits = get(stack);
                   traits.ifPresent(runnable);
             }
+      }
+
+      static void runIfPresent(ItemStack stack, Consumer<GenericTraits> runnable, Runnable orElse) {
+            if (!stack.isEmpty()) {
+                  Optional<GenericTraits> traits = get(stack);
+                  traits.ifPresentOrElse(runnable, orElse);
+            }
+            else orElse.run();
       }
 
       static boolean testIfPresent(ItemStack stack, Predicate<GenericTraits> predicate) {

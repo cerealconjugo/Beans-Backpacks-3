@@ -39,7 +39,7 @@ public abstract class ItemStorageTraits extends GenericTraits {
             super(sound);
       }
 
-      private static Optional<ItemStorageTraits> get(DataComponentHolder stack) {
+      public static Optional<ItemStorageTraits> get(DataComponentHolder stack) {
             for (TraitComponentKind<? extends ItemStorageTraits> type : Traits.STORAGE_TRAITS) {
                   ItemStorageTraits traits = stack.get(type);
                   if (traits != null)
