@@ -24,7 +24,6 @@ import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxCodecs;
 import com.beansgalaxy.backpacks.traits.lunch_box.LunchBoxTraits;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverCodecs;
 import com.beansgalaxy.backpacks.traits.quiver.QuiverTraits;
-import com.beansgalaxy.backpacks.traits.stacking.StackingTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.NonNullList;
@@ -44,7 +43,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public interface Traits {
-
       DataComponentType<PlaceableComponent>
                   PLACEABLE = register(PlaceableComponent.NAME, PlaceableComponent.CODEC, PlaceableComponent.STREAM_CODEC);
 
@@ -86,9 +84,6 @@ public interface Traits {
 
       TraitComponentKind<ChestTraits>
                   CHEST = TraitComponentKind.register(ChestTraits.NAME, ChestCodecs.INSTANCE);
-
-      TraitComponentKind<StackingTraits>
-                  STACKING = TraitComponentKind.register(StackingTraits.NAME, StackingTraits.CODECS);
 
       List<TraitComponentKind<? extends GenericTraits>> ALL_TRAITS = List.of(
                   BUNDLE,     LUNCH_BOX,        BULK,       BUCKET,

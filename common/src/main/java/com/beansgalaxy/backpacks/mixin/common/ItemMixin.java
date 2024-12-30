@@ -73,7 +73,7 @@ public class ItemMixin {
 
       @Inject(method = "overrideOtherStackedOnMe", cancellable = true, at = @At("TAIL"))
       private void backpacks_stackableOnMe(ItemStack pStack, ItemStack pOther, Slot pSlot, ClickAction pAction, Player pPlayer, SlotAccess pAccess, CallbackInfoReturnable<Boolean> cir) {
-            StackableComponent.stackItems(pStack, pOther, pSlot, pAction, pPlayer, pAccess, cir);
+            StackableComponent.newStackItems(pStack, pSlot, pOther, pAccess, pAction, pPlayer, cir);
       }
 
       @Inject(method = "inventoryTick", at = @At("HEAD"))

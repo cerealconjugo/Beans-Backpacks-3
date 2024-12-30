@@ -1,13 +1,13 @@
 package com.beansgalaxy.backpacks.mixin.common;
 
 import com.beansgalaxy.backpacks.access.BackData;
+import com.beansgalaxy.backpacks.components.StackableComponent;
 import com.beansgalaxy.backpacks.components.ender.EnderTraits;
 import com.beansgalaxy.backpacks.components.equipable.EquipableComponent;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import com.beansgalaxy.backpacks.shorthand.ShortContainer;
 import com.beansgalaxy.backpacks.shorthand.Shorthand;
 import com.beansgalaxy.backpacks.traits.Traits;
-import com.beansgalaxy.backpacks.traits.generic.GenericTraits;
 import com.beansgalaxy.backpacks.traits.generic.ItemStorageTraits;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +42,10 @@ public abstract class InventoryMixin implements BackData {
       @Shadow @Final public Player player;
       @Shadow @Final public NonNullList<ItemStack> items;
       @Shadow public int selected;
+
+      @Shadow public abstract int getSlotWithRemainingSpace(ItemStack pStack);
+
+      @Shadow public abstract ItemStack getItem(int pIndex);
 
       @Inject(method = "tick", at = @At("TAIL"))
       public void tickCarriedBackpack(CallbackInfo ci)
@@ -104,7 +107,43 @@ public abstract class InventoryMixin implements BackData {
                         ItemStack backpack = player.getItemBySlot(equipmentSlot);
                         return traits.pickupToBackpack(player, equipmentSlot, instance, backpack, stack, cir);
                   });
+
+
+                  ItemStack selectedStack = this.getItem(this.selected);
+                  if (this.backpacks_hasSpaceForStackable(selectedStack, stack)) {
+                        if (StackableComponent.stackItems(instance, selected, selectedStack, stack)) {
+                              cir.setReturnValue(true);
+                        }
+                  }
+
+                  ItemStack offHandStack = this.getItem(40);
+                  if (this.backpacks_hasSpaceForStackable(offHandStack, stack)) {
+                        if (StackableComponent.stackItems(instance, 40, offHandStack, stack)) {
+                              cir.setReturnValue(true);
+                        }
+                  }
+
+                  for(int i = 0; i < this.items.size(); ++i) {
+                        ItemStack destination = this.items.get(i);
+                        if (this.backpacks_hasSpaceForStackable(destination, stack)) {
+                              if (StackableComponent.stackItems(instance, i, destination, stack)) {
+                                    cir.setReturnValue(true);
+                              }
+                        }
+                  }
             }
+      }
+
+      @Unique
+      private boolean backpacks_hasSpaceForStackable(ItemStack pDestination, ItemStack pOrigin) {
+            if (pOrigin.isEmpty())
+                  return true;
+
+            return pOrigin.getCount() < pOrigin.getMaxStackSize()
+                        && !pDestination.isEmpty()
+                        && ItemStack.isSameItem(pDestination, pOrigin)
+                        && pDestination.isStackable()
+                        && pDestination.getCount() < pDestination.getMaxStackSize();
       }
 
       @Inject(method = "add(ILnet/minecraft/world/item/ItemStack;)Z", at = @At("RETURN"), cancellable = true)

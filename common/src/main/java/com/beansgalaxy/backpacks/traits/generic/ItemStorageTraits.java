@@ -5,6 +5,8 @@ import com.beansgalaxy.backpacks.screen.TinyClickType;
 import com.beansgalaxy.backpacks.traits.ITraitData;
 import com.beansgalaxy.backpacks.traits.TraitComponentKind;
 import com.beansgalaxy.backpacks.traits.Traits;
+import com.beansgalaxy.backpacks.util.DraggingContainer;
+import com.beansgalaxy.backpacks.util.DraggingTrait;
 import com.beansgalaxy.backpacks.util.ModSound;
 import com.beansgalaxy.backpacks.util.PatchedComponentHolder;
 import com.mojang.datafixers.util.Pair;
@@ -19,6 +21,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -33,7 +36,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public abstract class ItemStorageTraits extends GenericTraits {
+public abstract class ItemStorageTraits extends GenericTraits implements DraggingTrait {
 
       public ItemStorageTraits(ModSound sound) {
             super(sound);
@@ -243,4 +246,28 @@ public abstract class ItemStorageTraits extends GenericTraits {
       }
 
       public abstract void tinyMenuClick(PatchedComponentHolder holder, int index, TinyClickType clickType, SlotAccess carriedAccess, Player player);
+
+      public void clickSlot(DraggingContainer drag, Player player, PatchedComponentHolder holder) {
+            Slot slot = drag.backpackDraggedSlot;
+
+            if (drag.backpackDragType == 0) {
+                  ItemStack itemStack = getFirst(holder);
+                  if (itemStack != null && !slot.hasItem()) {
+                        if (AbstractContainerMenu.canItemQuickReplace(slot, itemStack, true) && slot.mayPlace(itemStack)) {
+                              drag.backpackDraggedSlots.put(slot, ItemStack.EMPTY);
+                              drag.slotClicked(slot, slot.index, 1, ClickType.PICKUP);
+                        }
+                  }
+            } else {
+                  ItemStack stack = slot.getItem();
+                  boolean mayPickup = slot.mayPickup(player);
+                  boolean hasItem = slot.hasItem();
+                  boolean canFit = canItemFit(holder, stack);
+                  boolean isFull = isFull(holder);
+                  if (mayPickup && hasItem && canFit && !isFull) {
+                        drag.backpackDraggedSlots.put(drag.backpackDraggedSlot, stack.copyWithCount(1));
+                        drag.slotClicked(slot, slot.index, 1, ClickType.PICKUP);
+                  }
+            }
+      }
 }

@@ -29,6 +29,10 @@ public final class EmptyStack {
             this.data = data;
       }
 
+      public static EmptyStack of(ItemStack stack) {
+            return new EmptyStack(stack.getCount(), stack.getComponentsPatch());
+      }
+
       public int amount() {
             return amount;
       }

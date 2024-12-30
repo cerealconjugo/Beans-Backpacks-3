@@ -558,4 +558,14 @@ public class CommonClient {
             }
             return false;
       }
+
+      public static void addStackableLines(int selectedSlot, StackableComponent component, List<Component> lines) {
+            MutableComponent empty = Component.empty();
+            MutableComponent pre = Component.literal("|".repeat(selectedSlot)).withStyle(ChatFormatting.GRAY);
+            empty.append(pre).append(Component.literal("|").withStyle(ChatFormatting.GOLD));
+            int postCount = component.stacks().size() - 1 - selectedSlot;
+            MutableComponent post = Component.literal("|".repeat(postCount)).withStyle(ChatFormatting.GRAY);
+            empty.append(post);
+            lines.add(empty);
+      }
 }
