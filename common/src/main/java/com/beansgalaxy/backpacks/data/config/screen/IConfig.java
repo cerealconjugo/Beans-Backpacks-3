@@ -35,7 +35,7 @@ public interface IConfig {
                   Path path = Services.PLATFORM.getConfigPath();
                   Path resolve = path.resolve(getPath() + ".json5");
                   if (!Files.exists(resolve))
-                        resolve = Services.PLATFORM.getConfigDir().resolve(Constants.MOD_ID + '-' + getPath() + ".json5");
+                        resolve = getLegacyLocation();
 
                   String json5Content = new String(Files.readAllBytes(resolve));
 
@@ -49,6 +49,11 @@ public interface IConfig {
 
             if (andWrite)
                   this.write();
+      }
+
+      @Deprecated(since="0.4-beta")
+      private Path getLegacyLocation() {
+            return Services.PLATFORM.getConfigDir().resolve(Constants.MOD_ID + '-' + getPath() + ".json5");
       }
 
       default void write() {

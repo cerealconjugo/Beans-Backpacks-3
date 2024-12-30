@@ -22,7 +22,7 @@ public class ServerPackSource {
             Path featuresPath = DataFeaturesSource.getPath();
             if (Files.notExists(featuresPath)) {
                   try {
-                        Files.createDirectory(featuresPath);
+                        Files.createDirectories(featuresPath);
                   } catch (IOException ignored) {
                         Constants.LOG.warn("Failed to create Data Features Directory at; {}", featuresPath);
                   }

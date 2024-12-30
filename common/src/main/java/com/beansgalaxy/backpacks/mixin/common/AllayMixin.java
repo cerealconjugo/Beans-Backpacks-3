@@ -127,8 +127,6 @@ public abstract class AllayMixin extends PathfinderMob implements ViewableAccess
 
       @Inject(method = "mobInteract", cancellable = true, at = @At("HEAD"))
       private void backpacksMobInteract(Player player, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
-            // TODO: write for instant place too !!including body item check!!
-
             ItemStack inHand = player.getItemInHand(pHand);
             if (isDancing() && isDuplicationItem(inHand) && canDuplicate())
                   return;

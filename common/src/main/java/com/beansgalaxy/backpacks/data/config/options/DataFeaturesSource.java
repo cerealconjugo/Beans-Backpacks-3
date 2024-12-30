@@ -30,10 +30,11 @@ public interface DataFeaturesSource {
                   addPacks(addPack, "built-in/", path)
             );
 
-            Path features = Services.PLATFORM.getConfigPath().resolve("features");
+            Path features = DataFeaturesSource.getPath();
             if (!addPacks(addPack, "feature/", features)) {
+
                   try {
-                        Files.createDirectory(features);
+                        Files.createDirectories(features);
                   } catch (IOException e) {
                         throw new RuntimeException(e);
                   }
