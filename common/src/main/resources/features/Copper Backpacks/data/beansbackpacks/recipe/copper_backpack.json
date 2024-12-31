@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "iPi",
+    "i i",
+    "iPi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:copper_ingot"
+    },
+    "P": {
+      "item": "minecraft:phantom_membrane"
+    }
+  },
+  "result": {
+    "id": "beansbackpacks:gold_backpack",
+    "components": {
+      "beansbackpacks:reference": "beansbackpacks:copper_backpack",
+      "minecraft:item_name": "{\"type\": \"translatable\", \"translate\": \"item.beansbackpacks.copper_backpack\"}",
+      "minecraft:custom_model_data": 1
+    },
+    "count": 1
+  }
+}
