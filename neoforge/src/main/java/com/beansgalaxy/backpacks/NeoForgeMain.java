@@ -115,8 +115,7 @@ public class NeoForgeMain {
             int slot = inventory.selected - inventory.items.size();
             if (slot > 0) {
                 Shorthand shorthand = Shorthand.get(player);
-                int weaponSelection = slot - shorthand.tools.getContainerSize();
-                if (weaponSelection < 0)
+                if (shorthand.getTimer() != 0)
                     shorthand.resetSelected(inventory);
             }
         }

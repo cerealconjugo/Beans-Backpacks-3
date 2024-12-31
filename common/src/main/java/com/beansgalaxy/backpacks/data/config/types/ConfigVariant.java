@@ -55,7 +55,7 @@ public abstract class ConfigVariant<T> implements ConfigLine {
             return value;
       }
 
-      public T getDefau() {
+      public T defau() {
             return defau;
       }
 }

@@ -15,10 +15,9 @@ public class InteractBlockCallback implements UseBlockCallback {
       public InteractionResult interact(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
             Inventory inventory = player.getInventory();
             int slot = inventory.selected - inventory.items.size();
-            if (slot > 0) {
+            if (slot >= 0) {
                   Shorthand shorthand = Shorthand.get(player);
-                  int weaponSelection = slot - shorthand.tools.getContainerSize();
-                  if (weaponSelection < 0)
+                  if (shorthand.getTimer() != 0)
                         shorthand.resetSelected(inventory);
             }
 

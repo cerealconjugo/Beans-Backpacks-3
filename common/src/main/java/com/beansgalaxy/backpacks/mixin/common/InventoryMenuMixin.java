@@ -30,7 +30,7 @@ public abstract class InventoryMenuMixin extends RecipeBookMenu<CraftingInput, C
             for (int i = 0; i < 9; i++)
                   this.addSlot(new ShorthandSlot.ToolSlot(shorthand, i));
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 4; i++)
                   this.addSlot(new ShorthandSlot.WeaponSlot(shorthand, i));
       }
 }

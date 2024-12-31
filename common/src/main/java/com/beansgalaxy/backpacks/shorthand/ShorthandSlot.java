@@ -65,15 +65,11 @@ public abstract class ShorthandSlot extends Slot {
             }
 
             private static ResourceLocation getIcon(int i) {
-                  return switch (i % 8) {
-                        case 1 -> ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
-                        case 2 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_bow");
-                        case 3 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_trident");
-                        case 4 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_fishing_rod");
-                        case 5 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_mace");
-                        case 6 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_bone");
-                        case 7 -> ResourceLocation.withDefaultNamespace("item/empty_slot_pickaxe");
-                        default -> ResourceLocation.withDefaultNamespace("item/empty_slot_sword");
+                  return switch (i % 4) {
+                        default -> ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
+                        case 1 -> ResourceLocation.withDefaultNamespace("item/empty_slot_pickaxe");
+                        case 2 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_shears");
+                        case 3 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_bone");
                   };
             }
 
@@ -87,12 +83,17 @@ public abstract class ShorthandSlot extends Slot {
 
             @Override
             public boolean mayPlace(ItemStack stack) {
+                  Item item = stack.getItem();
+                  if (ShorthandSlot.isTool(stack) || ServerSave.CONFIG.shorthand_additions.get().contains(item))
+                        return true;
+
+                  if (!ServerSave.CONFIG.allow_shorthand_weapons.get())
+                        return false;
+
                   if (ShorthandSlot.stackHasAttribute(stack))
                         return true;
 
-                  Item item = stack.getItem();
-                  return item instanceof ProjectileWeaponItem
-                  || ServerSave.CONFIG.shorthand_additions.get().contains(item);
+                  return item instanceof ProjectileWeaponItem;
             }
 
             @Nullable @Override
@@ -103,25 +104,26 @@ public abstract class ShorthandSlot extends Slot {
 
       public static class ToolSlot extends ShorthandSlot {
             private final ResourceLocation icon;
+            private final Shorthand shorthand;
 
             public ToolSlot(Shorthand shorthand, int slot) {
                   super(shorthand.tools, slot, getX(slot), getY(slot));
+                  this.shorthand = shorthand;
                   this.icon = getIcon(slot);
             }
 
             private static ResourceLocation getIcon(int i) {
-                  return switch (i % 8) {
-                        case 1, 6 -> ResourceLocation.withDefaultNamespace("item/empty_slot_shovel");
-                        case 2 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_shears");
-                        case 3 -> ResourceLocation.withDefaultNamespace("item/empty_slot_hoe");
-                        case 4 -> ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
-                        case 7 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_stick");
+                  return switch (i % 6) {
+                        case 0 -> ResourceLocation.withDefaultNamespace("item/empty_slot_shovel");
                         default -> ResourceLocation.withDefaultNamespace("item/empty_slot_pickaxe");
+                        case 2 -> ResourceLocation.withDefaultNamespace("item/empty_slot_hoe");
+                        case 4 -> ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "item/empty_slot_stick");
+                        case 5 -> ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
                   };
             }
 
             public static int getX(int slot) {
-                  return 8 + (slot * 18);
+                  return 151 - (slot * 18);
             }
 
             public static int getY(int slot) {
@@ -136,6 +138,28 @@ public abstract class ShorthandSlot extends Slot {
             @Nullable @Override
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                   return Pair.of(InventoryMenu.BLOCK_ATLAS, icon);
+            }
+
+            public ItemStack getItem() {
+                  return this.container.getItem(this.getContainerSlot());
+            }
+
+            public void set(ItemStack pStack) {
+                  this.container.setItem(this.getContainerSlot(), pStack);
+                  this.setChanged();
+            }
+
+            public ItemStack remove(int pAmount) {
+                  return this.container.removeItem(this.getContainerSlot(), pAmount);
+            }
+
+            public int getContainerSlot() {
+                  return super.getContainerSlot() - shorthand.getWeaponsSize();
+            }
+
+            @Override
+            public boolean isActive() {
+                  return getContainerSlot() >= 0 && super.isActive();
             }
       }
 }

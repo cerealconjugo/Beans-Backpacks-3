@@ -1,20 +1,14 @@
 package com.beansgalaxy.backpacks.shorthand;
 
-import com.beansgalaxy.backpacks.CommonClass;
 import com.beansgalaxy.backpacks.access.BackData;
 import com.beansgalaxy.backpacks.data.ServerSave;
 import com.beansgalaxy.backpacks.network.clientbound.SendWeaponSlot;
 import com.google.common.collect.Iterables;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.*;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Iterator;
@@ -117,17 +111,11 @@ public class Shorthand {
       }
 
       public int getToolsSize() {
-            int maxSlot = 8 - weapons.getContainerSize();
-            int offset = ServerSave.CONFIG.tool_belt_size.get() - 2;
-            double attributeValue = owner.getAttributeValue(CommonClass.TOOL_BELT_ATTRIBUTE) + offset;
-            return Mth.clamp((int) attributeValue, 0, maxSlot);
+            return ServerSave.CONFIG.getToolBeltSize(owner);
       }
 
       public int getWeaponsSize() {
-            int offset = ServerSave.CONFIG.shorthand_size.get() - 1;
-            double attributeValue = owner.getAttributeValue(CommonClass.SHORTHAND_ATTRIBUTE) + offset;
-            int clamp = Mth.clamp((int) attributeValue, 0, 8);
-            return clamp;
+            return ServerSave.CONFIG.getShorthandSize(owner);
       }
 
       public void dropOverflowItems(ShortContainer container) {
@@ -159,7 +147,8 @@ public class Shorthand {
 
             boolean saveItemsIfBroken = !ServerSave.CONFIG.tool_belt_break_items.get();
             boolean requiresToolForDrops = blockState.requiresCorrectToolForDrops();
-            for (int i = 0; i < tools.getContainerSize(); i++) {
+            int toolSize = tools.getContainerSize();
+            for (int i = 0; i < toolSize; i++) {
                   ItemStack tool = tools.getItem(i);
 
                   if (saveItemsIfBroken) {
@@ -174,28 +163,38 @@ public class Shorthand {
                               topSpeed = destroySpeed;
                               slot = i;
                         }
-                        else if (!requiresToolForDrops) 
+                        else if (!requiresToolForDrops)
                               canadate = i;
+                  }
+            }
+
+            if (slot == -1) {
+                  for (int i = 0; i < weapons.getContainerSize(); i++) {
+                        ItemStack tool = weapons.getItem(i);
+
+                        if (saveItemsIfBroken) {
+                              int remainingUses = tool.getMaxDamage() - tool.getDamageValue();
+                              if (remainingUses < 2)
+                                    continue;
+                        }
+
+                        float destroySpeed = tool.getItem().getDestroySpeed(tool, blockState);
+                        if (destroySpeed > topSpeed) {
+                              if (tool.getItem().isCorrectToolForDrops(tool, blockState)) {
+                                    topSpeed = destroySpeed;
+                                    slot = toolSize + i;
+                              }
+                        }
                   }
             }
 
             return slot == -1 ? canadate : slot;
       }
 
-      private float getBlockHardness(BlockState blockState, BlockPos pos) {
-            Level level = owner.level();
-            BlockGetter chunkForCollisions = level.getChunkForCollisions(
-                        SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
-
-            if (chunkForCollisions == null) return 1f;
-
-            return blockState.getDestroySpeed(chunkForCollisions, pos);
-      }
-
       public void onAttackBlock(BlockState blockState, float blockHardness) {
             Inventory inv = owner.getInventory();
             int weaponSlot = inv.selected - inv.items.size() - tools.getContainerSize();
-            if (weaponSlot >= 0)
+            if (weaponSlot >= 0 && timer == 0)
                   return;
 
             if (blockHardness < 0.1f)
@@ -220,6 +219,10 @@ public class Shorthand {
 
       private void setTimer(int time) {
             this.timer = time;
+      }
+
+      public int getTimer() {
+            return timer;
       }
 
       public Iterable<ItemStack> getContent() {
@@ -266,15 +269,13 @@ public class Shorthand {
             oToolSize = tools.getContainerSize();
             oWeaponSize = weapons.getContainerSize();
 
+            tickToolBeltTimer(inventory, slot);
+      }
+
+      private void tickToolBeltTimer(Inventory inventory, int slot) {
             if (size() <= slot || slot < 0) {
                   if (inventory.selected >= inventory.items.size())
                         inventory.selected = heldSelected;
-                  timer = 0;
-                  return;
-            }
-
-            boolean isToolSelected = slot < tools.getContainerSize();
-            if (!isToolSelected) {
                   timer = 0;
                   return;
             }
@@ -283,7 +284,7 @@ public class Shorthand {
                   resetSelected(inventory);
 
             if (timer > 0) {
-                  if (tools.getItem(slot).isEmpty())
+                  if (getItem(slot).isEmpty())
                         resetSelected(inventory);
                   timer--;
             }
@@ -292,6 +293,7 @@ public class Shorthand {
       public void resetSelected(Inventory inventory) {
             if (inventory.selected >= inventory.items.size())
                   inventory.selected = heldSelected;
+            timer = 0;
       }
 
       public int getSelected(Inventory instance) {

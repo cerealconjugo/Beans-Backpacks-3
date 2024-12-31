@@ -180,41 +180,43 @@ public class CommonClient {
 
 // ===================================================================================================================== SHORTHAND CLIENT
 
-      private static final ResourceLocation TOOL_BELT_SLOTS_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_belt_start.png");
-      private static final ResourceLocation TOOL_BELT_SLOTS_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/tool_belt_stop.png");
-      private static final ResourceLocation SHORTHAND_SLOTS_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand_start.png");
-      private static final ResourceLocation SHORTHAND_SLOTS_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand_stop.png");
-      private static final ResourceLocation BACK_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/back_slot.png");
 
       public static float getHandHeight(float mainHandHeight) {
             return 1f - mainHandHeight;
       }
 
+      private static final ResourceLocation BACK_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/back_slot.png");
+      private static final ResourceLocation SHORTHAND_START = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand/start.png");
+      private static final ResourceLocation SHORTHAND_STOP = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand/stop.png");
+      private static final ResourceLocation SHORTHAND_END = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand/end.png");
+      private static final ResourceLocation SHORTHAND_SLOT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand/shorthand.png");
+      private static final ResourceLocation SHORTHAND_TOOL_BELT = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/slots/shorthand/tool_belt.png");
+
       public static void renderShorthandSlots(GuiGraphics graphics, int leftPos, int topPos, int imageWidth, int imageHeight, LocalPlayer player) {
-//            int x = leftPos + imageWidth - 11;
-//            int y = topPos + imageHeight;
-//            graphics.blit(V_START, x, y - 32, 10, 0, 0, 32, 32, 32, 32);
-//            graphics.blit(V_SWORD, x, y - 32, 10, 0, 0, 32, 32, 32, 32);
-//            for (int i = 0; i < shorthand.tools.getContainerSize(); i++)
-//                  graphics.blit(V_TOOL, x, (y) - 54 - (i * 18), 20 + (i * 10), 0, 0, 32, 32, 32, 32);
+            graphics.blit(BACK_SLOT, leftPos + BackSlot.X - 1, topPos + BackSlot.Y - 1, 10, 0, 0, 18, 18, 18, 18);
 
             Shorthand shorthand = Shorthand.get(player);
             int hX = leftPos + imageWidth;
             int hY = topPos + imageHeight - 10;
             int weaponsContainerSize = shorthand.weapons.getContainerSize();
-            if (weaponsContainerSize != 0) {
-                  graphics.blit(SHORTHAND_SLOTS_START, hX - 32, hY, 10, 0, 0, 32, 32, 32, 32);
-                  for (int i = 0; i < weaponsContainerSize; i++)
-                        graphics.blit(SHORTHAND_SLOTS_STOP, hX - 32 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
-            }
             int toolsContainerSize = shorthand.tools.getContainerSize();
-            if (toolsContainerSize != 0) {
-                  graphics.blit(TOOL_BELT_SLOTS_START, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
-                  for (int i = 0; i < toolsContainerSize; i++)
-                        graphics.blit(TOOL_BELT_SLOTS_STOP, leftPos + (i * 18), hY, 20 + (i * 10), 0, 0, 32, 32, 32, 32);
-            }
+            int totalSize = weaponsContainerSize + toolsContainerSize;
+            if (totalSize == 0)
+                  return;
 
-            graphics.blit(BACK_SLOT, leftPos + BackSlot.X - 1, topPos + BackSlot.Y - 1, 10, 0, 0, 18, 18, 18, 18);
+            graphics.blit(SHORTHAND_START, hX - 32, hY, 10, 0, 0, 32, 32, 32, 32);
+            int i = 0;
+            while (i < totalSize) {
+                  ResourceLocation slot = i < weaponsContainerSize
+                                    ? SHORTHAND_SLOT : SHORTHAND_TOOL_BELT;
+
+                  graphics.blit(slot, hX - 32 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
+                  i++;
+            }
+            if (totalSize == 9)
+                  graphics.blit(SHORTHAND_END, leftPos, hY, 10, 0, 0, 32, 32, 32, 32);
+            else
+                  graphics.blit(SHORTHAND_STOP, hX - 14 - (i * 18), hY, 10, 0, 0, 32, 32, 32, 32);
       }
 
       private static final ResourceLocation SHORTHAND_SINGLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"shorthand_single");
@@ -374,6 +376,10 @@ public class CommonClient {
                         if (destroySpeed >= 0.1f)
                               toolBeltSlot = shorthand.getQuickestSlot(blockState);
                   }
+
+                  int containerSize = shorthand.tools.getContainerSize();
+                  if (toolBeltSlot >= containerSize)
+                        return;
             }
 
             if (toolBeltSlot == -1)

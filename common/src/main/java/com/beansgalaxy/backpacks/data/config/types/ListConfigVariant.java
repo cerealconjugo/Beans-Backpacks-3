@@ -40,7 +40,7 @@ public class ListConfigVariant<ENTRY> extends ConfigVariant<ArrayList<ENTRY>> {
 
       @Override
       public String encode() {
-            if (!validate.test(value)) value = getDefau();
+            if (!validate.test(value)) value = defau();
 
             StringBuilder sb = new StringBuilder().append(this);
             sb.append('[');

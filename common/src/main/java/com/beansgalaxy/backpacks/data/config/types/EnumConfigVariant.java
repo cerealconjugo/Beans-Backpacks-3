@@ -26,7 +26,7 @@ public class EnumConfigVariant<T extends Enum<T>> extends ConfigVariant<T> {
             while (iterator.hasNext()) {
                   T next = iterator.next();
                   sb.append(next);
-                  if (next == getDefau())
+                  if (next == defau())
                         sb.append(" (Default)");
                   if(iterator.hasNext())
                         sb.append(" : ");

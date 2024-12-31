@@ -60,9 +60,9 @@ public class CommonClass {
 
 
       public static final Holder<Attribute> TOOL_BELT_ATTRIBUTE = Services.PLATFORM.register("player.tool_belt",
-                new RangedAttribute("attribute.name.player.tool_belt", 2, 0, 8).setSyncable(true));
+                new RangedAttribute("attribute.name.player.tool_belt", 2, 0, 5).setSyncable(true));
       public static final Holder<Attribute> SHORTHAND_ATTRIBUTE = Services.PLATFORM.register("player.shorthand",
-                new RangedAttribute("attribute.name.player.shorthand", 1, 0, 8).setSyncable(true));
+                new RangedAttribute("attribute.name.player.shorthand", 1, 0, 4).setSyncable(true));
 
       public static void init() {
         ModSound.Events.register();

@@ -198,7 +198,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  bool.set(bool.getDefau());
+                  bool.set(bool.defau());
             }
 
             static Component getTranslatedValue(boolean value) {
@@ -255,7 +255,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  value.set(value.getDefau());
+                  value.set(value.defau());
             }
 
             Component getTranslatedValue(T value) {
@@ -297,7 +297,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  value.set(value.getDefau());
+                  value.set(value.defau());
             }
 
             private void close() {
@@ -361,7 +361,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  value.set(value.getDefau());
+                  value.set(value.defau());
             }
 
             private List<Item> searchResults = List.of();
@@ -512,7 +512,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  value.set(new ArrayList<>(value.getDefau()));
+                  value.set(new ArrayList<>(value.defau()));
             }
 
             @Override
@@ -587,7 +587,7 @@ public abstract class ConfigRows extends ContainerObjectSelectionList<ConfigRows
 
             @Override
             public void resetToDefault() {
-                  value.set(new HashMap<>(value.getDefau()));
+                  value.set(new HashMap<>(value.defau()));
             }
 
             private float lastDelta = 0;
