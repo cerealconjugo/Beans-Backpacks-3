@@ -158,11 +158,10 @@ public abstract class PlayerMixin implements ViewableAccessor {
             });
       }
 
-      @Inject(method = "createAttributes", cancellable = true, at = @At(value = "RETURN"))
+      @Inject(method = "createAttributes", at = @At(value = "RETURN"))
       private static void addShortAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
             AttributeSupplier.Builder returnValue = cir.getReturnValue();
-            AttributeSupplier.Builder add = returnValue.add(CommonClass.TOOL_BELT_ATTRIBUTE, 2).add(CommonClass.SHORTHAND_ATTRIBUTE, 1);
-            cir.setReturnValue(add);
+            returnValue.add(CommonClass.TOOL_BELT_ATTRIBUTE, 2).add(CommonClass.SHORTHAND_ATTRIBUTE, 1);
       }
 
        @Inject(method = "interactOn", cancellable = true, at = @At("HEAD"))
