@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5 Fabric <br> 0.5 NeoForge
+
+- **Shorthand**
+  - Weapons are no longer allowed to be equiped in the shorthand
+  - If a tool is not found in the toolbelt, the shorthand is searched and equipped
+  - Combined the shorthand and toolbelt slots to the right side of the inventory
+  - The Shorthand's max sized has been reduced from 8 to 4
+  - The Tool Belt's max sized has been reduced from 8 to 5
+  - Read more about the changes to the Shorthand [here](https://github.com/BeansGalaxy/Beans-Backpacks-3/issues/18) <---
+- **Config**
+  - `allow_shorthand_weapons`: allows for weapons to be equiped in the shorthand agian
+  - `disable_equipable_render`: disables equiped backpacks from rendering
+  - `disable_shorthand_render`: disables the shorthand from rendering
+  - `do_nbt_stacking`: allows simmilar items with different nbt to stack
+- **NBT Stacking**
+  - Items with simmilar nbt such as renamed items or bee hives can now be stack
+  - Items can only stack this way by the player in the inventory or on pick-up
+  - Disabled by default. Set `do_nbt_stacking` to `true` in the common config
+- **Bugs**
+  - Fixed crash with [Scorchful](https://modrinth.com/mod/scorchful) mod (thanks for the help [TheDeathlyCow](https://modrinth.com/user/TheDeathlyCow)!)
+
 ## 0.4 Fabric <br> 0.4 NeoForge
 
 - **Major Changes**
