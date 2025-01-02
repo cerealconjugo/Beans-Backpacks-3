@@ -16,6 +16,8 @@ public class ClientConfig implements IConfig {
       public EnumConfigVariant<ShorthandHUD> shorthand_hud_location;
       public HSetConfigVariant<Item> elytra_model_equipment;
       public EnumConfigVariant<ToolBeltHUD> tool_belt_hud_visibility;
+      public BoolConfigVariant disable_equipable_render;
+      public BoolConfigVariant disable_shorthand_render;
 
       private final ConfigLine[] LINES = new ConfigLine[] {
                   shorthand_hud_location = new EnumConfigVariant<>("shorthand_hud_location", ShorthandHUD.NEAR_CENTER, ShorthandHUD.values()),
@@ -24,7 +26,9 @@ public class ClientConfig implements IConfig {
                                                                  .isValid(in -> BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(in)))
                                                                  .defauString("minecraft:elytra")
                                                                  .comment("effects the position of the backpack on the player's back while these items are equipped in the chestplate slot")
-                                                                 .build("elytra_model_equipment")
+                                                                 .build("elytra_model_equipment"),
+                  disable_equipable_render = new BoolConfigVariant("disable_backpack_render", false, "Disables backpacks and \"beansbackpacks:equipable\" rendering on the player"),
+                  disable_shorthand_render = new BoolConfigVariant("disable_shorthand_render", false, "Disables shorthand item rendering on the player's back")
       };
 
       @Override

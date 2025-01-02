@@ -60,6 +60,44 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
 
       @Override
       public void render(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, float limbAngle, float limbDistance, float tick, float animationProgress, float playerHeadYaw, float playerHeadPitch) {
+            renderEquipables(pose, pBufferSource, pCombinedLight, player, tick);
+            renderShorthand(pose, pBufferSource, pCombinedLight, player);
+      }
+
+      private void renderShorthand(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player) {
+            if (CommonClient.CLIENT_CONFIG.disable_shorthand_render.get())
+                  return;
+
+            Shorthand shorthand = Shorthand.get(player);
+            int selectedWeapon = shorthand.getSelectedWeapon();
+            ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
+            if (stack.isEmpty())
+                  return;
+
+            Inventory inventory = player.getInventory();
+            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
+            boolean mainHand = selectedWeapon != selected;
+
+            if (mainHand && !stack.isEmpty()) {
+                  pose.pushPose();
+                  this.getParentModel().body.translateAndRotate(pose);
+                  pose.translate(0, player.isCrouching() ? 6/16f : 5/16f, 5/32f);
+                  if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
+                        pose.translate(0.0F, -1/16f, 1 / 16f);
+
+                  pose.mulPose(Axis.ZN.rotationDegrees(90));
+                  pose.translate(0.001, -0.001, 0);
+
+                  BakedModel model = itemRenderer.getModel(stack, player.level(), player, player.getId());
+                  itemRenderer().render(stack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, model);
+                  pose.popPose();
+            }
+      }
+
+      private void renderEquipables(PoseStack pose, MultiBufferSource pBufferSource, int pCombinedLight, AbstractClientPlayer player, float tick) {
+            if (CommonClient.CLIENT_CONFIG.disable_equipable_render.get())
+                  return;
+
             EquipableComponent.runIfPresent(player, (equipable, slot) -> {
                   if (!equipable.slots().test(slot))
                         return;
@@ -100,31 +138,6 @@ public class BackFeature extends RenderLayer<AbstractClientPlayer, PlayerModel<A
                   else if (model != null)
                         renderModel(pose, pBufferSource, pCombinedLight, player, slot, model, itemStack);
             });
-
-            Shorthand shorthand = Shorthand.get(player);
-            int selectedWeapon = shorthand.getSelectedWeapon();
-            ItemStack stack = shorthand.weapons.getItem(selectedWeapon);
-            if (stack.isEmpty())
-                  return;
-
-            Inventory inventory = player.getInventory();
-            int selected = inventory.selected - inventory.items.size() - shorthand.tools.getContainerSize();
-            boolean mainHand = selectedWeapon != selected;
-
-            if (mainHand && !stack.isEmpty()) {
-                  pose.pushPose();
-                  this.getParentModel().body.translateAndRotate(pose);
-                  pose.translate(0, player.isCrouching() ? 6/16f : 5/16f, 5/32f);
-                  if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty())
-                        pose.translate(0.0F, -1/16f, 1 / 16f);
-
-                  pose.mulPose(Axis.ZN.rotationDegrees(90));
-                  pose.translate(0.001, -0.001, 0);
-
-                  BakedModel model = itemRenderer.getModel(stack, player.level(), player, player.getId());
-                  itemRenderer().render(stack, ItemDisplayContext.FIXED, false, pose, pBufferSource, pCombinedLight, OverlayTexture.NO_OVERLAY, model);
-                  pose.popPose();
-            }
       }
 
       private void renderCapeAbove(PoseStack pose, MultiBufferSource mbs, int light, AbstractClientPlayer player, float headPitch) {
