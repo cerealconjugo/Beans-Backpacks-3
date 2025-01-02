@@ -6,8 +6,8 @@
   - Weapons are no longer allowed to be equiped in the shorthand
   - If a tool is not found in the toolbelt, the shorthand is searched and equipped
   - Combined the shorthand and toolbelt slots to the right side of the inventory
-  - The Shorthand's max sized has been reduced from 8 to 4
-  - The Tool Belt's max sized has been reduced from 8 to 5
+  - The Shorthand's max size has been reduced from 8 to 4
+  - The Tool Belt's max size has been reduced from 8 to 5
   - Read more about the changes to the Shorthand [here](https://github.com/BeansGalaxy/Beans-Backpacks-3/issues/18) <---
 - **Config**
   - `allow_shorthand_weapons`: allows for weapons to be equiped in the shorthand agian
