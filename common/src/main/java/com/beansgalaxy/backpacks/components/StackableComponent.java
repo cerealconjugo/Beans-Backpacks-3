@@ -44,7 +44,7 @@ public class StackableComponent implements DraggingTrait {
             this.count = count;
       }
 
-      public static void newStackItems(
+      public static void stackItems(
                   ItemStack stack, Slot slot,
                   ItemStack other, SlotAccess access,
                   ClickAction action, Player player,
@@ -368,11 +368,6 @@ public class StackableComponent implements DraggingTrait {
             return stacks;
       }
 
-
-      private static int toAdd(List<EmptyStack> stacks, ItemStack stack) {
-            return toAdd(stacks, stack.getItemHolder(), new EmptyStack(stack.getCount(), stack.getComponentsPatch()));
-      }
-
       private static int toAdd(List<EmptyStack> stacks, Holder<Item> holder, EmptyStack stack) {
             int count = EmptyStack.count(stacks);
             return Math.min(stack.getMaxStackSize(holder) - count, stack.amount);
@@ -397,11 +392,11 @@ public class StackableComponent implements DraggingTrait {
             }
       }
 
-      // ===================================================================================================================== MUTABLE
-
       private Mutable mute(SlotAccess access) {
             return new Mutable(this, access);
       }
+
+      // ===================================================================================================================== MUTABLE
 
       private static class Mutable {
             private final List<EmptyStack> stacks;

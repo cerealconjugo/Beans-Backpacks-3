@@ -33,7 +33,9 @@ public class CommonConfigRows extends ConfigRows {
                         new ConfigLabel(Component.translatable("config.beansbackpacks.common.keepInventory")),
                         new BoolConfigRow(config.keep_back_on_death),
                         new BoolConfigRow(config.keep_tool_belt_on_death),
-                        new BoolConfigRow(config.keep_shorthand_on_death)
+                        new BoolConfigRow(config.keep_shorthand_on_death),
+                        new ConfigLabel(Component.translatable("config.beansbackpacks.common.misc")),
+                        new BoolConfigRow(config.do_nbt_stacking)
             );
       }
 

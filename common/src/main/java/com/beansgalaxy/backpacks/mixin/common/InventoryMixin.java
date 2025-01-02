@@ -43,8 +43,6 @@ public abstract class InventoryMixin implements BackData {
       @Shadow @Final public NonNullList<ItemStack> items;
       @Shadow public int selected;
 
-      @Shadow public abstract int getSlotWithRemainingSpace(ItemStack pStack);
-
       @Shadow public abstract ItemStack getItem(int pIndex);
 
       @Inject(method = "tick", at = @At("TAIL"))
@@ -108,27 +106,32 @@ public abstract class InventoryMixin implements BackData {
                         return traits.pickupToBackpack(player, equipmentSlot, instance, backpack, stack, cir);
                   });
 
+                  if (ServerSave.CONFIG.do_nbt_stacking.get())
+                        backpacks_tryStackingComponent(stack, cir);
+            }
+      }
 
-                  ItemStack selectedStack = this.getItem(this.selected);
-                  if (this.backpacks_hasSpaceForStackable(selectedStack, stack)) {
-                        if (StackableComponent.stackItems(instance, selected, selectedStack, stack)) {
-                              cir.setReturnValue(true);
-                        }
+      @Unique
+      private void backpacks_tryStackingComponent(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+            ItemStack selectedStack = this.getItem(this.selected);
+            if (this.backpacks_hasSpaceForStackable(selectedStack, stack)) {
+                  if (StackableComponent.stackItems(instance, selected, selectedStack, stack)) {
+                        cir.setReturnValue(true);
                   }
+            }
 
-                  ItemStack offHandStack = this.getItem(40);
-                  if (this.backpacks_hasSpaceForStackable(offHandStack, stack)) {
-                        if (StackableComponent.stackItems(instance, 40, offHandStack, stack)) {
-                              cir.setReturnValue(true);
-                        }
+            ItemStack offHandStack = this.getItem(40);
+            if (this.backpacks_hasSpaceForStackable(offHandStack, stack)) {
+                  if (StackableComponent.stackItems(instance, 40, offHandStack, stack)) {
+                        cir.setReturnValue(true);
                   }
+            }
 
-                  for(int i = 0; i < this.items.size(); ++i) {
-                        ItemStack destination = this.items.get(i);
-                        if (this.backpacks_hasSpaceForStackable(destination, stack)) {
-                              if (StackableComponent.stackItems(instance, i, destination, stack)) {
-                                    cir.setReturnValue(true);
-                              }
+            for(int i = 0; i < this.items.size(); ++i) {
+                  ItemStack destination = this.items.get(i);
+                  if (this.backpacks_hasSpaceForStackable(destination, stack)) {
+                        if (StackableComponent.stackItems(instance, i, destination, stack)) {
+                              cir.setReturnValue(true);
                         }
                   }
             }

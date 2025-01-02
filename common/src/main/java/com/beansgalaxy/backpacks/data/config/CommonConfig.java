@@ -24,6 +24,7 @@ public class CommonConfig implements IConfig {
       public BoolConfigVariant keep_back_on_death;
       public BoolConfigVariant keep_tool_belt_on_death;
       public BoolConfigVariant keep_shorthand_on_death;
+      public BoolConfigVariant do_nbt_stacking;
 
       private final ConfigLine[] LINES = new ConfigLine[] {
                   tool_belt_size = new IntConfigVariant("tool_belt_size", 2, 0, 5),
@@ -38,7 +39,8 @@ public class CommonConfig implements IConfig {
                   tool_belt_break_items = new BoolConfigVariant("tool_belt_break_items", false, "Will the Tool Belt continue to use a tool until it breaks"),
                   keep_back_on_death = new BoolConfigVariant("keep_back_on_death", false, "On death, the player will drop their equipment in the Back Slot"),
                   keep_tool_belt_on_death = new BoolConfigVariant("keep_tool_belt_on_death", false, "On death, the player will drop their equipment in the Tool Belt"),
-                  keep_shorthand_on_death = new BoolConfigVariant("keep_shorthand_on_death", false, "On death, the player will drop their equipment in the Shorthand")
+                  keep_shorthand_on_death = new BoolConfigVariant("keep_shorthand_on_death", false, "On death, the player will drop their equipment in the Shorthand"),
+                  do_nbt_stacking = new BoolConfigVariant("do_nbt_stacking", false, "Matching items which do not stack due to differing nbt now can stack")
       };
 
       @Override
