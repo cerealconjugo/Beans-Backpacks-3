@@ -1,0 +1,116 @@
+{
+  "itemGroup.beansbackpacks": "Bean's Backpacks",
+  "pack.chest_backpacks.description": "Cambia Beans' Backpacks a una interface similar a los sacos a la de los cofres",
+
+  "item.beansbackpacks.backpack": "Mochila",
+  "item.beansbackpacks.iron_backpack": "Mochila de hierro",
+  "item.beansbackpacks.gold_backpack": "Mochila de oro",
+  "item.beansbackpacks.netherite_backpack": "Mochila de netherita",
+  "item.beansbackpacks.empty_ender_pouch": "Saco de ender",
+  "item.beansbackpacks.ender_pouch": "Saco de ender",
+  "item.beansbackpacks.bundle": "Saco",
+  "item.beansbackpacks.netherite_bucket": "Cubeta de netherita",
+  "item.beansbackpacks.lunch_box": "Lonchera",
+  "item.beansbackpacks.copper_leggings": "Grebas de cobre",
+  "item.beansbackpacks.experience_vial": "Frasco de Encantamientos",
+  "item.beansbackpacks.quiver": "Aljaba",
+  "item.beansbackpacks.alchemy_bag": "Bolsa Alquimista",
+  "item.beansbackpacks.rose_boots": "Botas rosas",
+  "item.beansbackpacks.netherite_lunch_box": "Lonchera de netherita",
+  "item.beansbackpacks.bulk_pouch": "Bolsa a granel",
+  "item.beansbackpacks.copper_backpack": "Mochila de cobre",
+
+  "item.beansbackpacks.legacy.winged_backpack": "Mochila alada",
+  "item.beansbackpacks.legacy.ender_backpack": "Mochila de ender",
+
+  "traits.beansbackpacks.inventory.bundle.solo": "§0.§r 1 pila",
+  "traits.beansbackpacks.inventory.bundle.size": "§0.§r %d Pilas",
+  "traits.beansbackpacks.equipment.bundle.solo": "§0.§r 1 pila",
+  "traits.beansbackpacks.equipment.bundle.size": "§0.§r %d Pilas",
+
+  "traits.beansbackpacks.inventory.bulk.solo": "§0.§r 1 Pila de objetos",
+  "traits.beansbackpacks.inventory.bulk.size": "§0.§r %d× Pila a granel",
+  "traits.beansbackpacks.equipment.bulk.solo": "§0.§r 1 Pila de objetos",
+  "traits.beansbackpacks.equipment.bulk.size": "§0.§r %d× Pila a granel",
+
+  "traits.beansbackpacks.inventory.quiver.solo": "§0.§r 1 Ranura de flecha",
+  "traits.beansbackpacks.inventory.quiver.size": "§0.§r %d Ranuras de flechas",
+  "traits.beansbackpacks.equipment.quiver.solo": "§0.§r 1 Ranura de flecha",
+  "traits.beansbackpacks.equipment.quiver.size": "§0.§r %d Ranuras de flechas",
+
+  "traits.beansbackpacks.inventory.alchemy.solo": "§0.§r 1 Poción",
+  "traits.beansbackpacks.inventory.alchemy.size": "§0.§r %d Pociones",
+  "traits.beansbackpacks.equipment.alchemy.solo": "§0.§r 1 Poción",
+  "traits.beansbackpacks.equipment.alchemy.size": "§0.§r %d Pociones",
+
+  "traits.beansbackpacks.inventory.chest.size": "§0.§r %dx%d Ranuras",
+  "traits.beansbackpacks.inventory.chest.solo": "§0.§r 1 Ranura",
+  "traits.beansbackpacks.inventory.chest.line": "§0.§r %d Ranuras",
+  "traits.beansbackpacks.equipment.chest.size": "§0.§r %dx%d Ranuras",
+  "traits.beansbackpacks.equipment.chest.solo": "§0.§r 1 Ranura",
+  "traits.beansbackpacks.equipment.chest.line": "§0.§r %d Ranuras",
+
+  "traits.beansbackpacks.inventory.lunch.solo": "§0.§r 1 Pila comestible",
+  "traits.beansbackpacks.inventory.lunch.size": "§0.§r %d Pilas comestibles",
+  "traits.beansbackpacks.equipment.lunch.solo": "§0.§r 1 Pila comestible",
+  "traits.beansbackpacks.equipment.lunch.size": "§0.§r %d Pilas comestibles",
+
+  "traits.beansbackpacks.inventory.bucket.solo": "§0.§r 1 Cubeta",
+  "traits.beansbackpacks.inventory.bucket.size": "§0.§r %d Cubetas",
+  "traits.beansbackpacks.equipment.bucket.solo": "§0.§r 1 Cubeta",
+  "traits.beansbackpacks.equipment.bucket.size": "§0.§r %d Cubetas",
+
+  "traits.beansbackpacks.inventory.battery.size": "§0.§r %dE",
+  "traits.beansbackpacks.equipment.battery.size": "§0.§r %dE",
+
+  "traits.beansbackpacks.inventory.experience.solo": "§0.§r %d Nivel",
+  "traits.beansbackpacks.inventory.experience.size": "§0.§r %d Niveles",
+  "traits.beansbackpacks.equipment.experience.solo": "§0.§r %d Nivel",
+  "traits.beansbackpacks.equipment.experience.size": "§0.§r %d Niveles",
+
+  "ender.beansbackpacks.trait_prefix": "Ender %d",
+  "ender.beansbackpacks.bound_player": "§0.§r Ligado a %d",
+
+  "tooltip.beansbackpacks.advanced.kind": "backpack_kind:%d",
+  "tooltip.beansbackpacks.advanced.reference": "§o%d",
+
+  "attribute.name.player.tool_belt": "Cinturón de herramientas",
+  "attribute.name.player.shorthand": "Abreviatura",
+
+  "key.beansbackpacks.category": "Beans' Backpacks",
+  "key.beansbackpacks.action": "Poner y recoger",
+  "key.beansbackpacks.desc.action": "Dejar sin asignar para emparejar esta acción con la tecla para %d",
+  "key.beansbackpacks.inventory": "Click para menú rápido",
+  "key.beansbackpacks.desc.inventory": "Dejar sin asignar para emparejar esta acción con la tecla para %d",
+  "key.beansbackpacks.utility": "Atajo ranura 2 (Anterior)",
+  "key.beansbackpacks.shorthand": "Atajo ranura 1 (Siguiente)",
+  "key.beansbackpacks.instant": "Poner/recoger instantáneamente",
+  "key.beansbackpacks.desc.instant": "Poner y recoger" mochilas al instante sin click derecho; Al asignar esta tecla se desactiva la %d",
+  "key.beansbackpacks.action_disabled": "Deshabilitado",
+  "key.beansbackpacks.desc.action_disabled": "%d se ha deshabilitado porque %d está asignado",
+
+  "screen.beansbackpacks.config.title-common": "Server & Singleplayer",
+  "screen.beansbackpacks.config.title-client": "Cliente",
+  "screen.beansbackpacks.config.title-traits": "Características",
+  "screen.beansbackpacks.config.title-features": "Funciones",
+  "screen.beansbackpacks.config.main.save_and_exit": "Guardar y salir",
+  "screen.beansbackpacks.config.main.reset_all": "Restablecer todo",
+  "screen.beansbackpacks.config.main.undo_all": "Deshacer todo",
+
+  "config.beansbackpacks.common.shorthandToolBelt": "Cinturón de herramientas y atajos",
+  "config.beansbackpacks.common.keepInventory": "Mantener inventario",
+  "config.beansbackpacks.common.misc": "Sin categorizar",
+  "config.beansbackpacks.traits.description": "\"Registra nuevos y sobreescribe existentes\nReferencias de rasgos que se utilizarán con el \"beansbackpacks:reference\" Componente\"",
+  "config.beansbackpacks.traits.new-title": "Registro Nuevo",
+  "config.beansbackpacks.traits.new-box": "namespace:trait_id",
+  "config.beansbackpacks.traits.remove-trait": "¿Quitar característica?",
+  "config.beansbackpacks.features.description": "Activa y desactiva funciones de Beans' Backpacks para personalizar tu experiencia!!\n\nLos Data Packs aparecen en '.../config/beansbackpacks/features'",
+  "config.beansbackpacks.features.enabled-packs": "Funciones activadas",
+  "config.beansbackpacks.features.disabled-packs": "Funciones disponibles",
+
+  "config.beansbackpacks.shorthand-hud.near-center": "El Atajo aparecerá en el lado de la Mano Principal de la Hotbar",
+  "config.beansbackpacks.shorthand-hud.far-corner": "El Atajo aparecerá en la esquina de la Pantalla del lado de la Mano Principal",
+
+  "pack.source.beansbackpacks": "Mochila",
+  "config.beansbackpacks.client.player-render": "Renderización del jugador"
+}
