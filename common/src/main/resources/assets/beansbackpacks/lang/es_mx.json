@@ -1,6 +1,6 @@
 {
   "itemGroup.beansbackpacks": "Bean's Backpacks",
-  "pack.chest_backpacks.description": "Cambia Beans' Backpacks a una interface similar a los sacos a la de los cofres",
+  "pack.chest_backpacks.description": "Cambia Beans' Backpacks a una interfaz similar a los sacos a la de los cofres",
 
   "item.beansbackpacks.backpack": "Mochila",
   "item.beansbackpacks.iron_backpack": "Mochila de hierro",
@@ -85,11 +85,11 @@
   "key.beansbackpacks.utility": "Atajo ranura 2 (Anterior)",
   "key.beansbackpacks.shorthand": "Atajo ranura 1 (Siguiente)",
   "key.beansbackpacks.instant": "Poner/recoger instantáneamente",
-  "key.beansbackpacks.desc.instant": "Poner y recoger" mochilas al instante sin click derecho; Al asignar esta tecla se desactiva la %d",
+  "key.beansbackpacks.desc.instant": "Poner y recoger mochilas al instante sin click derecho; Al asignar esta tecla se desactiva %d",
   "key.beansbackpacks.action_disabled": "Deshabilitado",
   "key.beansbackpacks.desc.action_disabled": "%d se ha deshabilitado porque %d está asignado",
 
-  "screen.beansbackpacks.config.title-common": "Server & Singleplayer",
+  "screen.beansbackpacks.config.title-common": "Servidor y un jugador",
   "screen.beansbackpacks.config.title-client": "Cliente",
   "screen.beansbackpacks.config.title-traits": "Características",
   "screen.beansbackpacks.config.title-features": "Funciones",
@@ -101,15 +101,15 @@
   "config.beansbackpacks.common.keepInventory": "Mantener inventario",
   "config.beansbackpacks.common.misc": "Sin categorizar",
   "config.beansbackpacks.traits.description": "\"Registra nuevos y sobreescribe existentes\nReferencias de rasgos que se utilizarán con el \"beansbackpacks:reference\" Componente\"",
-  "config.beansbackpacks.traits.new-title": "Registro Nuevo",
+  "config.beansbackpacks.traits.new-title": "Registro nuevo",
   "config.beansbackpacks.traits.new-box": "namespace:trait_id",
   "config.beansbackpacks.traits.remove-trait": "¿Quitar característica?",
   "config.beansbackpacks.features.description": "Activa y desactiva funciones de Beans' Backpacks para personalizar tu experiencia!!\n\nLos Data Packs aparecen en '.../config/beansbackpacks/features'",
   "config.beansbackpacks.features.enabled-packs": "Funciones activadas",
   "config.beansbackpacks.features.disabled-packs": "Funciones disponibles",
 
-  "config.beansbackpacks.shorthand-hud.near-center": "El Atajo aparecerá en el lado de la Mano Principal de la Hotbar",
-  "config.beansbackpacks.shorthand-hud.far-corner": "El Atajo aparecerá en la esquina de la Pantalla del lado de la Mano Principal",
+  "config.beansbackpacks.shorthand-hud.near-center": "El atajo aparecerá en el lado de la mano principal de la Hotbar",
+  "config.beansbackpacks.shorthand-hud.far-corner": "El atajo aparecerá en la esquina de la pantalla del lado de la mano principal",
 
   "pack.source.beansbackpacks": "Mochila",
   "config.beansbackpacks.client.player-render": "Renderización del jugador"
